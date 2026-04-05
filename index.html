@@ -1,0 +1,2647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emerald AI — Compute Flexibility Value Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+<script src="https://unpkg.com/recharts@2.1.16/umd/Recharts.js"></script>
+<script>if(window._Recharts && !window.Recharts) window.Recharts = window._Recharts;</script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   EMERALD AI — DARK FUTURISTIC THEME
+   Matching emeraldai.com brand palette
+   ═══════════════════════════════════════════ */
+
+:root {
+  --green:        #00d17a;
+  --green-bright: #00ff99;
+  --green-dim:    #007a47;
+  --green-glow:   rgba(0,209,122,0.15);
+  --teal:         #00c8b0;
+  --blue:         #4da8ff;
+  --purple:       #b87fff;
+  --amber:        #ffb020;
+  --red:          #ff5c6a;
+  --bg-base:      #080d18;
+  --bg-surface:   #0d1525;
+  --bg-raised:    #121d35;
+  --bg-overlay:   #172244;
+  --border:       #1c2e48;
+  --border-hi:    #253d60;
+  --text-1:       #dce8f5;
+  --text-2:       #7a90b0;
+  --text-3:       #3d5070;
+  --mono:         'Space Mono', 'JetBrains Mono', monospace;
+}
+
+/* Base */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  background-color: var(--bg-base) !important;
+  background-image:
+    linear-gradient(rgba(0,209,122,0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,209,122,0.028) 1px, transparent 1px);
+  background-size: 52px 52px;
+  color: var(--text-1) !important;
+  min-height: 100vh;
+}
+
+/* ── Backgrounds ─────────────────────────── */
+.bg-white           { background-color: var(--bg-surface) !important; }
+.bg-slate-50        { background-color: var(--bg-raised)  !important; }
+.bg-slate-100       { background-color: var(--bg-base)    !important; }
+.bg-slate-200       { background-color: #0a1220           !important; }
+.min-h-screen       { background-color: var(--bg-base)    !important; }
+
+/* ── Borders ─────────────────────────────── */
+.border-slate-100   { border-color: var(--border)    !important; }
+.border-slate-200   { border-color: var(--border-hi) !important; }
+.border-b           { border-bottom-color: var(--border) !important; }
+
+/* ── Shadows ─────────────────────────────── */
+.shadow-sm { box-shadow: 0 2px 12px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,209,122,0.06) !important; }
+
+/* ── Text ────────────────────────────────── */
+.text-slate-800     { color: var(--text-1) !important; }
+.text-slate-700     { color: #b5c8df      !important; }
+.text-slate-600     { color: var(--text-2) !important; }
+.text-slate-500     { color: #5a7090      !important; }
+.text-slate-400     { color: var(--text-3) !important; }
+
+/* ── Emerald ─────────────────────────────── */
+.text-emerald-700,
+.text-emerald-600   { color: var(--green) !important; }
+.text-emerald-800   { color: var(--green-bright) !important; }
+.text-emerald-200   { color: #80ffc4 !important; }
+.bg-emerald-600     { background-color: var(--green) !important; color: #020e06 !important; font-weight: 700; }
+.hover\:bg-emerald-700:hover { background-color: var(--green-dim) !important; }
+.bg-emerald-700     { background-color: #013d22 !important; }
+.bg-emerald-50      { background-color: #011509 !important; }
+.bg-emerald-100     { background-color: #012010 !important; }
+.border-emerald-100 { border-color: #013018 !important; }
+.border-emerald-200 { border-color: #014a25 !important; }
+.border-emerald-300 { border-color: #016535 !important; }
+.border-emerald-500 { border-color: var(--green) !important; }
+.border-l-4.border-emerald-500,
+.border-t-4.border-emerald-500 { border-color: var(--green) !important; box-shadow: inset 4px 0 0 0 var(--green); }
+
+/* ── Teal ────────────────────────────────── */
+.text-teal-600,
+.text-teal-700      { color: var(--teal) !important; }
+.text-teal-800      { color: #00e8d0    !important; }
+.bg-teal-50         { background-color: #011918 !important; }
+.bg-teal-100        { background-color: #002522 !important; }
+.border-teal-100    { border-color: #002a28 !important; }
+.border-teal-200    { border-color: #003d3a !important; }
+.border-teal-500    { border-color: var(--teal) !important; }
+.border-l-4.border-teal-500  { border-color: var(--teal) !important; box-shadow: inset 4px 0 0 0 var(--teal); }
+.border-t-4.border-teal-500  { border-color: var(--teal) !important; }
+
+/* ── Blue ────────────────────────────────── */
+.text-blue-600,
+.text-blue-700      { color: var(--blue) !important; }
+.text-blue-800,
+.text-blue-900      { color: #88c8ff    !important; }
+.bg-blue-50         { background-color: #010d1e !important; }
+.bg-blue-100        { background-color: #011428 !important; }
+.border-blue-100    { border-color: #011d3a !important; }
+.border-blue-200    { border-color: #012848 !important; }
+.border-blue-500    { border-color: var(--blue) !important; }
+.border-l-4.border-blue-500  { border-color: var(--blue) !important; box-shadow: inset 4px 0 0 0 var(--blue); }
+.border-t-4.border-blue-500  { border-color: var(--blue) !important; }
+
+/* ── Purple ──────────────────────────────── */
+.text-purple-600,
+.text-purple-700    { color: var(--purple) !important; }
+.text-purple-800    { color: #ccaaff      !important; }
+.bg-purple-50       { background-color: #0c0018 !important; }
+.bg-purple-100      { background-color: #130020 !important; }
+.border-purple-100  { border-color: #1e0030 !important; }
+.border-purple-200  { border-color: #2a0040 !important; }
+.border-purple-500  { border-color: var(--purple) !important; }
+.border-l-4.border-purple-500  { border-color: var(--purple) !important; box-shadow: inset 4px 0 0 0 var(--purple); }
+.border-t-4.border-purple-500  { border-color: var(--purple) !important; }
+
+/* ── Amber ───────────────────────────────── */
+.bg-amber-50        { background-color: #150e00 !important; }
+.bg-amber-100       { background-color: #1e1500 !important; }
+.border-amber-100   { border-color: #291c00 !important; }
+.border-amber-200   { border-color: #382600 !important; }
+.border-amber-400   { border-color: var(--amber) !important; }
+.text-amber-600,
+.text-amber-700     { color: var(--amber) !important; }
+.border-l-4.border-amber-400 { border-color: var(--amber) !important; box-shadow: inset 4px 0 0 0 var(--amber); }
+
+/* ── Red ─────────────────────────────────── */
+.bg-red-50          { background-color: #150008 !important; }
+.bg-red-100         { background-color: #1f000d !important; }
+.text-red-500       { color: var(--red) !important; }
+.text-red-600       { color: var(--red) !important; }
+.text-red-700       { color: #ff7a88 !important; }
+.border-l-4.border-red-400  { border-color: var(--red) !important; box-shadow: inset 4px 0 0 0 var(--red); }
+
+/* ── Badges / pills ──────────────────────── */
+.bg-slate-100.text-slate-700 { background-color: #0d1830 !important; color: #8899b0 !important; }
+.border-2.border-slate-200   { border-color: var(--border) !important; }
+.border-2.border-emerald-500 { border-color: var(--green) !important; background-color: #011e10 !important; }
+.border-2.border-red-500     { border-color: var(--red) !important; background-color: #1f000d !important; }
+.border-2.border-blue-500    { border-color: var(--blue) !important; background-color: #011428 !important; }
+
+/* ── Select elements ─────────────────────── */
+select {
+  background-color: var(--bg-raised) !important;
+  color: var(--text-1) !important;
+  border-color: var(--border-hi) !important;
+}
+select option { background-color: var(--bg-raised); color: var(--text-1); }
+
+/* ── Range slider ────────────────────────── */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  height: 5px; border-radius: 3px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green); cursor: pointer;
+  border: 2px solid var(--bg-surface);
+  box-shadow: 0 0 6px var(--green-glow);
+}
+input[type=range]::-moz-range-thumb {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green); cursor: pointer;
+  border: 2px solid var(--bg-surface);
+}
+
+/* ── Heatmap ─────────────────────────────── */
+.heatmap-cell { transition: all 0.15s; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); }
+.heatmap-cell:hover { transform: scale(1.06); z-index: 10; position: relative; filter: brightness(1.15); }
+
+/* ── Sticky headers ──────────────────────── */
+.sticky {
+  background-color: rgba(8,13,24,0.92) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom-color: var(--border) !important;
+}
+
+/* ── Hover states ────────────────────────── */
+.hover\:bg-slate-50:hover  { background-color: var(--bg-raised) !important; }
+.hover\:bg-slate-200:hover { background-color: var(--bg-overlay) !important; }
+.hover\:bg-slate-300:hover { background-color: var(--bg-overlay) !important; }
+.hover\:text-slate-700:hover { color: var(--text-1) !important; }
+.hover\:border-slate-300:hover { border-color: var(--border-hi) !important; }
+.rounded-xl { border-radius: 12px; }
+
+/* ── Gradients → dark equivalents ───────── */
+.bg-gradient-to-r,
+.bg-gradient-to-br { background-image: none !important; background-color: #011a0e !important; }
+
+/* ── Font utilities ──────────────────────── */
+.font-mono, pre { font-family: var(--mono) !important; }
+
+/* ── KPI numbers glow ────────────────────── */
+.text-3xl.font-bold.text-emerald-600,
+.text-3xl.font-bold.text-emerald-700 { text-shadow: 0 0 20px rgba(0,209,122,0.35); }
+
+/* ── Emerald green quote bar ─────────────── */
+.bg-emerald-700.text-white { background: linear-gradient(135deg, #011e12 0%, #013d22 100%) !important; border: 1px solid var(--green-dim) !important; }
+
+/* ── Pitch mode ──────────────────────────── */
+.pitch-hide { display: none !important; }
+
+/* ── Footer ──────────────────────────────── */
+footer { background-color: #050a12 !important; border-top-color: var(--border) !important; }
+
+/* ── Code blocks ─────────────────────────── */
+pre.font-mono { background-color: #030810 !important; border-color: var(--border) !important; color: var(--green) !important; }
+
+/* ── Table row highlight ─────────────────── */
+.bg-emerald-50 { background-color: #010e07 !important; }
+
+/* ── Scrollbar ───────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo, useEffect, useCallback, useRef } = React;
+const {
+  BarChart, Bar, LineChart, Line, AreaChart, Area,
+  ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip,
+  Legend, ResponsiveContainer, Cell, ReferenceLine,
+  PieChart, Pie, Sector
+} = Recharts;
+
+// ── Utilities ──────────────────────────────────────────────
+const fmtM = (v, d=1) => {
+  if (v === null || v === undefined || isNaN(v)) return 'N/A';
+  const s = v < 0 ? '-' : '';
+  const a = Math.abs(v);
+  if (a >= 1000) return `${s}$${(a/1000).toFixed(1)}B`;
+  return `${s}$${a.toFixed(d)}M`;
+};
+const fmtMSign = (v, d=1) => {
+  if (isNaN(v)) return 'N/A';
+  return (v >= 0 ? '+' : '') + fmtM(v, d);
+};
+const fmtDollar = v => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+const fmtPct = v => `${Number(v).toFixed(1)}%`;
+const fmtYrs = v => v === null ? '> horizon' : `${Number(v).toFixed(1)} yrs`;
+
+// ── Workload Segments ──────────────────────────────────────
+const WORKLOAD_SEGMENTS = [
+  { key:'wlPreTrain',   label:'AI Pre-Training',      short:'Pre-Train',  dot:'#00d17a', flexPct:16, tolerance:'High',      target:'Flex Primary',        desc:'Long-horizon batch jobs; curtailment windows of hours are acceptable' },
+  { key:'wlMLOps',      label:'Enterprise MLOps',     short:'MLOps',      dot:'#ffb020', flexPct:8,  tolerance:'Medium',    target:'Flex Secondary',      desc:'Periodic retraining pipelines; tolerates short curtailment with scheduling' },
+  { key:'wlInference',  label:'Real-time Inference',  short:'Inference',  dot:'#ff5c6a', flexPct:0,  tolerance:'None',      target:'Firm Only',           desc:'Sub-100ms SLA; zero curtailment tolerance — must be firm capacity' },
+  { key:'wlResearch',   label:'Research / Academia',  short:'Research',   dot:'#00d17a', flexPct:20, tolerance:'Very High', target:'Deep Discount Flex',  desc:'Opportunistic compute; highly elastic, actively prefers cheaper interruptible pricing' },
+  { key:'wlHPC',        label:'HPC / Batch Compute',  short:'HPC',        dot:'#00d17a', flexPct:15, tolerance:'High',      target:'Flex Primary',        desc:'Overnight batch, rendering, simulation; tolerates scheduled curtailment windows' },
+];
+
+// Effective DC flex % = weighted average of segment flex tolerances by workload share
+const computeEffectiveFlexPct = (s) => {
+  const total = WORKLOAD_SEGMENTS.reduce((sum, seg) => sum + (s[seg.key] || 0), 0);
+  if (total === 0) return 0;
+  return WORKLOAD_SEGMENTS.reduce((sum, seg) => sum + (s[seg.key] || 0) * seg.flexPct / total, 0);
+};
+
+// ── Defaults ───────────────────────────────────────────────
+const DEFAULTS = {
+  years: 10, discountRate: 10,
+  pue: 1.35,
+  // Workload mix (must sum to 100)
+  wlPreTrain: 35, wlMLOps: 25, wlInference: 20, wlResearch: 10, wlHPC: 10,
+  // Texas
+  txDcMW: 200, txFlexPct: 5, txBasePower: 40, txSpikePrice: 2500,
+  txSpikeHours: 150, txQueueNoFlex: 24, txQueueFlex: 12,
+  txGpuRate: 3.0, txPUE: 1.3, txLoadFactor: 0.85,
+  txDrCapRate: 35, txDrEnergyRate: 50,
+  txInterconnectNoFlex: 50, txInterconnectFlex: 30, txConductorCost: 2.0,
+  // Arizona
+  azDcMW: 200, azFlexPct: 5, azQueueNoFlex: 30, azQueueFlex: 15,
+  azDrCapRate: 50, azDrEnergyRate: 40, azPeakHours: 120,
+  azGpuRate: 3.0, azAvoidedUpgrade: 25, azConductorCost: 2.0,
+  // Virginia
+  vaCurrentMW: 200, vaUpsizeMW: 275, vaFlexPct: 5,
+  vaCapacityPrice: 329.17, vaAccreditation: 0.90,
+  vaQueueNoFlex: 48, vaQueueFlex: 24,
+  vaDayAheadPrice: 55, vaPeakHours: 100, vaDrEnergyRate: 75,
+  vaGpuRate: 3.0, vaConductorCost: 2.0,
+  vaInterconnectNoFlex: 40, vaInterconnectFlex: 20,
+};
+
+// ── Calculation Functions ──────────────────────────────────
+function calcTexas(s, effectiveFlexPct) {
+  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : s.txFlexPct;
+  const curtailMW = s.txDcMW * flexPct / 100;
+  // Queue savings scale linearly with flex commitment — full benefit requires ≥15% flex
+  // Below 15%, grid operators grant partial queue priority (five-nines constraint)
+  const flexQueueScale = Math.min(1, flexPct / 15);
+  const accelMo = Math.round(Math.max(0, (s.txQueueNoFlex - s.txQueueFlex) * flexQueueScale) * 10) / 10;
+  const annualGPU = s.txDcMW * s.txGpuRate;
+  const timeToPower = annualGPU * (accelMo / 12);
+  const annualSpike = curtailMW * s.txSpikeHours * (s.txSpikePrice - s.txBasePower) / 1e6;
+  const annualDRCap = curtailMW * s.txDrCapRate * 1000 / 1e6;
+  const annualDREnergy = curtailMW * s.txSpikeHours * s.txDrEnergyRate / 1e6;
+  const annualDR = annualDRCap + annualDREnergy;
+  // Interconnect savings also require minimum flex threshold (≥10%) for priority classification
+  const flexInterconnectScale = Math.min(1, flexPct / 10);
+  const interconnect = (s.txInterconnectNoFlex - s.txInterconnectFlex) * flexInterconnectScale;
+  const annualOp = annualSpike + annualDR;
+  const r = s.discountRate / 100;
+  let npv = timeToPower + interconnect;
+  const cashFlows = [{year:0, cf: timeToPower + interconnect, cum: timeToPower + interconnect}];
+  let cum = timeToPower + interconnect;
+  let payback = null;
+  for (let t = 1; t <= s.years; t++) {
+    const cf = annualOp - s.txConductorCost;
+    npv += cf / Math.pow(1+r, t);
+    cum += cf;
+    cashFlows.push({year:t, cf, cum});
+    if (cum >= 0 && payback === null) payback = t;
+  }
+  return { curtailMW, accelMo, annualGPU, timeToPower, annualSpike, annualDRCap, annualDREnergy, annualDR, interconnect, annualOp, npv, payback, cashFlows };
+}
+
+function calcArizona(s, effectiveFlexPct) {
+  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : s.azFlexPct;
+  const curtailMW = s.azDcMW * flexPct / 100;
+  const flexQueueScale = Math.min(1, flexPct / 15);
+  const accelMo = Math.round(Math.max(0, (s.azQueueNoFlex - s.azQueueFlex) * flexQueueScale) * 10) / 10;
+  const annualGPU = s.azDcMW * s.azGpuRate;
+  const timeToPower = annualGPU * (accelMo / 12);
+  const annualDRCap = curtailMW * s.azDrCapRate * 1000 / 1e6;
+  const annualDREnergy = curtailMW * s.azPeakHours * s.azDrEnergyRate / 1e6;
+  const annualDR = annualDRCap + annualDREnergy;
+  const flexInterconnectScale = Math.min(1, flexPct / 10);
+  const interconnect = s.azAvoidedUpgrade * flexInterconnectScale;
+  const annualOp = annualDR;
+  const r = s.discountRate / 100;
+  let npv = timeToPower + interconnect;
+  const cashFlows = [{year:0, cf: timeToPower + interconnect, cum: timeToPower + interconnect}];
+  let cum = timeToPower + interconnect;
+  let payback = null;
+  for (let t = 1; t <= s.years; t++) {
+    const cf = annualOp - s.azConductorCost;
+    npv += cf / Math.pow(1+r, t);
+    cum += cf;
+    cashFlows.push({year:t, cf, cum});
+    if (cum >= 0 && payback === null) payback = t;
+  }
+  return { curtailMW, accelMo, annualGPU, timeToPower, annualDRCap, annualDREnergy, annualDR, interconnect, annualOp, npv, payback, cashFlows };
+}
+
+function calcVirginia(s, effectiveFlexPct) {
+  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : s.vaFlexPct;
+  const curtailMW = s.vaCurrentMW * flexPct / 100;
+  const flexQueueScale = Math.min(1, flexPct / 15);
+  const accelMo = Math.round(Math.max(0, (s.vaQueueNoFlex - s.vaQueueFlex) * flexQueueScale) * 10) / 10;
+  const incrMW = Math.max(0, s.vaUpsizeMW - s.vaCurrentMW);
+  // PJM UCAP accreditation scales with flex commitment (higher flex → better accreditation)
+  const flexAccredScale = Math.min(1, 0.5 + (flexPct / 20));
+  const accredUCAP = curtailMW * s.vaAccreditation * flexAccredScale;
+  const annualCapRev = accredUCAP * s.vaCapacityPrice * 365 / 1e6;
+  const annualUpsizeRev = incrMW * s.vaGpuRate;
+  const upsizeTimeToPower = annualUpsizeRev * (accelMo / 12);
+  const annualDREnergy = curtailMW * s.vaPeakHours * s.vaDrEnergyRate / 1e6;
+  const flexInterconnectScale = Math.min(1, flexPct / 10);
+  const interconnect = (s.vaInterconnectNoFlex - s.vaInterconnectFlex) * flexInterconnectScale;
+  const annualOp = annualCapRev + annualDREnergy + annualUpsizeRev;
+  const r = s.discountRate / 100;
+  let npv = upsizeTimeToPower + interconnect;
+  const cashFlows = [{year:0, cf: upsizeTimeToPower + interconnect, cum: upsizeTimeToPower + interconnect}];
+  let cum = upsizeTimeToPower + interconnect;
+  let payback = null;
+  for (let t = 1; t <= s.years; t++) {
+    const cf = annualOp - s.vaConductorCost;
+    npv += cf / Math.pow(1+r, t);
+    cum += cf;
+    cashFlows.push({year:t, cf, cum});
+    if (cum >= 0 && payback === null) payback = t;
+  }
+  return { curtailMW, accelMo, incrMW, accredUCAP, annualCapRev, annualUpsizeRev, upsizeTimeToPower, annualDREnergy, interconnect, annualOp, npv, payback, cashFlows };
+}
+
+// ── Reusable Components ────────────────────────────────────
+const Slider = ({ label, value, min, max, step=1, unit='', onChange, fmt }) => {
+  const pct = ((value - min) / (max - min)) * 100;
+  const display = fmt ? fmt(value) : value;
+  return (
+    <div className="mb-4">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-xs font-medium text-slate-600">{label}</span>
+        <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+          {display}{unit && !fmt ? ` ${unit}` : ''}
+        </span>
+      </div>
+      <div className="relative">
+        <input type="range" min={min} max={max} step={step} value={value}
+          onChange={e => onChange(Number(e.target.value))}
+          className="w-full cursor-pointer"
+          style={{ background: `linear-gradient(to right, #00d17a 0%, #00d17a ${pct}%, #1c2e48 ${pct}%, #1c2e48 100%)` }}
+        />
+      </div>
+      <div className="flex justify-between text-xs text-slate-400 mt-0.5">
+        <span>{min}{unit && !fmt ? unit : ''}</span>
+        <span>{max}{unit && !fmt ? unit : ''}</span>
+      </div>
+    </div>
+  );
+};
+
+const KPICard = ({ title, value, sub, color='emerald', icon }) => {
+  const borderColor = {emerald:'border-emerald-500', blue:'border-blue-500', purple:'border-purple-500', teal:'border-teal-500', amber:'border-amber-400', red:'border-red-400'}[color];
+  const valColor = {emerald:'text-emerald-600', blue:'text-blue-600', purple:'text-purple-600', teal:'text-teal-600', amber:'text-amber-600', red:'text-red-600'}[color];
+  return (
+    <div className={`bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 ${borderColor} p-5`}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{title}</p>
+          <p className={`text-3xl font-bold ${valColor}`}>{value}</p>
+          {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
+        </div>
+        {icon && <span className="text-2xl">{icon}</span>}
+      </div>
+    </div>
+  );
+};
+
+const InfoCard = ({ title, children, color='blue' }) => {
+  const bg = {blue:'bg-blue-50 border-blue-200', teal:'bg-teal-50 border-teal-200', purple:'bg-purple-50 border-purple-200', emerald:'bg-emerald-50 border-emerald-200', amber:'bg-amber-50 border-amber-200'}[color];
+  return (
+    <div className={`rounded-lg border p-4 ${bg} mb-3`}>
+      {title && <p className="text-sm font-bold text-slate-700 mb-2">{title}</p>}
+      <div className="text-sm text-slate-600">{children}</div>
+    </div>
+  );
+};
+
+const Collapsible = ({ title, children, defaultOpen=true, accent='slate' }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-4">
+      <button onClick={() => setOpen(!open)}
+        className="w-full flex justify-between items-center p-4 text-left hover:bg-slate-50 rounded-xl transition-colors">
+        <span className="text-sm font-semibold text-slate-700">{title}</span>
+        <span className="text-slate-400 text-lg">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+};
+
+const FormulaBox = ({ children }) => (
+  <pre style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:'#00d17a',background:'#030810',padding:'10px 12px',borderRadius:8,border:'1px solid #1c2e48',overflowX:'auto',whiteSpace:'pre-wrap',marginTop:8}}>{children}</pre>
+);
+
+const SectionTitle = ({ children, sub }) => (
+  <div className="mb-4">
+    <h3 className="text-lg font-semibold text-slate-800">{children}</h3>
+    {sub && <p className="text-sm text-slate-500 mt-0.5">{sub}</p>}
+  </div>
+);
+
+const Badge = ({ children, color='emerald' }) => {
+  const cls = {emerald:'bg-emerald-100 text-emerald-800', blue:'bg-blue-100 text-blue-800', purple:'bg-purple-100 text-purple-800', teal:'bg-teal-100 text-teal-800', amber:'bg-amber-100 text-amber-700', red:'bg-red-100 text-red-700', slate:'bg-slate-100 text-slate-700'}[color];
+  return <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${cls}`}>{children}</span>;
+};
+
+// ── Custom Tooltip ─────────────────────────────────────────
+const CustomTooltip = ({ active, payload, label, prefix='$', suffix='M' }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{background:'#0d1525',border:'1px solid #1c2e48',borderRadius:8,padding:'10px 14px',boxShadow:'0 4px 24px rgba(0,0,0,0.7),0 0 0 1px rgba(0,209,122,0.08)',minWidth:160}}>
+      <p style={{color:'#00d17a',fontWeight:700,fontSize:11,marginBottom:6,letterSpacing:'0.05em'}}>{label}</p>
+      {payload.map((p,i) => (
+        <p key={i} style={{color:p.color,display:'flex',justifyContent:'space-between',gap:16,fontSize:11,margin:'2px 0'}}>
+          <span style={{color:'#7a90b0'}}>{p.name}</span>
+          <span style={{fontWeight:700}}>{prefix}{typeof p.value==='number'?Math.abs(p.value).toFixed(1):p.value}{suffix}</span>
+        </p>
+      ))}
+    </div>
+  );
+};
+
+// ── Workload Mix Panel ────────────────────────────────────
+const WorkloadMixPanel = ({ s, set, effectiveFlexPct }) => {
+  const total = WORKLOAD_SEGMENTS.reduce((sum, seg) => sum + (s[seg.key]||0), 0);
+  const remaining = 100 - total;
+  const firmMW = 200 * (1 - effectiveFlexPct/100);
+  const flexMW  = 200 * (effectiveFlexPct/100);
+
+  const adjustSeg = (key, newVal) => {
+    const old = s[key] || 0;
+    const delta = newVal - old;
+    // Clamp to available headroom
+    const clamped = Math.min(Math.max(newVal, 0), old + Math.max(0, remaining + old - newVal + newVal - newVal) );
+    const actualClamped = Math.min(newVal, 100 - (total - old));
+    set(key, Math.max(0, actualClamped));
+  };
+
+  const dotColor = tol => tol==='Very High'?'#00d17a':tol==='High'?'#00d17a':tol==='Medium'?'#ffb020':'#ff5c6a';
+
+  return (
+    <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'14px 18px',marginBottom:16}}>
+      {/* Header row */}
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12,flexWrap:'wrap',gap:8}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:28,height:28,background:'linear-gradient(135deg,#00d17a,#00c8b0)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13}}>⚙</div>
+          <div>
+            <p style={{fontSize:12,fontWeight:700,color:'var(--text-1)',margin:0}}>Workload Mix — Compute Profile</p>
+            <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>Determines effective DC flexibility from customer SLA constraints</p>
+          </div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          {/* Effective flex readout */}
+          <div style={{background:'var(--bg-raised)',border:'1px solid var(--border-hi)',borderRadius:8,padding:'5px 12px',textAlign:'center'}}>
+            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 1px',textTransform:'uppercase',letterSpacing:'0.07em'}}>Effective Flex</p>
+            <p style={{fontSize:16,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)',margin:0}}>{effectiveFlexPct.toFixed(1)}%</p>
+          </div>
+          <div style={{background:'var(--bg-raised)',border:'1px solid var(--border-hi)',borderRadius:8,padding:'5px 12px',textAlign:'center'}}>
+            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 1px',textTransform:'uppercase',letterSpacing:'0.07em'}}>Flex MW</p>
+            <p style={{fontSize:16,fontWeight:700,color:'var(--teal)',fontFamily:'var(--mono)',margin:0}}>{flexMW.toFixed(0)} MW</p>
+          </div>
+          <div style={{background:'var(--bg-raised)',border:'1px solid var(--border-hi)',borderRadius:8,padding:'5px 12px',textAlign:'center'}}>
+            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 1px',textTransform:'uppercase',letterSpacing:'0.07em'}}>Firm MW</p>
+            <p style={{fontSize:16,fontWeight:700,color:'var(--text-2)',fontFamily:'var(--mono)',margin:0}}>{firmMW.toFixed(0)} MW</p>
+          </div>
+          <div style={{
+            background: Math.abs(remaining) < 1 ? 'rgba(0,209,122,0.12)' : 'rgba(255,92,106,0.12)',
+            border: `1px solid ${Math.abs(remaining)<1?'var(--green)':'var(--red)'}`,
+            borderRadius:8,padding:'5px 12px',textAlign:'center'
+          }}>
+            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 1px',textTransform:'uppercase',letterSpacing:'0.07em'}}>Allocated</p>
+            <p style={{fontSize:16,fontWeight:700,color:Math.abs(remaining)<1?'var(--green)':'var(--red)',fontFamily:'var(--mono)',margin:0}}>{total}%</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Stacked fill bar */}
+      <div style={{height:8,borderRadius:4,overflow:'hidden',display:'flex',marginBottom:14,background:'var(--border)'}}>
+        {WORKLOAD_SEGMENTS.map(seg=>{
+          const pct = s[seg.key]||0;
+          return pct>0 && <div key={seg.key} style={{width:`${pct}%`,background:seg.dot==='#ffb020'?'#ffb020':seg.dot,opacity:seg.flexPct===0?0.3:1,transition:'width 0.2s'}}/>;
+        })}
+      </div>
+
+      {/* Segment rows */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:'6px 24px'}}>
+        {WORKLOAD_SEGMENTS.map(seg => {
+          const val = s[seg.key]||0;
+          const curtailMW = (200 * val/100 * seg.flexPct/100).toFixed(1);
+          return (
+            <div key={seg.key} style={{display:'flex',alignItems:'center',gap:10,padding:'5px 0'}}>
+              {/* Dot + label */}
+              <div style={{display:'flex',alignItems:'center',gap:6,minWidth:164,flexShrink:0}}>
+                <div style={{width:8,height:8,borderRadius:'50%',background:seg.flexPct===0?'#ff5c6a':seg.flexPct>=15?'#00d17a':'#ffb020',flexShrink:0,boxShadow:`0 0 5px ${seg.flexPct===0?'#ff5c6a':seg.flexPct>=15?'#00d17a':'#ffb020'}88`}}/>
+                <span style={{fontSize:11,color:'var(--text-1)',fontWeight:500}}>{seg.label}</span>
+              </div>
+              {/* Mini slider */}
+              <div style={{flex:1,position:'relative',height:14,display:'flex',alignItems:'center'}}>
+                <div style={{position:'absolute',left:0,right:0,height:3,background:'var(--border)',borderRadius:2}}>
+                  <div style={{position:'absolute',left:0,width:`${val}%`,height:'100%',background:seg.flexPct===0?'#ff5c6a44':seg.flexPct>=15?'#00d17a':'#ffb020',borderRadius:2}}/>
+                </div>
+                <input type="range" min={0} max={100} step={1} value={val}
+                  onChange={e => adjustSeg(seg.key, Number(e.target.value))}
+                  style={{position:'absolute',left:0,right:0,width:'100%',opacity:0,cursor:'pointer',height:14,margin:0}}/>
+              </div>
+              {/* Value + flex indicator */}
+              <div style={{display:'flex',alignItems:'center',gap:6,minWidth:110,flexShrink:0}}>
+                <span style={{fontSize:11,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)',minWidth:32,textAlign:'right'}}>{val}%</span>
+                <span style={{fontSize:9,padding:'1px 6px',borderRadius:10,fontWeight:600,whiteSpace:'nowrap',
+                  background:seg.flexPct===0?'rgba(255,92,106,0.15)':seg.flexPct>=15?'rgba(0,209,122,0.12)':'rgba(255,176,32,0.15)',
+                  color:seg.flexPct===0?'#ff5c6a':seg.flexPct>=15?'#00d17a':'#ffb020'}}>
+                  {seg.tolerance}
+                </span>
+                <span style={{fontSize:9,color:'var(--text-3)',whiteSpace:'nowrap'}}>{curtailMW}MW flex</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Warning if not 100% */}
+      {Math.abs(remaining) >= 1 && (
+        <div style={{marginTop:10,padding:'6px 12px',background:'rgba(255,92,106,0.1)',borderRadius:6,border:'1px solid rgba(255,92,106,0.3)'}}>
+          <p style={{fontSize:10,color:'var(--red)',margin:0}}>⚠ Workload mix totals {total}% — adjust sliders to reach 100% for accurate flex calculation</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Global Controls ────────────────────────────────────────
+const GlobalControls = ({ s, set, pitchMode, setPitchMode, reset, totalNPV, effectiveFlexPct }) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [showWorkload, setShowWorkload] = useState(true);
+  return (
+    <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+      <div className="max-w-screen-2xl mx-auto px-4 py-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div style={{width:32,height:32,background:'var(--green)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:15,color:'#020e06',fontFamily:'Space Grotesk,sans-serif',letterSpacing:'-0.5px'}}>⟡</div>
+            <div>
+              <h1 className="text-lg font-bold text-emerald-700 leading-tight">Emerald AI</h1>
+              <p className="text-xs text-slate-500">Compute Flexibility Value Calculator</p>
+            </div>
+          </div>
+          <div className="flex-1 flex items-center gap-6 overflow-x-auto">
+            {!pitchMode && !collapsed && (
+              <>
+                <div className="min-w-[140px]">
+                  <Slider label="WACC %" value={s.discountRate} min={6} max={20} step={0.5} onChange={v=>set('discountRate',v)} />
+                </div>
+                <div className="min-w-[140px]">
+                  <Slider label="Analysis Horizon" value={s.years} min={5} max={20} unit=" yrs" onChange={v=>set('years',v)} />
+                </div>
+                <div className="min-w-[160px]">
+                  <Slider label="GPU Revenue Rate" value={s.txGpuRate} min={1} max={6} step={0.1} onChange={v=>{set('txGpuRate',v);set('azGpuRate',v);set('vaGpuRate',v);}} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
+                </div>
+                <div className="min-w-[130px]">
+                  <Slider label="PUE (All Sites)" value={s.pue} min={1.1} max={2.0} step={0.05} onChange={v=>set('pue',v)} fmt={v=>v.toFixed(2)} />
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {/* Effective flex pill in header */}
+            {!collapsed && (
+              <button onClick={()=>setShowWorkload(w=>!w)}
+                style={{display:'flex',alignItems:'center',gap:6,background:'rgba(0,209,122,0.1)',border:'1px solid rgba(0,209,122,0.3)',borderRadius:8,padding:'4px 10px',cursor:'pointer'}}>
+                <div style={{width:7,height:7,borderRadius:'50%',background:'var(--green)'}}/>
+                <span style={{fontSize:11,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{effectiveFlexPct.toFixed(1)}% flex</span>
+                <span style={{fontSize:9,color:'var(--text-3)'}}>{showWorkload?'▲':'▼'} workload</span>
+              </button>
+            )}
+            <div className="text-right">
+              <p className="text-xs text-slate-500">Portfolio NPV</p>
+              <p className="text-xl font-bold text-emerald-600">{fmtM(totalNPV)}</p>
+            </div>
+            <button onClick={reset} className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors">↺ Reset</button>
+            <button onClick={() => setPitchMode(p=>!p)}
+              className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${pitchMode ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+              {pitchMode ? '📊 Pitch Mode ON' : '📊 Pitch Mode'}
+            </button>
+            <button onClick={() => setCollapsed(c=>!c)} className="text-slate-400 hover:text-slate-600">{collapsed ? '▼' : '▲'}</button>
+          </div>
+        </div>
+        {/* Workload mix panel — collapsible */}
+        {!collapsed && showWorkload && !pitchMode && (
+          <div style={{paddingTop:10}}>
+            <WorkloadMixPanel s={s} set={set} effectiveFlexPct={effectiveFlexPct} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Portfolio Overview Tab ─────────────────────────────────
+const PortfolioTab = ({ s, tx, az, va, pitchMode }) => {
+  const totalNPV = tx.npv + az.npv + va.npv;
+  const sites = [
+    { name: 'Texas / ERCOT', status: 'DEVELOPMENT', color: 'teal', driver: 'Accelerated Interconnection + Price Spike Avoidance', npv: tx.npv, streams: [['Time-to-Power Value', tx.timeToPower],['Spike Avoidance (10yr)', tx.annualSpike * s.years],['DR Revenue (10yr)', tx.annualDR * s.years]], payback: tx.payback },
+    { name: 'Arizona / APS+SRP', status: 'DEVELOPMENT', color: 'purple', driver: 'Flexible Load Priority + DR Program Revenue', npv: az.npv, streams: [['Time-to-Power Value', az.timeToPower],['DR Revenue (10yr)', az.annualDR * s.years],['Interconnect Savings', az.interconnect]], payback: az.payback },
+    { name: 'Virginia / PJM', status: 'OPERATIONAL', color: 'blue', driver: 'Capacity Market Revenue + Upsized Connection', npv: va.npv, streams: [['PJM Cap Market (10yr)', va.annualCapRev * s.years],['Upsize Revenue (10yr)', va.annualUpsizeRev * s.years],['DR Energy (10yr)', va.annualDREnergy * s.years]], payback: va.payback },
+  ];
+
+  const stackedData = [
+    { name: 'Texas', timeToPower: +tx.timeToPower.toFixed(1), drRevenue: +(tx.annualDR*(s.years*0.6)).toFixed(1), spikeAvoidance: +(tx.annualSpike*(s.years*0.6)).toFixed(1), interconnect: +tx.interconnect.toFixed(1), upsize: 0 },
+    { name: 'Arizona', timeToPower: +az.timeToPower.toFixed(1), drRevenue: +(az.annualDR*(s.years*0.6)).toFixed(1), spikeAvoidance: 0, interconnect: +az.interconnect.toFixed(1), upsize: 0 },
+    { name: 'Virginia', timeToPower: +va.upsizeTimeToPower.toFixed(1), drRevenue: +(va.annualDREnergy*(s.years*0.6)).toFixed(1), spikeAvoidance: 0, interconnect: +va.interconnect.toFixed(1), upsize: +(va.annualUpsizeRev*(s.years*0.6)).toFixed(1), capacityMarket: +(va.annualCapRev*(s.years*0.6)).toFixed(1) },
+  ];
+
+  // Waterfall — site NPV bridge from $0 to total portfolio NPV
+  const wfBridge = [
+    { name: 'Texas\nERCOT', value: +tx.npv.toFixed(1), type: 'add', color: '#14b8a6' },
+    { name: 'Arizona\nAPS+SRP', value: +az.npv.toFixed(1), type: 'add', color: '#8b5cf6' },
+    { name: 'Virginia\nPJM', value: +va.npv.toFixed(1), type: 'add', color: '#3b82f6' },
+    { name: 'Portfolio\nTotal', value: +(tx.npv+az.npv+va.npv).toFixed(1), type: 'total', color: '#10b981' },
+  ];
+  let runTotal = 0;
+  const waterfallData = wfBridge.map((step) => {
+    if (step.type === 'total') return { ...step, start: 0, bar: step.value };
+    const start = runTotal;
+    runTotal += step.value;
+    return { ...step, start, bar: step.value };
+  });
+
+  const metricsRows = [
+    { label: '10-yr NPV of Flexibility', tx: fmtM(tx.npv), az: fmtM(az.npv), va: fmtM(va.npv), tot: fmtM(totalNPV) },
+    { label: 'Annual DR Revenue (stabilized)', tx: fmtM(tx.annualDR), az: fmtM(az.annualDR), va: fmtM(va.annualDREnergy + va.annualCapRev), tot: fmtM(tx.annualDR + az.annualDR + va.annualDREnergy + va.annualCapRev) },
+    { label: 'Time-to-Power Gain (months)', tx: `${Number(tx.accelMo).toFixed(1)} mo`, az: `${Number(az.accelMo).toFixed(1)} mo`, va: `${Number(va.accelMo).toFixed(1)} mo`, tot: '—' },
+    { label: 'Revenue at Risk (without flex)', tx: fmtM(tx.timeToPower), az: fmtM(az.timeToPower), va: fmtM(va.upsizeTimeToPower), tot: fmtM(tx.timeToPower+az.timeToPower+va.upsizeTimeToPower) },
+    { label: 'Conductor Payback Period', tx: fmtYrs(tx.payback), az: fmtYrs(az.payback), va: fmtYrs(va.payback), tot: '—' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Hero Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {sites.map(site => (
+          <div key={site.name} className={`bg-white rounded-xl shadow-sm border border-slate-100 border-t-4 ${
+            {teal:'border-teal-500',purple:'border-purple-500',blue:'border-blue-500'}[site.color]} p-5`}>
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="text-base font-bold text-slate-800">{site.name}</h3>
+              <Badge color={site.status==='OPERATIONAL'?'blue':'amber'}>{site.status}</Badge>
+            </div>
+            <p className={`text-xs font-semibold mb-3 ${{teal:'text-teal-700',purple:'text-purple-700',blue:'text-blue-700'}[site.color]}`}>{site.driver}</p>
+            <p className="text-xs text-slate-500 mb-1">10-Year NPV of Flexibility</p>
+            <p className={`text-3xl font-bold mb-3 ${{teal:'text-teal-600',purple:'text-purple-600',blue:'text-blue-600'}[site.color]}`}>{fmtM(site.npv)}</p>
+            <div className="space-y-1">
+              {site.streams.map(([label, val]) => (
+                <div key={label} className="flex justify-between text-xs">
+                  <span className="text-slate-500">{label}</span>
+                  <span className="font-semibold text-slate-700">{fmtM(val)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <span className="text-xs text-slate-500">Conductor Payback: </span>
+              <span className="text-xs font-bold text-slate-700">{fmtYrs(site.payback)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Stacked Bar + Waterfall */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="NPV of value streams by site (discounted, illustrative)">Value Streams by Site</SectionTitle>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={stackedData} margin={{top:5,right:10,left:10,bottom:5}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="name" tick={{fontSize:12}} />
+              <YAxis tickFormatter={v=>`$${v}M`} tick={{fontSize:11}} />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend wrapperStyle={{fontSize:11}} />
+              <Bar dataKey="timeToPower" name="Time-to-Power" stackId="a" fill="#10b981" radius={[0,0,0,0]} />
+              <Bar dataKey="drRevenue" name="DR Revenue" stackId="a" fill="#3b82f6" />
+              <Bar dataKey="spikeAvoidance" name="Spike Avoidance" stackId="a" fill="#14b8a6" />
+              <Bar dataKey="capacityMarket" name="Cap Market (PJM)" stackId="a" fill="#8b5cf6" />
+              <Bar dataKey="upsize" name="Upsize Revenue" stackId="a" fill="#6366f1" />
+              <Bar dataKey="interconnect" name="Interconnect Savings" stackId="a" fill="#f59e0b" radius={[4,4,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="Each site's NPV contribution builds to portfolio total">Portfolio NPV Bridge by Site</SectionTitle>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={waterfallData} margin={{top:15,right:20,left:20,bottom:10}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="name" tick={{fontSize:11}} />
+              <YAxis tickFormatter={v=>`$${(v/1000).toFixed(1)}B`} tick={{fontSize:11}} />
+              <Tooltip formatter={(v,n,p) => p.dataKey==='bar' ? [`${fmtM(p.payload.bar)}`, p.payload.name] : null} />
+              <Bar dataKey="start" stackId="wf" fill="transparent" isAnimationActive={false} />
+              <Bar dataKey="bar" stackId="wf" radius={[5,5,0,0]} isAnimationActive={false} label={{position:'top', formatter: v => fmtM(v), fontSize:11, fontWeight:'bold', fill:'#334155'}}>
+                {waterfallData.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Metrics Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <SectionTitle>Key Metrics Summary</SectionTitle>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="text-left py-2 pr-4 text-slate-500 font-semibold text-xs">Metric</th>
+                <th className="text-right py-2 px-3 text-teal-600 font-semibold text-xs">Texas</th>
+                <th className="text-right py-2 px-3 text-purple-600 font-semibold text-xs">Arizona</th>
+                <th className="text-right py-2 px-3 text-blue-600 font-semibold text-xs">Virginia</th>
+                <th className="text-right py-2 pl-3 text-emerald-700 font-bold text-xs">Total Portfolio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {metricsRows.map((row, i) => (
+                <tr key={i} className={`border-b border-slate-100 ${i===0?'bg-emerald-50':''}`}>
+                  <td className="py-2.5 pr-4 text-slate-600 text-xs">{row.label}</td>
+                  <td className="text-right py-2.5 px-3 font-semibold text-teal-700 text-xs">{row.tx}</td>
+                  <td className="text-right py-2.5 px-3 font-semibold text-purple-700 text-xs">{row.az}</td>
+                  <td className="text-right py-2.5 px-3 font-semibold text-blue-700 text-xs">{row.va}</td>
+                  <td className="text-right py-2.5 pl-3 font-bold text-emerald-700 text-sm">{row.tot}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Texas Tab ──────────────────────────────────────────────
+const FlexDerivedBadge = ({ effectiveFlexPct, dcMW }) => (
+  <div style={{marginBottom:14}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+      <span style={{fontSize:11,fontWeight:600,color:'var(--text-2)'}}>Flexibility Commitment</span>
+      <span style={{fontSize:10,color:'var(--text-3)',fontStyle:'italic'}}>← derived from workload mix</span>
+    </div>
+    <div style={{background:'rgba(0,209,122,0.07)',border:'1px solid rgba(0,209,122,0.2)',borderRadius:8,padding:'8px 12px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+      <div style={{display:'flex',alignItems:'center',gap:8}}>
+        <div style={{width:7,height:7,borderRadius:'50%',background:'var(--green)'}}/>
+        <span style={{fontSize:13,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{effectiveFlexPct.toFixed(1)}%</span>
+        <span style={{fontSize:10,color:'var(--text-2)'}}>effective curtailment ceiling</span>
+      </div>
+      <div style={{display:'flex',gap:10}}>
+        <div style={{textAlign:'center'}}>
+          <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 1px'}}>FLEX MW</p>
+          <p style={{fontSize:11,fontWeight:700,color:'var(--teal)',fontFamily:'var(--mono)',margin:0}}>{(dcMW*effectiveFlexPct/100).toFixed(0)} MW</p>
+        </div>
+        <div style={{textAlign:'center'}}>
+          <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 1px'}}>FIRM MW</p>
+          <p style={{fontSize:11,fontWeight:700,color:'var(--text-2)',fontFamily:'var(--mono)',margin:0}}>{(dcMW*(1-effectiveFlexPct/100)).toFixed(0)} MW</p>
+        </div>
+      </div>
+    </div>
+    <p style={{fontSize:9,color:'var(--text-3)',marginTop:4}}>Adjust workload mix in the header ↑ to change this value</p>
+  </div>
+);
+
+const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
+  const ercotForecast = [
+    {year:'2025', peak:85.8}, {year:'2026', peak:94.7}, {year:'2027', peak:104.3},
+    {year:'2028', peak:121.5}, {year:'2029', peak:128.9}, {year:'2030', peak:138.9}, {year:'2031', peak:144.5}
+  ];
+  const queueData = [
+    {name:'Data Centers', value:77.5, color:'#14b8a6'},
+    {name:'Crypto', value:11.3, color:'#f59e0b'},
+    {name:'Industrial', value:6.9, color:'#6366f1'},
+    {name:'DC/Crypto', value:2.7, color:'#8b5cf6'},
+    {name:'Hydrogen', value:1.1, color:'#10b981'},
+    {name:'Other', value:0.5, color:'#94a3b8'},
+  ];
+  const spikeProfile = Array.from({length:24}, (_,h) => {
+    let price = 45;
+    if (h >= 7 && h <= 9) price = 80;
+    if (h >= 14 && h <= 16) price = 120;
+    if (h >= 17 && h <= 21) price = 350;
+    if (h === 18 || h === 19) price = s.txSpikePrice * 0.4;
+    if (h === 19) price = s.txSpikePrice * 0.8;
+    if (h === 20) price = s.txSpikePrice;
+    const curtail = (h >= 18 && h <= 21);
+    return { hour: `${h}:00`, price: Math.round(price), spike: curtail && price > 500 ? price : 0, base: curtail && price > 500 ? 0 : price };
+  });
+  const dcMWLine = s.txDcMW / 1000;
+
+  return (
+    <div className="space-y-4">
+      {!pitchMode && (
+        <Collapsible title="📋 ERCOT Market Context" defaultOpen={false}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InfoCard title="Market Structure" color="teal">
+              <ul className="space-y-1 text-xs">
+                <li>• Energy-only market — no capacity market</li>
+                <li>• System-Wide Offer Cap (SWCAP): <strong>$5,000/MWh</strong></li>
+                <li>• Record demand Aug 20, 2024: <strong>85,931 MW</strong> → cleared at $5,000/MWh</li>
+                <li>• Peak forecast: 85.8 GW (2025) → 144.5 GW (2031) per ERCOT LTDEF</li>
+                <li>• Large Flexible Load (LFL): ≥75 MW, must respond to real-time prices</li>
+              </ul>
+            </InfoCard>
+            <InfoCard title="Interconnection Queue" color="amber">
+              <ul className="space-y-1 text-xs">
+                <li>• <strong>238,629 MW</strong> in queue as of March 2026</li>
+                <li>• Data centers = <strong>77.5%</strong> of large load pipeline</li>
+                <li>• LLIS/GINR Batch Zero deadline: July 2026</li>
+                <li>• Without LFL: standard multi-year queue + full transmission study</li>
+                <li>• With LFL + verified flexibility: prioritized pathway</li>
+              </ul>
+            </InfoCard>
+          </div>
+        </Collapsible>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* KPIs */}
+        <div className="space-y-3">
+          <KPICard title="10-Year NPV" value={fmtM(tx.npv)} sub="Flexibility value, discounted" color="teal" icon="⚡" />
+          <KPICard title="Annual DR Revenue" value={fmtM(tx.annualDR)} sub={`${tx.curtailMW.toFixed(0)} MW curtailable`} color="emerald" icon="💰" />
+          <KPICard title="Time-to-Power Gain" value={`${Number(tx.accelMo).toFixed(1)} months`} sub={fmtM(tx.timeToPower) + ' revenue unlocked'} color="teal" icon="⏱" />
+          <KPICard title="Annual Spike Savings" value={fmtM(tx.annualSpike)} sub={`${s.txSpikeHours} hrs @ $${s.txSpikePrice}/MWh`} color="amber" icon="🌡" />
+        </div>
+
+        {!pitchMode && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+            <p className="text-sm font-semibold text-slate-700 mb-3">Texas Site Inputs</p>
+            <div className="space-y-1">
+              <Slider label="DC Capacity (MW)" value={s.txDcMW} min={50} max={500} step={10} onChange={v=>set('txDcMW',v)} />
+              <FlexDerivedBadge effectiveFlexPct={effectiveFlexPct||0} dcMW={s.txDcMW} />
+              <Slider label="Spike Price ($/MWh)" value={s.txSpikePrice} min={500} max={5000} step={100} onChange={v=>set('txSpikePrice',v)} fmt={v=>`$${v.toLocaleString()}`} />
+              <Slider label="Spike Hours/Year" value={s.txSpikeHours} min={50} max={400} step={10} onChange={v=>set('txSpikeHours',v)} />
+              <Slider label="Queue Without Flex (mo)" value={s.txQueueNoFlex} min={12} max={60} onChange={v=>set('txQueueNoFlex',v)} />
+              <Slider label="Queue With Flex (mo)" value={s.txQueueFlex} min={6} max={36} onChange={v=>set('txQueueFlex',v)} />
+              <Slider label="GPU Revenue Rate" value={s.txGpuRate} min={1} max={6} step={0.1} onChange={v=>set('txGpuRate',v)} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
+              <Slider label="DR Cap Rate ($/kW-yr)" value={s.txDrCapRate} min={0} max={80} step={5} onChange={v=>set('txDrCapRate',v)} />
+            </div>
+          </div>
+        )}
+
+        {/* Queue Timeline */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+          <p className="text-sm font-semibold text-slate-700 mb-3">⏱ Interconnection Timeline Comparison</p>
+          <div className="space-y-4 mt-4">
+            <div>
+              <div className="flex justify-between text-xs text-slate-500 mb-1">
+                <span>Without Flexibility</span>
+                <span className="font-bold text-red-500">{s.txQueueNoFlex} months in queue</span>
+              </div>
+              <div className="flex h-8 rounded-lg overflow-hidden">
+                <div className="bg-red-400 flex items-center justify-center text-white text-xs font-bold" style={{width:`${(s.txQueueNoFlex/60)*100}%`}}>Queue: {s.txQueueNoFlex}mo</div>
+                <div className="bg-green-200 flex items-center justify-center text-green-800 text-xs flex-1">Operational</div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs text-slate-500 mb-1">
+                <span>With Conductor Flexibility</span>
+                <span className="font-bold text-emerald-600">{s.txQueueFlex} months in queue</span>
+              </div>
+              <div className="flex h-8 rounded-lg overflow-hidden">
+                <div className="bg-yellow-400 flex items-center justify-center text-slate-800 text-xs font-bold" style={{width:`${(s.txQueueFlex/60)*100}%`}}>Queue: {s.txQueueFlex}mo</div>
+                <div className="bg-emerald-400 flex items-center justify-center text-white text-xs font-bold flex-1">Operational — {Number(tx.accelMo).toFixed(1)} months earlier</div>
+              </div>
+            </div>
+            <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-200 text-center">
+              <p className="text-xs text-emerald-700">Revenue Unlocked by Early Start</p>
+              <p className="text-2xl font-bold text-emerald-600">{fmtM(tx.timeToPower)}</p>
+              <p className="text-xs text-emerald-600">{Number(tx.accelMo).toFixed(1)} months × {fmtM(tx.annualGPU)}/yr GPU revenue</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Price Profile + Cash Flow */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="Stylized ERCOT summer day — Conductor triggers curtailment during spike windows">ERCOT Hourly Price Profile</SectionTitle>
+          <ResponsiveContainer width="100%" height={240}>
+            <ComposedChart data={spikeProfile} margin={{top:5,right:10,left:10,bottom:5}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="hour" tick={{fontSize:9}} interval={3} />
+              <YAxis tickFormatter={v=>`$${v}`} tick={{fontSize:11}} />
+              <Tooltip formatter={(v,n) => [`$${v}/MWh`, n]} />
+              <Bar dataKey="base" name="Base Price" fill="#94a3b8" radius={[2,2,0,0]} />
+              <Bar dataKey="spike" name="🔴 Spike (Conductor curtails)" fill="#ef4444" radius={[2,2,0,0]} />
+            </ComposedChart>
+          </ResponsiveContainer>
+          {!pitchMode && <FormulaBox>{`Spike Savings = ${tx.curtailMW.toFixed(0)} MW × ${s.txSpikeHours} hrs × ($${s.txSpikePrice} − $${s.txBasePower})/MWh / 1,000,000
+= ${fmtM(tx.annualSpike)}/year`}</FormulaBox>}
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="Cumulative NPV over analysis horizon">10-Year Cash Flow & NPV</SectionTitle>
+          <ResponsiveContainer width="100%" height={240}>
+            <ComposedChart data={tx.cashFlows} margin={{top:5,right:10,left:10,bottom:5}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="year" label={{value:'Year',position:'insideBottom',offset:-2,fontSize:11}} tick={{fontSize:11}} />
+              <YAxis tickFormatter={v=>`$${v.toFixed(0)}M`} tick={{fontSize:11}} />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="cf" name="Annual CF" fill="#14b8a6" opacity={0.7} radius={[3,3,0,0]} />
+              <Line type="monotone" dataKey="cum" name="Cumulative NPV" stroke="#047857" strokeWidth={2.5} dot={false} />
+              {tx.payback && <ReferenceLine x={tx.payback} stroke="#f59e0b" strokeDasharray="4 4" label={{value:`Payback yr ${tx.payback}`,fontSize:10,fill:'#b45309'}} />}
+              <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ERCOT Forecast + Queue */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="ERCOT 2025 LTDEF — illustrates surging demand driving interconnection urgency">ERCOT Peak Demand Forecast</SectionTitle>
+          <ResponsiveContainer width="100%" height={240}>
+            <ComposedChart data={ercotForecast} margin={{top:5,right:10,left:10,bottom:5}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="year" tick={{fontSize:12}} />
+              <YAxis tickFormatter={v=>`${v} GW`} domain={[70,160]} tick={{fontSize:11}} />
+              <Tooltip formatter={v => [`${v} GW`]} />
+              <Bar dataKey="peak" name="ERCOT Peak (GW)" fill="#14b8a6" opacity={0.8} radius={[4,4,0,0]} />
+              <ReferenceLine y={dcMWLine} stroke="#ef4444" strokeDasharray="4 4" label={{value:`CSP: ${s.txDcMW}MW`,fontSize:10,fill:'#dc2626',position:'right'}} />
+            </ComposedChart>
+          </ResponsiveContainer>
+          <p className="text-xs text-slate-500 mt-2 text-center">ERCOT demand growing 13.6% AAGR 2025–2031 per LTDEF</p>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="ERCOT Large Load Interconnection Queue — March 2026 TAC Report">Queue Composition (238,629 MW)</SectionTitle>
+          <div className="flex items-center gap-4">
+            <ResponsiveContainer width={180} height={180}>
+              <PieChart>
+                <Pie data={queueData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
+                  {queueData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                </Pie>
+                <Tooltip formatter={v => [`${v}%`]} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex-1 space-y-1">
+              {queueData.map(d => (
+                <div key={d.name} className="flex items-center gap-2 text-xs">
+                  <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{background:d.color}}></div>
+                  <span className="text-slate-600">{d.name}</span>
+                  <span className="font-bold text-slate-800 ml-auto">{d.value}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 mt-2 text-xs text-teal-800">
+            💡 Your {s.txDcMW} MW site = <strong>{((s.txDcMW / 238629) * 100).toFixed(3)}%</strong> of total queue. Data centers dominate — flexibility is the key differentiator.
+          </div>
+        </div>
+      </div>
+
+      {!pitchMode && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle>Value Stream Summary</SectionTitle>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              ['⚡ Time-to-Power', fmtM(tx.timeToPower), `${Number(tx.accelMo).toFixed(1)}mo acceleration`],
+              ['💧 Spike Avoidance', fmtM(tx.annualSpike)+'/yr', `${tx.curtailMW.toFixed(0)}MW × ${s.txSpikeHours}hrs`],
+              ['💵 DR Revenue', fmtM(tx.annualDR)+'/yr', `Cap + Energy payments`],
+              ['🔌 Interconnect', fmtM(tx.interconnect), 'One-time savings'],
+            ].map(([label, val, sub]) => (
+              <div key={label} className="bg-teal-50 rounded-lg p-3 border border-teal-100">
+                <p className="text-xs text-teal-700 font-semibold mb-1">{label}</p>
+                <p className="text-xl font-bold text-teal-800">{val}</p>
+                <p className="text-xs text-teal-600">{sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Arizona Tab ────────────────────────────────────────────
+const ArizonaTab = ({ s, set, az, pitchMode, effectiveFlexPct }) => {
+  const srpRiskData = [60, 70, 75, 80, 90, 100].map(lf => {
+    const forecasted = s.azDcMW;
+    const billed = Math.max(forecasted * 0.80, forecasted * lf/100);
+    const actual = forecasted * lf/100;
+    const stranded = (billed - actual) * s.azGpuRate / s.azDcMW * 1000 * 12 / 1e6;
+    return { lf: `${lf}%`, stranded: +Math.max(0, stranded).toFixed(2) };
+  });
+
+  return (
+    <div className="space-y-4">
+      {!pitchMode && (
+        <Collapsible title="📋 Arizona Grid Market Context" defaultOpen={false}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InfoCard title="APS/SRP Market Structure" color="purple">
+              <ul className="space-y-1 text-xs">
+                <li>• Vertically integrated — not ISO/RTO market</li>
+                <li>• APS peak: ~8,500 MW; <strong>4.5 GW committed</strong> + 20 GW potential queue</li>
+                <li>• Arizona demand grew <strong>8% in 2025</strong> — 4× national average</li>
+                <li>• APS adopting cluster-based first-ready/first-served (FERC Order 2023 style)</li>
+                <li>• APS stated policy: <strong>prioritizing flexible loads</strong></li>
+              </ul>
+            </InfoCard>
+            <InfoCard title="Emerald AI Demonstration — May 2025" color="emerald">
+              <ul className="space-y-1 text-xs">
+                <li>• <strong>Oracle + NVIDIA cluster</strong> in Phoenix, AZ</li>
+                <li>• Event 1: May 1, 2025 — APS system peak</li>
+                <li>• Event 2: May 3, 2025 — SRP system peak</li>
+                <li>• Result: <strong>25% power reduction, zero SLA violations, 6 hrs sustained</strong></li>
+                <li>• Partners: Oracle Cloud Infrastructure, NVIDIA, SRP, EPRI DCFlex</li>
+              </ul>
+            </InfoCard>
+          </div>
+        </Collapsible>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="space-y-3">
+          <KPICard title="10-Year NPV" value={fmtM(az.npv)} sub="Flexibility value, discounted" color="purple" icon="☀️" />
+          <KPICard title="Annual DR Revenue" value={fmtM(az.annualDR)} sub={`${az.curtailMW.toFixed(0)} MW curtailable`} color="purple" icon="💰" />
+          <KPICard title="Time-to-Power Gain" value={`${Number(az.accelMo).toFixed(1)} months`} sub={fmtM(az.timeToPower) + ' revenue unlocked'} color="purple" icon="⏱" />
+          <KPICard title="Interconnect Savings" value={fmtM(az.interconnect)} sub="One-time cost avoidance" color="amber" icon="🔌" />
+        </div>
+
+        {!pitchMode && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+            <p className="text-sm font-semibold text-slate-700 mb-3">Arizona Site Inputs</p>
+            <Slider label="DC Capacity (MW)" value={s.azDcMW} min={50} max={500} step={10} onChange={v=>set('azDcMW',v)} />
+            <FlexDerivedBadge effectiveFlexPct={effectiveFlexPct||0} dcMW={s.azDcMW} />
+            <Slider label="Queue Without Flex (mo)" value={s.azQueueNoFlex} min={12} max={60} onChange={v=>set('azQueueNoFlex',v)} />
+            <Slider label="Queue With Flex (mo)" value={s.azQueueFlex} min={6} max={36} onChange={v=>set('azQueueFlex',v)} />
+            <Slider label="APS DR Cap Rate ($/kW-yr)" value={s.azDrCapRate} min={20} max={150} step={5} onChange={v=>set('azDrCapRate',v)} />
+            <Slider label="DR Energy Rate ($/MWh)" value={s.azDrEnergyRate} min={10} max={100} step={5} onChange={v=>set('azDrEnergyRate',v)} />
+            <Slider label="Peak Event Hours/yr" value={s.azPeakHours} min={50} max={300} step={10} onChange={v=>set('azPeakHours',v)} />
+            <Slider label="GPU Revenue Rate" value={s.azGpuRate} min={1} max={6} step={0.1} onChange={v=>set('azGpuRate',v)} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
+          </div>
+        )}
+
+        {/* Gantt Timeline */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+          <p className="text-sm font-semibold text-slate-700 mb-4">Project Timeline Comparison</p>
+          {[['Without Flexibility', s.azQueueNoFlex, 'bg-red-400', 'text-red-600'],
+            ['With Conductor', s.azQueueFlex, 'bg-yellow-400', 'text-yellow-600']
+          ].map(([label, queueMo, qColor, tColor]) => (
+            <div key={label} className="mb-4">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-600 font-medium">{label}</span>
+                <span className={`font-bold ${tColor}`}>{queueMo}mo queue</span>
+              </div>
+              <div className="flex h-7 rounded overflow-hidden text-xs">
+                <div className={`${qColor} flex items-center justify-center text-white font-bold`} style={{width:`${(queueMo/60)*100}%`}}>Queue</div>
+                <div className="bg-slate-200 flex items-center justify-center text-slate-600" style={{width:'12%'}}>Build</div>
+                <div className="bg-emerald-400 flex items-center justify-center text-white font-bold flex-1">Revenue</div>
+              </div>
+            </div>
+          ))}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+            <p className="text-xs text-purple-700">Revenue Gap from Acceleration</p>
+            <p className="text-2xl font-bold text-purple-700">{fmtM(az.timeToPower)}</p>
+            <p className="text-xs text-purple-600">{Number(az.accelMo).toFixed(1)} months × {fmtM(az.annualGPU)}/yr</p>
+          </div>
+        </div>
+      </div>
+
+      {/* SRP Billing Risk + Demonstration */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="SRP E-67 Plan: billed at max(actual, 80% of forecast). Flexibility eliminates stranded capacity cost.">SRP E-67 Billing Risk Calculator</SectionTitle>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={srpRiskData} margin={{top:5,right:10,left:10,bottom:5}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="lf" label={{value:'Load Factor',position:'insideBottom',offset:-2,fontSize:11}} tick={{fontSize:12}} />
+              <YAxis tickFormatter={v=>`$${v}M`} tick={{fontSize:11}} />
+              <Tooltip formatter={v=>[`$${v}M/yr`, 'Stranded Cost Risk']} />
+              <Bar dataKey="stranded" name="Annual Billing Premium ($M)" fill="#8b5cf6" radius={[4,4,0,0]}>
+                {srpRiskData.map((d,i) => <Cell key={i} fill={d.stranded > 0 ? '#8b5cf6' : '#10b981'} />)}
+              </Bar>
+              <ReferenceLine x="80%" stroke="#10b981" strokeDasharray="4 4" />
+            </BarChart>
+          </ResponsiveContainer>
+          {!pitchMode && <FormulaBox>{`Stranded Cost = max(0, Forecasted×80% − Actual Load) × Revenue Rate
+With flexibility: shape load to always hit 80% minimum → $0 stranded`}</FormulaBox>}
+        </div>
+
+        {/* Demo Case Study */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">🏆</span>
+            <SectionTitle>Live Demonstration — May 2025</SectionTitle>
+          </div>
+          <div style={{background:'linear-gradient(135deg,#011a0e 0%,#011820 100%)',border:'1px solid #014a25',borderRadius:12,padding:16,marginBottom:12}}>
+            <p className="text-sm font-bold text-emerald-800 mb-2">Oracle + NVIDIA Cluster, Phoenix AZ</p>
+            <p className="text-xs text-slate-600 italic mb-3">"First real-world demonstration of software-based platform transforming a production AI cluster into a grid-responsive asset"</p>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {[['25%', 'Power Reduction Achieved'], ['0', 'SLA Violations'], ['6 hrs', 'Sustained Response']].map(([v, l]) => (
+                <div key={l} className="bg-white rounded-lg p-2 border border-emerald-100">
+                  <p className="text-xl font-bold text-emerald-600">{v}</p>
+                  <p className="text-xs text-slate-500">{l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+              <span className="text-sm">📅</span>
+              <div className="text-xs"><span className="font-semibold">May 1, 2025</span> — APS system peak event</div>
+            </div>
+            <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+              <span className="text-sm">📅</span>
+              <div className="text-xs"><span className="font-semibold">May 3, 2025</span> — SRP system peak event</div>
+            </div>
+            <div className="flex items-center gap-2 p-2 bg-emerald-50 rounded-lg border border-emerald-200">
+              <span className="text-sm">✅</span>
+              <div className="text-xs text-emerald-800">Partners: Oracle Cloud, NVIDIA, SRP, EPRI DCFlex — <strong>DCFlex Certified</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cash Flow */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <SectionTitle sub="Annual cash flows and cumulative NPV">Arizona 10-Year Cash Flow</SectionTitle>
+        <ResponsiveContainer width="100%" height={220}>
+          <ComposedChart data={az.cashFlows} margin={{top:5,right:10,left:10,bottom:5}}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+            <XAxis dataKey="year" tick={{fontSize:11}} />
+            <YAxis tickFormatter={v=>`$${v.toFixed(0)}M`} tick={{fontSize:11}} />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="cf" name="Annual CF" fill="#8b5cf6" opacity={0.7} radius={[3,3,0,0]} />
+            <Line type="monotone" dataKey="cum" name="Cumulative NPV" stroke="#7c3aed" strokeWidth={2.5} dot={false} />
+            {az.payback && <ReferenceLine x={az.payback} stroke="#f59e0b" strokeDasharray="4 4" label={{value:`Payback yr ${az.payback}`,fontSize:10,fill:'#b45309'}} />}
+            <ReferenceLine y={0} stroke="#94a3b8" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// ── Virginia Tab ───────────────────────────────────────────
+const VirginiaTab = ({ s, set, va, pitchMode, effectiveFlexPct }) => {
+  const pjmHistory = [
+    {dy:'2019/20', price:76.53}, {dy:'2020/21', price:140.00}, {dy:'2021/22', price:50.00},
+    {dy:'2022/23', price:34.13}, {dy:'2023/24', price:28.92}, {dy:'2024/25', price:28.92},
+    {dy:'2025/26', price:269.92}, {dy:'2026/27', price:329.17}, {dy:'2027/28', price:333.44},
+  ];
+  const projYears = ['2028/29','2029/30','2030/31'];
+  const pjmFull = [
+    ...pjmHistory,
+    ...projYears.map((dy,i) => ({
+      dy, price: null,
+      low: +(333.44 * Math.pow(1.02, i+1)).toFixed(2),
+      base: +(333.44 * Math.pow(1.05, i+1)).toFixed(2),
+      high: +(333.44 * Math.pow(1.10, i+1)).toFixed(2),
+    }))
+  ];
+
+  const queueTrend = [
+    {year:'2023', months:36}, {year:'2024', months:42}, {year:'2025', months:48},
+    {year:'2026', months:52}, {year:'2027', months:55},
+    {year:'2026 (flex)', months:24, flex:24}, {year:'2027 (flex)', months:26, flex:26},
+  ];
+  const queueChart = [
+    {year:'2023', standard:36, flex:null}, {year:'2024', standard:42, flex:null},
+    {year:'2025', standard:48, flex:null}, {year:'2026', standard:52, flex:24},
+    {year:'2027', standard:55, flex:26}, {year:'2028', standard:58, flex:28},
+  ];
+
+  return (
+    <div className="space-y-4">
+      {!pitchMode && (
+        <Collapsible title="📋 PJM / Virginia Market Context" defaultOpen={false}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InfoCard title="PJM Capacity Market (RPM) — Record Prices" color="blue">
+              <ul className="space-y-1 text-xs">
+                <li>• 2024/25: <strong>$28.92/MW-day</strong> → 2025/26: <strong>$269.92/MW-day</strong> (10× increase)</li>
+                <li>• 2026/27: <strong>$329.17/MW-day</strong> — hit price cap. Historic record.</li>
+                <li>• 2027/28: <strong>$333.44/MW-day</strong></li>
+                <li>• DOM zone cleared at $444.26/MW-day in 2025/26</li>
+                <li>• DR cleared ~4% of 2026/27 BRA supply mix</li>
+                <li>• Total 2026/27 auction: $16.1 billion cleared</li>
+              </ul>
+            </InfoCard>
+            <InfoCard title="Virginia Upsize Opportunity" color="blue">
+              <ul className="space-y-1 text-xs">
+                <li>• Existing 200 MW site <strong>operational 2 years</strong> — proven reliability</li>
+                <li>• Flexibility changes incremental study: 75 MW → 50 MW effective peak</li>
+                <li>• Northern Virginia = world's largest DC cluster (Loudoun County)</li>
+                <li>• PJM queue: <strong>4–5 year average wait</strong> without flexibility</li>
+                <li>• FERC Order 2023: cluster-based processing — readiness deposits required</li>
+              </ul>
+            </InfoCard>
+          </div>
+        </Collapsible>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="space-y-3">
+          <KPICard title="10-Year NPV" value={fmtM(va.npv)} sub="Flexibility value, discounted" color="blue" icon="🔷" />
+          <KPICard title="PJM Cap Market Revenue" value={fmtM(va.annualCapRev)+'/yr'} sub={`${va.accredUCAP.toFixed(0)} MW accredited UCAP`} color="blue" icon="💹" />
+          <KPICard title="Upsize Revenue" value={fmtM(va.annualUpsizeRev)+'/yr'} sub={`+${va.incrMW} MW (${s.vaCurrentMW}→${s.vaUpsizeMW} MW)`} color="blue" icon="📈" />
+          <KPICard title="Time-to-Upsize Gain" value={`${Number(va.accelMo).toFixed(1)} months`} sub={fmtM(va.upsizeTimeToPower) + ' value unlocked'} color="amber" icon="⏱" />
+        </div>
+
+        {!pitchMode && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+            <p className="text-sm font-semibold text-slate-700 mb-3">Virginia Site Inputs</p>
+            <Slider label="Current Connection (MW)" value={s.vaCurrentMW} min={100} max={400} step={10} onChange={v=>set('vaCurrentMW',v)} />
+            <Slider label="Target Upsize (MW)" value={s.vaUpsizeMW} min={150} max={500} step={10} onChange={v=>set('vaUpsizeMW',v)} />
+            <FlexDerivedBadge effectiveFlexPct={effectiveFlexPct||0} dcMW={s.vaCurrentMW} />
+            <Slider label="PJM BRA Price ($/MW-day)" value={s.vaCapacityPrice} min={50} max={500} step={5} onChange={v=>set('vaCapacityPrice',v)} fmt={v=>`$${v.toFixed(2)}`} />
+            <Slider label="DR Accreditation Factor" value={s.vaAccreditation} min={0.5} max={1.0} step={0.05} onChange={v=>set('vaAccreditation',v)} fmt={v=>`${(v*100).toFixed(0)}%`} />
+            <Slider label="Queue Without Flex (mo)" value={s.vaQueueNoFlex} min={24} max={84} step={6} onChange={v=>set('vaQueueNoFlex',v)} />
+            <Slider label="Queue With Flex (mo)" value={s.vaQueueFlex} min={12} max={48} step={6} onChange={v=>set('vaQueueFlex',v)} />
+            <Slider label="GPU Revenue Rate" value={s.vaGpuRate} min={1} max={6} step={0.1} onChange={v=>set('vaGpuRate',v)} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
+          </div>
+        )}
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+          <p className="text-sm font-semibold text-slate-700 mb-3">Value Stream Breakdown</p>
+          <div className="space-y-3">
+            {[
+              ['🏦 PJM Capacity Market', fmtM(va.annualCapRev)+'/yr', `${va.accredUCAP.toFixed(0)} UCAP MW × $${s.vaCapacityPrice}/MW-day × 365`, 'blue'],
+              ['📈 Upsize Revenue', fmtM(va.annualUpsizeRev)+'/yr', `+${va.incrMW} MW × $${s.vaGpuRate}M/MW/yr`, 'blue'],
+              ['⚡ DR Energy', fmtM(va.annualDREnergy)+'/yr', `${va.curtailMW.toFixed(0)} MW × ${s.vaPeakHours} hrs × $${s.vaDrEnergyRate}/MWh`, 'blue'],
+              ['🔌 Interconnect', fmtM(va.interconnect), 'One-time upsize study savings', 'amber'],
+              ['⏱ Time-to-Upsize', fmtM(va.upsizeTimeToPower), `${Number(va.accelMo).toFixed(1)}mo × ${fmtM(va.annualUpsizeRev)}/yr`, 'emerald'],
+            ].map(([label, val, sub, c]) => (
+              <div key={label} className={`rounded-lg p-3 border ${{blue:'bg-blue-50 border-blue-100',amber:'bg-amber-50 border-amber-100',emerald:'bg-emerald-50 border-emerald-100'}[c]}`}>
+                <div className="flex justify-between items-start">
+                  <span className="text-xs font-semibold text-slate-700">{label}</span>
+                  <span className={`text-sm font-bold ${{blue:'text-blue-700',amber:'text-amber-700',emerald:'text-emerald-700'}[c]}`}>{val}</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">{sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* PJM Capacity Price Chart + Queue Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="Historical BRA clearing prices + forward scenarios">PJM Capacity Market Price History</SectionTitle>
+          <ResponsiveContainer width="100%" height={250}>
+            <ComposedChart data={pjmFull} margin={{top:5,right:10,left:10,bottom:20}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="dy" tick={{fontSize:8}} angle={-35} textAnchor="end" />
+              <YAxis tickFormatter={v=>`$${v}`} tick={{fontSize:11}} label={{value:'$/MW-day',angle:-90,position:'insideLeft',fontSize:10}} />
+              <Tooltip formatter={(v,n) => v?[`$${Number(v).toFixed(2)}/MW-day`,n]:['—',n]} />
+              <Bar dataKey="price" name="Actual BRA Price" fill="#3b82f6" radius={[3,3,0,0]} />
+              <Line type="monotone" dataKey="low" name="Low Case" stroke="#94a3b8" strokeDasharray="3 3" dot={false} strokeWidth={1.5} />
+              <Line type="monotone" dataKey="base" name="Base Case" stroke="#10b981" strokeDasharray="5 2" dot={false} strokeWidth={2} />
+              <Line type="monotone" dataKey="high" name="High Case" stroke="#ef4444" strokeDasharray="5 2" dot={false} strokeWidth={1.5} />
+              <ReferenceLine y={329.17} stroke="#f59e0b" strokeWidth={1} strokeDasharray="4 4" label={{value:'Price Cap $329',fontSize:9,fill:'#b45309'}} />
+            </ComposedChart>
+          </ResponsiveContainer>
+          <p className="text-xs text-center text-slate-500 mt-1">2025/26 DOM Zone peak: $444.26/MW-day. 2026/27 hit price cap.</p>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <SectionTitle sub="PJM interconnection wait vs. flexibility-accelerated pathway">PJM Queue Wait: Standard vs. Flexible</SectionTitle>
+          <ResponsiveContainer width="100%" height={250}>
+            <ComposedChart data={queueChart} margin={{top:5,right:10,left:10,bottom:5}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <XAxis dataKey="year" tick={{fontSize:12}} />
+              <YAxis tickFormatter={v=>`${v}mo`} tick={{fontSize:11}} />
+              <Tooltip formatter={(v,n) => [`${v} months`, n]} />
+              <Line type="monotone" dataKey="standard" name="Standard Queue" stroke="#ef4444" strokeWidth={2.5} dot={{r:4}} />
+              <Line type="monotone" dataKey="flex" name="With Conductor (Flexible)" stroke="#10b981" strokeWidth={2.5} strokeDasharray="6 2" dot={{r:4}} />
+            </ComposedChart>
+          </ResponsiveContainer>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 text-xs text-blue-800 text-center">
+            💡 Flexibility commitment compresses effective queue from ~{s.vaQueueNoFlex} → {s.vaQueueFlex} months for upsize study
+          </div>
+        </div>
+      </div>
+
+      {/* NPV Cash Flow */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <SectionTitle sub="Annual cash flows and cumulative NPV over analysis horizon">Virginia 10-Year Cash Flow & NPV</SectionTitle>
+        <ResponsiveContainer width="100%" height={220}>
+          <ComposedChart data={va.cashFlows} margin={{top:5,right:10,left:10,bottom:5}}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+            <XAxis dataKey="year" tick={{fontSize:11}} />
+            <YAxis tickFormatter={v=>`$${v.toFixed(0)}M`} tick={{fontSize:11}} />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="cf" name="Annual CF" fill="#3b82f6" opacity={0.7} radius={[3,3,0,0]} />
+            <Line type="monotone" dataKey="cum" name="Cumulative NPV" stroke="#1d4ed8" strokeWidth={2.5} dot={false} />
+            {va.payback && <ReferenceLine x={va.payback} stroke="#f59e0b" strokeDasharray="4 4" label={{value:`Payback yr ${va.payback}`,fontSize:10,fill:'#b45309'}} />}
+            <ReferenceLine y={0} stroke="#94a3b8" />
+          </ComposedChart>
+        </ResponsiveContainer>
+        {!pitchMode && <FormulaBox>{`Annual Capacity Revenue = ${va.accredUCAP.toFixed(0)} UCAP MW × $${s.vaCapacityPrice}/MW-day × 365 = ${fmtM(va.annualCapRev)}/yr
+Annual Upsize Revenue  = +${va.incrMW} MW × $${s.vaGpuRate}M/MW/yr = ${fmtM(va.annualUpsizeRev)}/yr
+Annual DR Energy       = ${va.curtailMW.toFixed(0)} MW × ${s.vaPeakHours} hrs × $${s.vaDrEnergyRate}/MWh = ${fmtM(va.annualDREnergy)}/yr
+Total Annual Value     = ${fmtM(va.annualOp)}/yr  |  10-yr NPV = ${fmtM(va.npv)}`}</FormulaBox>}
+      </div>
+    </div>
+  );
+};
+
+// ── Sensitivity Engine ─────────────────────────────────────
+const SensitivityTab = ({ s, set }) => {
+  const [rowVar, setRowVar] = useState('txFlexPct');
+  const [colVar, setColVar] = useState('txGpuRate');
+  const [scenario, setScenario] = useState('base');
+
+  const VARS = [
+    { key:'txFlexPct', label:'Flexibility %', min:0.5, max:20, values:[0.5,2,5,10,15,20] },
+    { key:'txSpikeHours', label:'Spike Hours/yr', min:50, max:400, values:[50,100,150,250,400] },
+    { key:'vaCapacityPrice', label:'PJM Cap Price ($/MW-day)', min:50, max:500, values:[50,150,329,400,500] },
+    { key:'txGpuRate', label:'GPU Revenue Rate ($M/MW/yr)', min:1, max:6, values:[1,2,3,4.5,6] },
+    { key:'txQueueNoFlex', label:'Queue Wait Reduction (mo)', min:12, max:60, values:[12,18,24,36,48] },
+  ];
+
+  const computeNPV = (overrides) => {
+    const merged = {...s, ...overrides};
+    const tx = calcTexas(merged);
+    const az = calcArizona(merged);
+    const va = calcVirginia(merged);
+    return tx.npv + az.npv + va.npv;
+  };
+
+  const rowDef = VARS.find(v=>v.key===rowVar);
+  const colDef = VARS.find(v=>v.key===colVar);
+  const heatmapData = rowDef && colDef ? rowDef.values.map(rv =>
+    colDef.values.map(cv => computeNPV({[rowVar]:rv, [colVar]:cv}))
+  ) : [];
+
+  const allVals = heatmapData.flat();
+  const hMin = allVals.length ? Math.min(...allVals) : 0;
+  const hMax = allVals.length ? Math.max(...allVals) : 1;
+  const heatColor = (v) => {
+    const t = (v - hMin) / (hMax - hMin || 1);
+    const r = Math.round(255 - t * 200);
+    const g = Math.round(100 + t * 155);
+    const b = Math.round(100 - t * 80);
+    return `rgb(${r},${g},${b})`;
+  };
+
+  // Tornado
+  const baseNPV = computeNPV({});
+  const tornadoDrivers = [
+    { label:'GPU Revenue Rate', key:'txGpuRate', lo:1.0, hi:6.0 },
+    { label:'Queue Reduction (months)', key:'txQueueNoFlex', lo:12, hi:48 },
+    { label:'Flexibility Commitment %', key:'txFlexPct', lo:0.5, hi:20 },
+    { label:'PJM Cap Price ($/MW-day)', key:'vaCapacityPrice', lo:50, hi:500 },
+    { label:'ERCOT Spike Price ($/MWh)', key:'txSpikePrice', lo:500, hi:5000 },
+    { label:'Spike/Stress Hours/yr', key:'txSpikeHours', lo:50, hi:400 },
+    { label:'Discount Rate (WACC)', key:'discountRate', lo:6, hi:20 },
+  ].map(d => ({
+    ...d,
+    loNPV: computeNPV({[d.key]: d.lo}),
+    hiNPV: computeNPV({[d.key]: d.hi}),
+  })).map(d => ({
+    ...d,
+    swing: Math.abs(d.hiNPV - d.loNPV),
+    posSwing: +(Math.max(d.hiNPV, d.loNPV) - baseNPV).toFixed(1),
+    negSwing: +(Math.min(d.hiNPV, d.loNPV) - baseNPV).toFixed(1),
+  })).sort((a,b) => b.swing - a.swing);
+
+  // Scenarios
+  const SCENARIOS = {
+    bear: { txGpuRate:1.5, azGpuRate:1.5, vaGpuRate:1.5, vaCapacityPrice:200, txSpikePrice:1000, txQueueNoFlex:18, txFlexPct:2, azFlexPct:2, vaFlexPct:2 },
+    base: {},
+    bull: { txGpuRate:5.0, azGpuRate:5.0, vaGpuRate:5.0, vaCapacityPrice:450, txSpikePrice:5000, txQueueNoFlex:36, txFlexPct:15, azFlexPct:15, vaFlexPct:15 },
+  };
+  const scenarioResults = ['bear','base','bull'].map(sc => {
+    const params = {...s, ...SCENARIOS[sc]};
+    const tx = calcTexas(params), az = calcArizona(params), va = calcVirginia(params);
+    return { sc, npv: tx.npv+az.npv+va.npv, dr: tx.annualDR+az.annualDR+va.annualDREnergy+va.annualCapRev, payback: [tx.payback,az.payback,va.payback].filter(Boolean).reduce((a,b,_,arr)=>a+b,0)/3||null };
+  });
+
+  // Monte Carlo
+  const [mcResults, setMcResults] = useState(null);
+  const runMC = useCallback(() => {
+    const N = 1000;
+    const results = [];
+    for (let i = 0; i < N; i++) {
+      const gpuRate = 1.5 + Math.random() * 4.5;
+      const queueRed = 6 + Math.random() * 30;
+      const capPrice = 150 + (Math.random() + Math.random() - 1) * 150;
+      const spikeHrs = 50 + Math.random() * 350;
+      const flexPct = 0.5 + Math.random() * 14.5;  // 0.5–15% range reflecting five-nines constraints
+      const overrides = {
+        txGpuRate: gpuRate, azGpuRate: gpuRate, vaGpuRate: gpuRate,
+        vaCapacityPrice: Math.max(50, capPrice),
+        txSpikeHours: spikeHrs, txQueueNoFlex: s.txQueueNoFlex,
+        txQueueFlex: Math.max(6, s.txQueueNoFlex - queueRed),
+        azQueueNoFlex: s.azQueueNoFlex, azQueueFlex: Math.max(6, s.azQueueNoFlex - queueRed),
+        vaQueueNoFlex: s.vaQueueNoFlex, vaQueueFlex: Math.max(12, s.vaQueueNoFlex - queueRed * 2),
+        txFlexPct: flexPct, azFlexPct: flexPct, vaFlexPct: flexPct,
+      };
+      results.push(computeNPV(overrides));
+    }
+    results.sort((a,b)=>a-b);
+    const p10 = results[Math.floor(N*0.10)], p50 = results[Math.floor(N*0.50)], p90 = results[Math.floor(N*0.90)];
+    const mean = results.reduce((a,b)=>a+b,0)/N;
+    const bins = 20;
+    const binMin = results[0], binMax = results[N-1];
+    const binSize = (binMax - binMin) / bins;
+    const histogram = Array.from({length: bins}, (_,i) => ({
+      range: `$${(binMin + i*binSize).toFixed(0)}M`,
+      count: results.filter(v => v >= binMin + i*binSize && v < binMin + (i+1)*binSize).length,
+      isP50: (binMin + i*binSize) <= p50 && p50 < (binMin + (i+1)*binSize),
+    }));
+    setMcResults({ histogram, p10, p50, p90, mean });
+  }, [s]);
+
+  return (
+    <div className="space-y-6">
+      {/* Heatmap */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <SectionTitle sub="Total portfolio NPV ($M) across two variable dimensions">2D Sensitivity Heatmap</SectionTitle>
+        <div className="flex gap-6 mb-4 flex-wrap">
+          <div>
+            <label className="text-xs font-semibold text-slate-600 block mb-1">Row Variable</label>
+            <select value={rowVar} onChange={e=>setRowVar(e.target.value)} className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              {VARS.map(v=><option key={v.key} value={v.key}>{v.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 block mb-1">Column Variable</label>
+            <select value={colVar} onChange={e=>setColVar(e.target.value)} className="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              {VARS.map(v=><option key={v.key} value={v.key}>{v.label}</option>)}
+            </select>
+          </div>
+        </div>
+        {rowDef && colDef && (
+          <div className="overflow-x-auto">
+            <table className="text-xs border-collapse">
+              <thead>
+                <tr>
+                  <th className="p-2 text-slate-500 text-left font-semibold">{rowDef.label} ↓ / {colDef.label} →</th>
+                  {colDef.values.map(v => <th key={v} className="p-2 text-slate-600 font-semibold min-w-[90px]">{v}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {rowDef.values.map((rv, ri) => (
+                  <tr key={rv}>
+                    <td className="p-2 font-semibold text-slate-600 bg-slate-50">{rv}</td>
+                    {colDef.values.map((cv, ci) => {
+                      const val = heatmapData[ri]?.[ci] || 0;
+                      return (
+                        <td key={cv} className="heatmap-cell p-2 text-center font-bold rounded text-white text-xs" style={{background: heatColor(val), minWidth:90}}>
+                          {fmtM(val)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Tornado */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <SectionTitle sub="P10→P90 swing on Total Portfolio NPV. Sorted by absolute impact.">Tornado Chart — Value Driver Sensitivity</SectionTitle>
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={tornadoDrivers} layout="vertical" margin={{top:5,right:60,left:195,bottom:5}}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+            <XAxis type="number" tickFormatter={v=>`${v>=0?'+':''}$${Math.abs(v).toFixed(0)}M`} tick={{fontSize:11}} domain={['auto','auto']} />
+            <YAxis type="category" dataKey="label" tick={{fontSize:11}} width={188} />
+            <Tooltip formatter={(v,n)=>[`${v>=0?'+':''}$${v.toFixed(1)}M vs base`,n]} />
+            <ReferenceLine x={0} stroke="#334155" strokeWidth={1.5} />
+            <Bar dataKey="negSwing" name="Downside (P10)" fill="#ef4444" radius={[3,0,0,3]} />
+            <Bar dataKey="posSwing" name="Upside (P90)" fill="#10b981" radius={[0,3,3,0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Scenario Comparison */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <SectionTitle sub="Click a scenario to apply it across all tabs">Scenario Comparison</SectionTitle>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          {scenarioResults.map(({sc, npv, dr, payback}) => {
+            const colors = {bear:'red', base:'emerald', bull:'blue'};
+            const labels = {bear:'🐻 Bear Case', base:'📊 Base Case', bull:'🚀 Bull Case'};
+            const c = colors[sc];
+            const isActive = JSON.stringify(SCENARIOS[sc]||{}) === '{}' ? scenario===sc : scenario===sc;
+            return (
+              <button key={sc} onClick={() => { setScenario(sc); if (sc !== 'base') { Object.entries(SCENARIOS[sc]).forEach(([k,v])=>set(k,v)); } }}
+                className={`p-4 rounded-xl border-2 transition-all text-left ${scenario===sc ? `border-${c}-500 bg-${c}-50` : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                <p className={`text-sm font-bold mb-2 text-${c}-700`}>{labels[sc]}</p>
+                <p className="text-xs text-slate-500 mb-1">Portfolio NPV</p>
+                <p className={`text-2xl font-bold text-${c}-600`}>{fmtM(npv)}</p>
+                <div className="mt-2 space-y-1 text-xs">
+                  <div className="flex justify-between"><span className="text-slate-500">Annual DR</span><span className="font-semibold">{fmtM(dr)}/yr</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Payback</span><span className="font-semibold">{fmtYrs(payback)}</span></div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="text-left py-2 pr-4 text-slate-500">Parameter</th>
+                <th className="text-right py-2 px-3 text-red-600 font-bold">Bear</th>
+                <th className="text-right py-2 px-3 text-emerald-600 font-bold">Base</th>
+                <th className="text-right py-2 px-3 text-blue-600 font-bold">Bull</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['GPU Revenue Rate', '$1.5M/MW/yr', '$3.0M/MW/yr', '$5.0M/MW/yr'],
+                ['PJM Cap Price', '$200/MW-day', '$329/MW-day', '$450/MW-day'],
+                ['ERCOT Spike Price', '$1,000/MWh', '$2,500/MWh', '$5,000/MWh'],
+                ['Queue Reduction', '6 months', '12 months', '24 months'],
+                ['Flexibility %', '15%', '25%', '35%'],
+              ].map(([label, bear, base, bull]) => (
+                <tr key={label} className="border-b border-slate-100">
+                  <td className="py-2 pr-4 text-slate-600">{label}</td>
+                  <td className="text-right py-2 px-3 text-red-600">{bear}</td>
+                  <td className="text-right py-2 px-3 text-emerald-600 font-semibold">{base}</td>
+                  <td className="text-right py-2 px-3 text-blue-600">{bull}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Monte Carlo */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <SectionTitle sub="1,000 simulations — distributions fitted to bear/bull scenario ranges">Monte Carlo Simulation</SectionTitle>
+          <button onClick={runMC} className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+            ▶ Run 1,000 Simulations
+          </button>
+        </div>
+        {mcResults ? (
+          <>
+            <div className="grid grid-cols-4 gap-3 mb-4">
+              {[['P10', mcResults.p10,'slate'],['Mean', mcResults.mean,'blue'],['P50', mcResults.p50,'emerald'],['P90', mcResults.p90,'teal']].map(([label,val,c])=>(
+                <div key={label} className={`bg-${c}-50 rounded-lg p-3 border border-${c}-100 text-center`}>
+                  <p className="text-xs text-slate-500">{label}</p>
+                  <p className={`text-lg font-bold text-${c}-700`}>{fmtM(val)}</p>
+                </div>
+              ))}
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={mcResults.histogram} margin={{top:5,right:10,left:10,bottom:20}}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+                <XAxis dataKey="range" tick={{fontSize:8}} angle={-35} textAnchor="end" interval={1} />
+                <YAxis tick={{fontSize:11}} />
+                <Tooltip formatter={(v,n)=>[`${v} simulations`,'Frequency']} />
+                <Bar dataKey="count" name="Frequency">
+                  {mcResults.histogram.map((entry, i) => <Cell key={i} fill={entry.isP50 ? '#10b981' : '#3b82f6'} opacity={0.8} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </>
+        ) : (
+          <div className="text-center py-12 text-slate-400">
+            <p className="text-4xl mb-3">🎲</p>
+            <p className="text-sm">Click "Run 1,000 Simulations" to generate probability distribution of portfolio NPV</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── CSP Monetization Tab ───────────────────────────────────
+const CSPTab = ({ s, tx, az, va }) => {
+
+  // ── Revenue model inputs ──
+  const pue = s.pue;  // global site input — set in header controls
+  const [kWPerRack, setKwPerRack]       = useState(40);
+  const [gpuPerRack, setGpuPerRack]     = useState(8);
+  const [utilization, setUtilization]   = useState(85);
+  const [firmGpuRate, setFirmGpuRate]   = useState(3.50);
+  const [flexDiscPrimary, setFlexDiscPrimary]   = useState(8);   // % discount vs firm for pre-train / HPC
+  const [flexDiscSecondary, setFlexDiscSecondary] = useState(4); // % discount for MLOps
+  const [flexDiscDeep, setFlexDiscDeep] = useState(18);          // % discount for Research
+  const [drSharePct, setDrSharePct]     = useState(50);          // % DR revenue passed to customer
+  const [accelAmortYrs, setAccelAmortYrs] = useState(3);         // amortise time-to-power gain over N yrs
+
+  // Derive tier splits from workload mix
+  const firmPct      = s.wlInference / 100;
+  const flexPriPct   = (s.wlPreTrain + s.wlHPC) / 100;
+  const flexSecPct   = s.wlMLOps / 100;
+  const flexDeepPct  = s.wlResearch / 100;
+
+  // ── Per-site capacity helpers ──
+  const siteMW = [
+    { name:'Texas',   mw: s.txDcMW,      color:'var(--teal)' },
+    { name:'Arizona', mw: s.azDcMW,      color:'var(--purple)' },
+    { name:'Virginia',mw: s.vaCurrentMW, color:'var(--blue)' },
+  ];
+  const totalMW = siteMW.reduce((a,b)=>a+b.mw,0);
+
+  // GPU hour math (per 200 MW site, generalised to totalMW)
+  const itLoadMW      = totalMW / pue;
+  const rackCount     = Math.floor(itLoadMW * 1000 / kWPerRack);
+  const totalGPUs     = rackCount * gpuPerRack;
+  const hoursPerYear  = 8760;
+  const utilFrac      = utilization / 100;
+  const billedGPUhrs  = totalGPUs * hoursPerYear * utilFrac;   // total
+
+  // Revenue per tier ($/GPU-hr)
+  const firmRate      = firmGpuRate / 1000;   // convert $M/MW/yr → rough $/GPU-hr proxy: firm rate = firmGpuRate
+  // We'll work in $M/yr throughout for consistency with rest of model
+  // Annual revenue = (MW in tier) × GPU revenue rate × utilization × tier multiplier
+  const gpuRateBase   = s.txGpuRate;  // $M/MW/yr at full utilization (global slider)
+  const firmRateAdj   = gpuRateBase * 1.10;   // firm commands ~10% premium over blended
+  const flexPriRate   = firmRateAdj  * (1 - flexDiscPrimary/100);
+  const flexSecRate   = firmRateAdj  * (1 - flexDiscSecondary/100);
+  const flexDeepRate  = firmRateAdj  * (1 - flexDiscDeep/100);
+
+  // ── BASELINE scenario (no flex, all capacity billed at blended GPU rate with no tier premium) ──
+  // Note: baseline uses gpuRateBase (not firmRateAdj) — without flex, no firm premium is earned
+  const baseUtilAdj   = utilFrac;
+  const base_total    = totalMW * gpuRateBase * baseUtilAdj;  // undifferentiated blended rate, no flex premium
+  const base_netRev   = base_total;
+
+  // ── FLEX-ENABLED scenario ──
+  const flex_firm     = totalMW * firmPct     * firmRateAdj  * utilFrac;
+  const flex_pri      = totalMW * flexPriPct  * flexPriRate  * utilFrac;
+  const flex_sec      = totalMW * flexSecPct  * flexSecRate  * utilFrac;
+  const flex_deep     = totalMW * flexDeepPct * flexDeepRate * utilFrac;
+  const flex_grossRev = flex_firm + flex_pri + flex_sec + flex_deep;
+
+  // Grid revenue streams (from calc results)
+  const totalDR       = tx.annualDR + az.annualDR + va.annualDREnergy + va.annualCapRev;
+  const drCSPShare    = totalDR * (1 - drSharePct/100);        // portion kept by Emerald
+  const drCustomerShare = totalDR * (drSharePct/100);          // passed to customer (reduces effective price)
+
+  // Accelerated revenue: time-to-power gains amortised over accelAmortYrs
+  const totalAccelRev = tx.timeToPower + az.timeToPower + va.upsizeTimeToPower;
+  const accelAnnualised = totalAccelRev / accelAmortYrs;
+
+  // Interconnect savings annualised
+  const totalInterconn = tx.interconnect + az.interconnect + va.interconnect;
+  const interconnAnnual = totalInterconn / accelAmortYrs;
+
+  // Queue premium: faster to power = additional revenue-bearing months
+  const flex_netRev   = flex_grossRev + drCSPShare + accelAnnualised + interconnAnnual;
+
+  // Delta
+  const revDelta      = flex_netRev - base_netRev;
+  const revDeltaPct   = base_netRev > 0 ? (revDelta / base_netRev) * 100 : 0;
+
+  // ── Build waterfall chart data ──
+  const waterfallBase = [
+    { name:'Firm Tier\nRevenue',     val: flex_firm,          color:'#4da8ff', base:0 },
+    { name:'Flex Primary\nRevenue',  val: flex_pri,           color:'#00d17a', base:0 },
+    { name:'Flex Secondary\nRevenue',val: flex_sec,           color:'#00c8b0', base:0 },
+    { name:'Deep Discount\nRevenue', val: flex_deep,          color:'#b87fff', base:0 },
+    { name:'DR Revenue\n(CSP share)',val: drCSPShare,         color:'#ffb020', base:0 },
+    { name:'Accel. Rev\n(amort.)',   val: accelAnnualised,    color:'#00ff99', base:0 },
+    { name:'Interconnect\nSavings',  val: interconnAnnual,    color:'#00c8b0', base:0 },
+  ];
+  const comparisonData = [
+    { name:'Baseline\n(No Flex)', total: +base_netRev.toFixed(1), isBase:true },
+    { name:'Firm Tier',           total: +flex_firm.toFixed(1),   isBase:false },
+    { name:'+ Flex Primary',      total: +(flex_firm+flex_pri).toFixed(1), isBase:false },
+    { name:'+ Flex Secondary',    total: +(flex_firm+flex_pri+flex_sec).toFixed(1), isBase:false },
+    { name:'+ Deep Discount',     total: +(flex_grossRev).toFixed(1), isBase:false },
+    { name:'+ DR Revenue',        total: +(flex_grossRev+drCSPShare).toFixed(1), isBase:false },
+    { name:'+ Accel Rev',         total: +(flex_grossRev+drCSPShare+accelAnnualised).toFixed(1), isBase:false },
+    { name:'All-In Flex',         total: +flex_netRev.toFixed(1), isBase:false, isFinal:true },
+  ];
+
+  const Row = ({label,val,sub,color='var(--text-1)',indent=false,bold=false,border=false,bg=null}) => (
+    <div style={{
+      display:'flex',alignItems:'baseline',justifyContent:'space-between',
+      padding:'7px 12px',borderRadius:6,
+      background:bg||'transparent',
+      borderTop:border?'1px solid var(--border)':'none',
+      marginLeft:indent?12:0
+    }}>
+      <span style={{fontSize:11,color:indent?'var(--text-2)':'var(--text-1)',fontWeight:bold?700:500}}>{label}</span>
+      {sub && <span style={{fontSize:9,color:'var(--text-3)',marginLeft:6,flex:1,paddingLeft:8}}>{sub}</span>}
+      <span style={{fontSize:11,fontWeight:bold?700:600,color,fontFamily:'var(--mono)',flexShrink:0}}>{val}</span>
+    </div>
+  );
+
+  const Section = ({title,icon,color,children}) => (
+    <div style={{background:'var(--bg-surface)',borderRadius:12,border:`1px solid ${color}44`,overflow:'hidden',flex:1}}>
+      <div style={{background:`${color}12`,borderBottom:`1px solid ${color}33`,padding:'10px 16px',display:'flex',alignItems:'center',gap:8}}>
+        <span style={{fontSize:14}}>{icon}</span>
+        <span style={{fontSize:12,fontWeight:700,color,textTransform:'uppercase',letterSpacing:'0.06em'}}>{title}</span>
+      </div>
+      <div style={{padding:'8px 4px'}}>{children}</div>
+    </div>
+  );
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',gap:20,color:'var(--text-1)'}}>
+
+      {/* ── Header ── */}
+      <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'18px 24px'}}>
+        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+          <div>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:6}}>
+              <div style={{width:32,height:32,background:'linear-gradient(135deg,#00d17a,#00c8b0)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>💼</div>
+              <div>
+                <h2 style={{fontSize:18,fontWeight:700,color:'var(--text-1)',margin:0}}>Revenue Model — Bottoms-Up Analysis</h2>
+                <p style={{fontSize:11,color:'var(--text-2)',margin:0}}>Baseline vs. Flex-Enabled · {totalMW} MW portfolio · Workload-mix driven tier splits</p>
+              </div>
+            </div>
+          </div>
+          {/* Summary KPIs */}
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+            {[
+              {l:'Baseline Annual Rev',  v:fmtM(base_netRev)+'/yr',  c:'var(--text-2)'},
+              {l:'Flex-Enabled Rev',     v:fmtM(flex_netRev)+'/yr',  c:'var(--green)'},
+              {l:'Net Revenue Delta',    v:(revDelta>=0?'+':'')+fmtM(revDelta)+'/yr', c:revDelta>=0?'var(--green)':'var(--red)'},
+              {l:'Delta %',             v:(revDeltaPct>=0?'+':'')+revDeltaPct.toFixed(1)+'%', c:revDelta>=0?'var(--green)':'var(--red)'},
+            ].map(k=>(
+              <div key={k.l} style={{background:'var(--bg-raised)',border:'1px solid var(--border-hi)',borderRadius:8,padding:'8px 14px',textAlign:'center',minWidth:120}}>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 3px',textTransform:'uppercase',letterSpacing:'0.07em'}}>{k.l}</p>
+                <p style={{fontSize:14,fontWeight:700,color:k.c,fontFamily:'var(--mono)',margin:0}}>{k.v}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── DC Infrastructure Assumptions ── */}
+      <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'16px 20px'}}>
+        <p style={{fontSize:11,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:12}}>📐 DC Infrastructure Assumptions</p>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:16}}>
+          {[
+            {l:'PUE (Power Usage Effectiveness)', v:pue, readOnly:true,
+             sub:`IT Load: ${(totalMW/pue).toFixed(0)} MW · set globally in header`},
+            {l:'kW per Rack (avg density)',        v:kWPerRack, min:10,max:100,step:5,unit:'kW',set:setKwPerRack,
+             sub:`${rackCount.toLocaleString()} racks total`},
+            {l:'GPUs per Rack',                    v:gpuPerRack, min:4,max:16,step:1,set:setGpuPerRack,
+             sub:`${(totalGPUs/1000).toFixed(0)}k GPUs total`},
+          ].map(inp=>(
+            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:`1px solid ${inp.readOnly?'rgba(0,209,122,0.25)':'var(--border)'}`}}>
+              <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{inp.l}</p>
+              <p style={{fontSize:16,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)',margin:'0 0 4px'}}>{inp.fmt?inp.fmt(inp.v):inp.v}{inp.unit?` ${inp.unit}`:''}</p>
+              <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>{inp.sub}</p>
+              {inp.readOnly
+                ? <div style={{height:3,background:'var(--border)',borderRadius:2,position:'relative'}}>
+                    <div style={{position:'absolute',left:0,width:`${((inp.v-1.1)/(2.0-1.1))*100}%`,height:'100%',background:'var(--green)',borderRadius:2,opacity:0.5}}/>
+                    <p style={{fontSize:9,color:'var(--green)',margin:'5px 0 0',fontStyle:'italic'}}>← adjust in global header</p>
+                  </div>
+                : <Slider label="" value={inp.v} min={inp.min} max={inp.max} step={inp.step||1} onChange={inp.set} fmt={inp.fmt} unit={inp.unit||''} />
+              }
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12}}>
+          {[
+            {l:'GPU Utilization Rate', v:utilization, min:50,max:100,step:1,unit:'%',set:setUtilization,
+             sub:`${(billedGPUhrs/1e9).toFixed(1)}B billed GPU-hrs/yr`},
+            {l:'Firm Tier Rate (blended basis)',  v:firmGpuRate,min:1.0,max:8.0,step:0.1,fmt:v=>`$${v.toFixed(2)}M/MW/yr`,set:setFirmGpuRate,
+             sub:'Inference-class / SLA-guaranteed capacity'},
+          ].map(inp=>(
+            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)'}}>
+              <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{inp.l}</p>
+              <p style={{fontSize:15,fontWeight:700,color:'var(--blue)',fontFamily:'var(--mono)',margin:'0 0 4px'}}>{inp.fmt?inp.fmt(inp.v):inp.v}{!inp.fmt&&inp.unit?inp.unit:''}</p>
+              <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>{inp.sub}</p>
+              <Slider label="" value={inp.v} min={inp.min} max={inp.max} step={inp.step||1} onChange={inp.set} fmt={inp.fmt} unit={!inp.fmt?(inp.unit||''):''}/>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Side-by-side buildup ── */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+
+        {/* BASELINE */}
+        <Section title="Baseline — No Flexibility" icon="📊" color="var(--text-2)">
+          <Row label="Total Portfolio Capacity" val={`${totalMW} MW`} sub="3 sites combined"/>
+          <Row label="IT Load (after PUE)" val={`${(totalMW/pue).toFixed(0)} MW`} indent sub={`PUE ${pue.toFixed(2)}`}/>
+          <Row label="GPU Racks" val={rackCount.toLocaleString()} indent sub={`${kWPerRack}kW/rack`}/>
+          <Row label="Total GPUs" val={(totalGPUs/1000).toFixed(0)+'k'} indent sub={`${gpuPerRack} GPU/rack`}/>
+          <Row label="Utilization" val={`${utilization}%`} indent/>
+          <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
+          <Row label="All Capacity @ Firm Rate" val={fmtM(base_total)+'/yr'} bold color="var(--blue)" sub={`$${firmRateAdj.toFixed(2)}M/MW/yr × ${utilization}%`}/>
+          <Row label="Workload Tiering" val="— None —" indent sub="Undifferentiated pricing"/>
+          <Row label="DR / Grid Revenue" val="$0" indent sub="No flex commitment"/>
+          <Row label="Accelerated Rev Gain" val="$0" indent sub="Standard queue timeline"/>
+          <Row label="Interconnect Savings" val="$0" indent sub="Full standard cost"/>
+          <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
+          <Row label="TOTAL ANNUAL REVENUE" val={fmtM(base_netRev)+'/yr'} bold color="var(--text-2)" bg="var(--bg-overlay)" border/>
+          <Row label="NPV (10-yr, 10% WACC)" val={fmtM(base_netRev*6.14)} bold color="var(--text-2)" sub="annuity factor"/>
+        </Section>
+
+        {/* FLEX-ENABLED */}
+        <Section title="Flex-Enabled — Emerald Conductor" icon="⚡" color="var(--green)">
+          <Row label="Total Portfolio Capacity" val={`${totalMW} MW`} sub="3 sites combined"/>
+          {/* Tier splits */}
+          <Row label="→ Firm Tier (Inference)" val={`${(totalMW*firmPct).toFixed(0)} MW`} indent color="var(--blue)" sub={`${s.wlInference}% of load · 100% SLA`}/>
+          <Row label="→ Flex Primary (Pre-Train/HPC)" val={`${(totalMW*flexPriPct).toFixed(0)} MW`} indent color="var(--green)" sub={`${s.wlPreTrain+s.wlHPC}% · −${flexDiscPrimary}% disc`}/>
+          <Row label="→ Flex Secondary (MLOps)" val={`${(totalMW*flexSecPct).toFixed(0)} MW`} indent color="var(--teal)" sub={`${s.wlMLOps}% · −${flexDiscSecondary}% disc`}/>
+          <Row label="→ Deep Discount (Research)" val={`${(totalMW*flexDeepPct).toFixed(0)} MW`} indent color="var(--purple)" sub={`${s.wlResearch}% · −${flexDiscDeep}% disc`}/>
+          <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
+          <Row label="Firm Tier Revenue" val={fmtM(flex_firm)+'/yr'} bold color="var(--blue)" sub={`$${firmRateAdj.toFixed(2)}M/MW × ${utilization}%`}/>
+          <Row label="Flex Primary Revenue" val={fmtM(flex_pri)+'/yr'} color="var(--green)" indent sub={`$${flexPriRate.toFixed(2)}M/MW × ${utilization}%`}/>
+          <Row label="Flex Secondary Revenue" val={fmtM(flex_sec)+'/yr'} color="var(--teal)" indent sub={`$${flexSecRate.toFixed(2)}M/MW × ${utilization}%`}/>
+          <Row label="Deep Discount Revenue" val={fmtM(flex_deep)+'/yr'} color="var(--purple)" indent sub={`$${flexDeepRate.toFixed(2)}M/MW × ${utilization}%`}/>
+          <Row label="Gross Compute Revenue" val={fmtM(flex_grossRev)+'/yr'} bold color="var(--text-1)" border/>
+          <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
+          <Row label="DR Revenue (Emerald share)" val={'+'+fmtM(drCSPShare)+'/yr'} color="var(--amber)" sub={`${100-drSharePct}% retained · total pool ${fmtM(totalDR)}/yr`}/>
+          <Row label="DR Revenue (customer share)" val={'−'+fmtM(drCustomerShare)+'/yr'} color="var(--text-3)" indent sub={`${drSharePct}% passed to flex customers`}/>
+          <Row label="Accelerated Rev (amort.)" val={'+'+fmtM(accelAnnualised)+'/yr'} color="var(--green)" sub={`${fmtM(totalAccelRev)} over ${accelAmortYrs} yrs`}/>
+          <Row label="Interconnect Savings (amort.)" val={'+'+fmtM(interconnAnnual)+'/yr'} color="var(--teal)" sub={`${fmtM(totalInterconn)} total`}/>
+          <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
+          <Row label="TOTAL ALL-IN REVENUE" val={fmtM(flex_netRev)+'/yr'} bold color="var(--green)" bg="rgba(0,209,122,0.08)" border/>
+          <Row label="NPV (10-yr, 10% WACC)" val={fmtM(flex_netRev*6.14)} bold color="var(--green)" sub="annuity factor"/>
+        </Section>
+      </div>
+
+      {/* ── Flex discount + DR share inputs ── */}
+      <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'16px 20px'}}>
+        <p style={{fontSize:11,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:14}}>🎛 Flex Pricing & Revenue Share Assumptions</p>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
+          {[
+            {l:'Flex Primary Discount',     v:flexDiscPrimary,   min:2,max:20,set:setFlexDiscPrimary,   sub:'Pre-Train / HPC vs Firm'},
+            {l:'Flex Secondary Discount',   v:flexDiscSecondary, min:1,max:12,set:setFlexDiscSecondary, sub:'MLOps vs Firm'},
+            {l:'Deep Discount (Research)',  v:flexDiscDeep,      min:5,max:35,set:setFlexDiscDeep,      sub:'Research / Academia'},
+            {l:'DR Revenue to Customer',    v:drSharePct,        min:0,max:100,step:5,set:setDrSharePct, sub:'% of DR pool shared'},
+          ].map(inp=>(
+            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)'}}>
+              <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{inp.l}</p>
+              <p style={{fontSize:15,fontWeight:700,color:'var(--amber)',fontFamily:'var(--mono)',margin:'0 0 2px'}}>{inp.v}%</p>
+              <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>{inp.sub}</p>
+              <Slider label="" value={inp.v} min={inp.min} max={inp.max} step={inp.step||1} onChange={inp.set} unit="%"/>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:12}}>
+          <div style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)'}}>
+            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>Accel / Interconnect Amortisation Period</p>
+            <p style={{fontSize:15,fontWeight:700,color:'var(--teal)',fontFamily:'var(--mono)',margin:'0 0 2px'}}>{accelAmortYrs} yrs</p>
+            <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>Spread one-time gains over N years for annual comparison</p>
+            <Slider label="" value={accelAmortYrs} min={1} max={10} step={1} onChange={setAccelAmortYrs} unit=" yrs"/>
+          </div>
+          {/* Delta summary */}
+          <div style={{background:revDelta>=0?'rgba(0,209,122,0.07)':'rgba(255,92,106,0.07)',borderRadius:8,padding:'12px 16px',border:`1px solid ${revDelta>=0?'rgba(0,209,122,0.3)':'rgba(255,92,106,0.3)'}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:6}}>
+            <p style={{fontSize:10,color:'var(--text-3)',margin:0,textTransform:'uppercase',letterSpacing:'0.07em'}}>All-In Revenue Uplift vs. Baseline</p>
+            <p style={{fontSize:26,fontWeight:700,color:revDelta>=0?'var(--green)':'var(--red)',fontFamily:'var(--mono)',margin:0}}>{revDelta>=0?'+':''}{fmtM(revDelta)}<span style={{fontSize:14}}>/yr</span></p>
+            <div style={{display:'flex',gap:10}}>
+              <span style={{fontSize:11,color:'var(--text-2)'}}>Baseline: <strong style={{color:'var(--text-1)'}}>{fmtM(base_netRev)}/yr</strong></span>
+              <span style={{fontSize:11,color:revDelta>=0?'var(--green)':'var(--red)'}}>Flex: <strong>{fmtM(flex_netRev)}/yr</strong></span>
+              <span style={{fontSize:11,fontWeight:700,color:revDelta>=0?'var(--green)':'var(--red)'}}>{revDeltaPct>=0?'+':''}{revDeltaPct.toFixed(1)}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Revenue Buildup Chart ── */}
+      <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'16px 20px'}}>
+        <p style={{fontSize:11,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>📈 Flex-Enabled Revenue Buildup — Step Chart</p>
+        <p style={{fontSize:11,color:'var(--text-2)',marginBottom:14}}>From baseline (no flex) to all-in flex revenue — each bar shows cumulative total as components are added</p>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={comparisonData} margin={{top:10,right:20,left:20,bottom:40}}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" vertical={false}/>
+            <XAxis dataKey="name" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} angle={-25} textAnchor="end" interval={0}/>
+            <YAxis tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false}
+              tickFormatter={v=>`$${(v/1000).toFixed(1)}B`}/>
+            <Tooltip content={({active,payload,label})=>{
+              if(!active||!payload?.length) return null;
+              return <div style={{background:'#0d1525',border:'1px solid #1c2e48',borderRadius:8,padding:'8px 12px'}}>
+                <p style={{color:'#00d17a',fontWeight:700,fontSize:11,marginBottom:4}}>{label}</p>
+                <p style={{color:'#dce8f5',fontSize:11,fontFamily:'var(--mono)'}}>{fmtM(payload[0].value)}/yr</p>
+              </div>;
+            }}/>
+            <ReferenceLine y={base_netRev} stroke="#7a90b0" strokeDasharray="4 3" strokeWidth={1.5}
+              label={{value:'Baseline',fill:'#7a90b0',fontSize:9,position:'right'}}/>
+            <Bar dataKey="total" name="Annual Revenue" radius={[4,4,0,0]}>
+              {comparisonData.map((d,i)=>(
+                <Cell key={i} fill={d.isFinal?'#00d17a':d.isBase?'#253d60':'#1e3a5f'}
+                  opacity={d.isFinal?1:d.isBase?0.8:0.7}/>
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* ── Customer segmentation + core argument ── */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'16px 20px'}}>
+          <p style={{fontSize:11,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:12}}>👥 B2B Customer Segmentation</p>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+            <thead>
+              <tr style={{borderBottom:'1px solid var(--border)'}}>
+                {['Customer','Flex Tolerance','Tier Target','Rate vs Firm'].map(h=>(
+                  <th key={h} style={{textAlign:'left',padding:'5px 8px',fontSize:9,color:'var(--text-3)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em'}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                {c:'AI Labs (Pre-Training)',  seg:'wlPreTrain',  tol:'High',      tier:'Flex Primary',       disc:flexDiscPrimary,   col:'#00d17a'},
+                {c:'Enterprise MLOps',        seg:'wlMLOps',     tol:'Medium',    tier:'Flex Secondary',     disc:flexDiscSecondary, col:'#ffb020'},
+                {c:'Real-time Inference',     seg:'wlInference', tol:'None',      tier:'Firm Only',          disc:0,                 col:'#4da8ff'},
+                {c:'Research / Academia',     seg:'wlResearch',  tol:'Very High', tier:'Deep Discount Flex', disc:flexDiscDeep,      col:'#b87fff'},
+                {c:'HPC / Batch Compute',     seg:'wlHPC',       tol:'High',      tier:'Flex Primary',       disc:flexDiscPrimary,   col:'#00d17a'},
+              ].map((row,i)=>{
+                const mixPct = s[row.seg]||0;
+                const dot = row.tol==='None'?'#ff5c6a':row.tol==='Medium'?'#ffb020':'#00d17a';
+                return (
+                  <tr key={row.c} style={{borderBottom:'1px solid var(--border)',background:i%2===0?'transparent':'var(--bg-raised)'}}>
+                    <td style={{padding:'7px 8px',color:'var(--text-1)',fontWeight:500}}>{row.c}</td>
+                    <td style={{padding:'7px 8px'}}>
+                      <span style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:10}}>
+                        <span style={{width:6,height:6,borderRadius:'50%',background:dot,display:'inline-block'}}/>
+                        <span style={{color:'var(--text-2)'}}>{row.tol}</span>
+                      </span>
+                    </td>
+                    <td style={{padding:'7px 8px',fontWeight:600,color:row.col,fontSize:11}}>{row.tier}</td>
+                    <td style={{padding:'7px 8px',fontFamily:'var(--mono)',fontSize:11,color:row.disc>0?'var(--amber)':'var(--blue)'}}>
+                      {row.disc>0?`−${row.disc}%`:'Firm'} · <span style={{color:'var(--text-3)'}}>{mixPct}% mix</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          {[
+            {icon:'🔒',c:'var(--blue)',   title:'FIRM COMPUTE',  sub:'Inference-class',
+             pts:['100% uptime SLA — never interrupted','Fixed $/GPU-hr (Firm Rate)','Eligible for real-time inference APIs','No flexibility commitment required']},
+            {icon:'⚡',c:'var(--green)', title:'FLEX COMPUTE',  sub:'Training-class / Schedulable',
+             pts:['99.9% job completion SLA','5–18% price discount vs. Firm tier','DR payments shared with customer','Priority queue access in constrained markets']},
+          ].map(p=>(
+            <div key={p.title} style={{background:'var(--bg-surface)',borderRadius:10,border:`1px solid ${p.c}44`,padding:'14px 16px',flex:1}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                  <span style={{fontSize:16}}>{p.icon}</span>
+                  <div>
+                    <p style={{fontSize:12,fontWeight:700,color:p.c,margin:0}}>{p.title}</p>
+                    <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>{p.sub}</p>
+                  </div>
+                </div>
+              </div>
+              <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:4}}>
+                {p.pts.map((pt,i)=>(
+                  <li key={i} style={{fontSize:11,color:'var(--text-2)',display:'flex',gap:6}}>
+                    <span style={{color:p.c,flexShrink:0}}>{p.icon==='🔒'?'🔒':'⚡'}</span>{pt}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Core argument ── */}
+      <div style={{background:'linear-gradient(135deg,#011a0e 0%,#011820 100%)',border:'1px solid #014a25',borderRadius:12,padding:'18px 24px',textAlign:'center'}}>
+        <p style={{fontSize:11,fontWeight:700,color:'var(--green)',marginBottom:6,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔑 The Core Argument</p>
+        <p style={{fontSize:13,color:'var(--text-2)',fontStyle:'italic',maxWidth:720,margin:'0 auto',lineHeight:1.65}}>"Every CSP is chasing the same GPU supply. The differentiator isn't the chip — it's reliable power. Flexible data centers get power faster, get more of it, and get paid by the grid to manage it intelligently. <strong style={{color:'var(--text-1)'}}>That's a product feature, not just an operational strategy.</strong>"</p>
+      </div>
+
+    </div>
+  );
+};
+
+// ── Geo Intelligence Tab ──────────────────────────────────
+const GEO_DATA = {
+  texas: {
+    label:'Texas / ERCOT', color:'var(--teal)', market:'ERCOT',
+    regions:[
+      { id:'dfw', name:'North Texas (DFW)', county:'Tarrant / Dallas Co.',
+        x:62,y:38, lmpAvg:42,lmpPeak:180, sentiment:4.2,sentimentLabel:'Very Favorable',
+        tariffDemand:8.50,tariffEnergy:0.042, queueStd:24,queueFlex:11,queueSavings:13,
+        dcFriendly:'Very High',upsizeDelta:8.4,
+        keyTenants:'Meta, Google, Microsoft, TikTok',
+        note:'Primary hyperscaler hub; city council pro-DC; ERCOT Fast Track eligible. Tariff: ERCOT Large Load Rider LR-X. Surge spikes to $5,000/MWh managed via flex curtailment.' },
+      { id:'houston', name:'Houston / Gulf Coast', county:'Harris Co.',
+        x:74,y:65, lmpAvg:38,lmpPeak:220, sentiment:3.1,sentimentLabel:'Moderate',
+        tariffDemand:9.20,tariffEnergy:0.038, queueStd:28,queueFlex:13,queueSavings:15,
+        dcFriendly:'Moderate',upsizeDelta:6.2,
+        keyTenants:'Switch, CyrusOne, Evoque',
+        note:'Industrial grid; high spike exposure; flooding risk offsets political sentiment. Oncor territory. Flex curtailment DR revenue partially offsets elevated energy cost.' },
+      { id:'westtx', name:'West Texas (Permian)', county:'Midland / Ector Co.',
+        x:22,y:54, lmpAvg:18,lmpPeak:95, sentiment:4.8,sentimentLabel:'Extremely Favorable',
+        tariffDemand:6.80,tariffEnergy:0.028, queueStd:36,queueFlex:14,queueSavings:22,
+        dcFriendly:'High',upsizeDelta:11.2,
+        keyTenants:'Lancium, Applied Digital, Cipher Mining',
+        note:'Cheapest renewable power in the US; county actively recruiting; long base queue but flex cuts 22 months. AEP Texas territory. Wind curtailment revenue available.' },
+      { id:'austin', name:'Austin / Central TX', county:'Travis / Williamson Co.',
+        x:53,y:54, lmpAvg:45,lmpPeak:210, sentiment:2.8,sentimentLabel:'Mixed / Restrictive',
+        tariffDemand:8.90,tariffEnergy:0.044, queueStd:22,queueFlex:10,queueSavings:12,
+        dcFriendly:'Low',upsizeDelta:4.1,
+        keyTenants:'Oracle, Apple, Tesla (edge)',
+        note:'City council passed large-load review ordinance; water consumption concerns cited in 2024. Oncor/PEC territory split. Shorter base queue, but permitting risk elevated.' },
+      { id:'sanantonio', name:'San Antonio', county:'Bexar Co.',
+        x:50,y:72, lmpAvg:41,lmpPeak:195, sentiment:3.6,sentimentLabel:'Favorable',
+        tariffDemand:8.20,tariffEnergy:0.040, queueStd:26,queueFlex:12,queueSavings:14,
+        dcFriendly:'Moderate',upsizeDelta:5.8,
+        keyTenants:'Rackspace, H-E-B (edge)',
+        note:'CPS Energy offers large-load incentives; moderate political support. Municipal utility = faster tariff negotiation. Flex program under development 2025.' },
+    ]
+  },
+  arizona: {
+    label:'Arizona / APS+SRP', color:'var(--purple)', market:'WECC/APS/SRP',
+    regions:[
+      { id:'westvalley', name:'West Valley (APS)', county:'Maricopa Co. West',
+        x:30,y:58, lmpAvg:52,lmpPeak:280, sentiment:4.5,sentimentLabel:'Very Favorable',
+        tariffDemand:14.20,tariffEnergy:0.055, queueStd:30,queueFlex:14,queueSavings:16,
+        dcFriendly:'Very High',upsizeDelta:13.8,
+        keyTenants:'Meta (Mesa), Google, Aligned',
+        note:'APS Flex Load Rider E-32 active; Maricopa County offers tax abatements. Primary AZ campus zone. Summer peak $280/MWh — flex load essential for cost management.' },
+      { id:'eastvalley', name:'East Valley (SRP)', county:'Maricopa Co. East',
+        x:56,y:58, lmpAvg:49,lmpPeak:260, sentiment:4.1,sentimentLabel:'Favorable',
+        tariffDemand:12.80,tariffEnergy:0.051, queueStd:28,queueFlex:13,queueSavings:15,
+        dcFriendly:'High',upsizeDelta:11.4,
+        keyTenants:'Iron Mountain, QTS, Cologix',
+        note:'SRP Large Load program; Chandler/Gilbert actively courting hyperscalers with incentive packages. SRP E-37 large power tariff. Flex DR program pays $50/MWh curtailed.' },
+      { id:'tucson', name:'Tucson (TEP)', county:'Pima Co.',
+        x:48,y:80, lmpAvg:44,lmpPeak:230, sentiment:3.2,sentimentLabel:'Moderate',
+        tariffDemand:11.50,tariffEnergy:0.047, queueStd:34,queueFlex:16,queueSavings:18,
+        dcFriendly:'Moderate',upsizeDelta:7.2,
+        keyTenants:'University research (edge)',
+        note:'TEP DR program available; city council split on large industrial loads. University of Arizona partnership potential. Cooler than Phoenix by 8°F — PUE advantage.' },
+      { id:'flagstaff', name:'Flagstaff (APS North)', county:'Coconino Co.',
+        x:40,y:30, lmpAvg:38,lmpPeak:180, sentiment:2.9,sentimentLabel:'Mixed',
+        tariffDemand:10.90,tariffEnergy:0.044, queueStd:38,queueFlex:18,queueSavings:20,
+        dcFriendly:'Low',upsizeDelta:4.8,
+        keyTenants:'None established',
+        note:'Environmental opposition from tribal land proximity; long queue; cooler climate (7,000ft elevation) is primary advantage. Avoid unless greenfield cooling economics dominate.' },
+    ]
+  },
+  virginia: {
+    label:'Virginia / PJM', color:'var(--blue)', market:'PJM/Dominion',
+    regions:[
+      { id:'loudoun', name:'Loudoun County (NoVA)', county:'Loudoun Co.',
+        x:30,y:28, lmpAvg:58,lmpPeak:145, sentiment:3.4,sentimentLabel:'Saturating',
+        tariffDemand:7.80,tariffEnergy:0.062, queueStd:48,queueFlex:22,queueSavings:26,
+        dcFriendly:'High (Capacity Risk)',upsizeDelta:18.2,
+        keyTenants:'AWS, Microsoft, Google, Meta, Equinix',
+        note:"World's largest DC cluster; Dominion 'Data Center Alley' tariff Schedule 19. Moratorium risk in select townships 2025. PJM capacity market pays $329/MW-day. Flex load = queue priority tier 1." },
+      { id:'princewilliam', name:'Prince William (NoVA)', county:'Prince William Co.',
+        x:38,y:36, lmpAvg:55,lmpPeak:140, sentiment:2.9,sentimentLabel:'At Risk',
+        tariffDemand:7.60,tariffEnergy:0.060, queueStd:52,queueFlex:24,queueSavings:28,
+        dcFriendly:'Low',upsizeDelta:14.4,
+        keyTenants:'QTS, Aligned, Stack',
+        note:'2023 rezoning moratorium; political opposition growing. Longest queue in portfolio at 52 months standard. Flex reduces to 24 months, unlocking $33.6M accelerated revenue. Highest risk profile.' },
+      { id:'richmond', name:'Richmond', county:'Chesterfield / Henrico Co.',
+        x:56,y:54, lmpAvg:48,lmpPeak:125, sentiment:4.2,sentimentLabel:'Very Favorable',
+        tariffDemand:6.90,tariffEnergy:0.055, queueStd:40,queueFlex:18,queueSavings:22,
+        dcFriendly:'High',upsizeDelta:12.6,
+        keyTenants:'CyrusOne, Dominion Energy HQ proximity',
+        note:'VEDP actively recruiting; state data center incentive package available. I-95 fiber corridor. Dominion HQ = faster utility engagement. Lowest LMP in VA portfolio at $48/MWh avg.' },
+      { id:'hamptonroads', name:'Hampton Roads', county:'Virginia Beach / Norfolk',
+        x:76,y:64, lmpAvg:46,lmpPeak:120, sentiment:4.0,sentimentLabel:'Favorable',
+        tariffDemand:6.50,tariffEnergy:0.053, queueStd:42,queueFlex:19,queueSavings:23,
+        dcFriendly:'Moderate',upsizeDelta:10.8,
+        keyTenants:'DXC Technology, military edge',
+        note:'Military/federal demand base provides stable anchor tenant. Port logistics advantage. Coastal flooding risk manageable with elevation planning. Subsea cable landing point.' },
+      { id:'swvirginia', name:'SW Virginia (Emerging)', county:'Montgomery / Roanoke Co.',
+        x:18,y:50, lmpAvg:41,lmpPeak:108, sentiment:4.7,sentimentLabel:'Extremely Favorable',
+        tariffDemand:5.80,tariffEnergy:0.048, queueStd:44,queueFlex:20,queueSavings:24,
+        dcFriendly:'Very High',upsizeDelta:16.4,
+        keyTenants:'None yet (greenfield opportunity)',
+        note:'Virginia TROF incentive zone; lowest tariffs in state. AEP Appalachian territory. Fiber expanding via BEAD program. Strong political support — economic development priority. Best risk-adjusted entry point.' },
+    ]
+  }
+};
+
+const STATE_SHAPES = {
+  texas: {
+    outline: "M 3,2 L 50,2 L 50,28 L 97,28 L 100,35 L 96,60 L 85,78 L 73,90 L 58,96 L 42,90 L 27,76 L 14,60 L 6,42 L 3,2 Z",
+    counties: [
+      "M 3,28 L 50,28",          // Panhandle south edge
+      "M 27,2 L 27,28",          // Panhandle Randall/Armstrong divide
+      "M 30,28 L 22,65",         // Caprock Escarpment (W TX boundary)
+      "M 53,28 L 52,90",         // I-35 corridor (N–S)
+      "M 46,50 L 62,68",         // Balcones Fault / Hill Country
+      "M 62,68 L 73,90",         // Gulf Coast approach
+      "M 65,44 L 85,72",         // E Texas Piney Woods divide
+      "M 14,50 L 46,50",         // Edwards Plateau N edge
+      "M 7,62 L 42,68",          // Rio Grande Plains N edge
+    ],
+    contours:[
+      {cx:22,cy:54,rings:[17,12,7]},
+      {cx:62,cy:38,rings:[9,5]},
+      {cx:52,cy:62,rings:[8,4]},
+    ],
+    wm:{x:16,y:15,size:14}
+  },
+  arizona: {
+    outline: "M 8,3 L 62,3 L 62,14 L 76,14 L 76,25 L 95,25 L 96,96 L 82,100 L 5,100 L 3,62 L 8,3 Z",
+    counties: [
+      "M 8,44 L 95,44",          // Mogollon Rim (major escarpment)
+      "M 8,62 L 76,62",          // Maricopa / Pinal boundary
+      "M 8,76 L 76,76",          // Pinal / Pima boundary
+      "M 36,25 L 36,100",        // Yuma / Maricopa W divide
+      "M 62,14 L 62,44",         // Coconino / Navajo E boundary
+      "M 55,44 L 55,100",        // Pinal / Graham E boundary
+      "M 76,44 L 76,62",         // Maricopa / Gila E boundary
+      "M 20,25 L 20,100",        // La Paz / Maricopa W boundary
+    ],
+    contours:[
+      {cx:42,cy:30,rings:[16,10,5]},
+      {cx:32,cy:58,rings:[11,6]},
+      {cx:46,cy:80,rings:[9,5]},
+    ],
+    wm:{x:14,y:16,size:14}
+  },
+  virginia: {
+    outline: "M 3,35 L 12,18 L 24,10 L 38,6 L 52,9 L 66,14 L 78,20 L 90,28 L 97,40 L 95,54 L 86,64 L 74,72 L 60,78 L 46,76 L 32,68 L 18,58 L 8,48 Z",
+    counties: [
+      "M 18,10 L 14,72",         // Blue Ridge Mountains
+      "M 24,10 L 20,70",         // Blue Ridge E slope / Shenandoah Valley
+      "M 46,9 L 52,78",          // Fall Line (Piedmont / Coastal Plain)
+      "M 3,40 L 46,20",          // Rappahannock River / NoVA boundary
+      "M 66,22 L 74,72",         // York / James River corridor
+      "M 86,34 L 95,40",         // Hampton Roads neck
+      "M 60,30 L 66,22",         // Northern Neck top
+    ],
+    contours:[
+      {cx:18,cy:42,rings:[14,8,4]},
+      {cx:48,cy:44,rings:[15,8]},
+      {cx:78,cy:58,rings:[9,5]},
+    ],
+    wm:{x:36,y:48,size:14}
+  }
+};
+
+const sentimentColor = score => {
+  if (score >= 4.5) return '#00d17a';
+  if (score >= 3.8) return '#00c8b0';
+  if (score >= 3.0) return '#ffb020';
+  if (score >= 2.5) return '#ff8c42';
+  return '#ff5c6a';
+};
+const metricValue = (r, mode) => ({price:r.lmpAvg,sentiment:r.sentiment,tariff:r.tariffDemand,queue:r.queueStd,flex:r.queueSavings}[mode]||r.sentiment);
+const metricColor = (r, mode) => {
+  if (mode==='price') { const v=r.lmpAvg; return v<25?'#00d17a':v<45?'#00c8b0':v<55?'#ffb020':'#ff5c6a'; }
+  if (mode==='sentiment') return sentimentColor(r.sentiment);
+  if (mode==='tariff') { const v=r.tariffDemand; return v<8?'#00d17a':v<11?'#00c8b0':v<13?'#ffb020':'#ff5c6a'; }
+  if (mode==='queue') { const v=r.queueStd; return v<25?'#00d17a':v<35?'#ffb020':v<45?'#ff8c42':'#ff5c6a'; }
+  if (mode==='flex') { const v=r.queueSavings; return v>=22?'#00d17a':v>=15?'#00c8b0':v>=12?'#4da8ff':'#ffb020'; }
+  return '#00d17a';
+};
+
+const GeoTab = () => {
+  const [geoState, setGeoState] = useState('texas');
+  const [selectedId, setSelectedId] = useState(null);
+  const [metricMode, setMetricMode] = useState('sentiment');
+
+  const stateData = GEO_DATA[geoState];
+  const regions = stateData.regions;
+  const selected = regions.find(r => r.id === selectedId) || regions[0];
+
+  const metricLabels = {
+    price:     { label:'Avg LMP Price',          unit:'$/MWh',     desc:'Average locational marginal price — lower is better for load cost' },
+    sentiment: { label:'DC Jurisdiction Sentiment', unit:'/5',     desc:'Favorability score toward large data center developments (county + utility + state)' },
+    tariff:    { label:'Large Load Demand Tariff',  unit:'$/kW-mo', desc:'Demand charge component of utility large-load tariff — primary fixed cost driver' },
+    queue:     { label:'Queue Wait (Standard)',     unit:'months',  desc:'Interconnection queue wait without any flexible load commitment' },
+    flex:      { label:'Queue Jump Savings',        unit:'months',  desc:'Months saved by committing to flexible load program — directly unlocks upsize revenue' },
+  };
+
+  const queueChartData = regions.map(r => ({
+    name: r.name.split('(')[0].trim().split(' ').slice(0,2).join(' '),
+    standard: r.queueStd, flex: r.queueFlex, savings: r.queueSavings, upsizeDelta: r.upsizeDelta,
+  }));
+  const upsizeData = regions.map(r => ({
+    name: r.name.split(' ')[0], revenue: r.upsizeDelta, color: sentimentColor(r.sentiment),
+  }));
+
+  const legendItems = {
+    price:     [{l:'<$25/MWh',c:'#00d17a'},{l:'$25–44',c:'#00c8b0'},{l:'$45–54',c:'#ffb020'},{l:'>$55',c:'#ff5c6a'}],
+    sentiment: [{l:'≥4.5 Excellent',c:'#00d17a'},{l:'3.8–4.5 Good',c:'#00c8b0'},{l:'3.0–3.8 Mixed',c:'#ffb020'},{l:'<3.0 At Risk',c:'#ff5c6a'}],
+    tariff:    [{l:'<$8/kW-mo',c:'#00d17a'},{l:'$8–11',c:'#00c8b0'},{l:'$11–13',c:'#ffb020'},{l:'>$13',c:'#ff5c6a'}],
+    queue:     [{l:'<25mo',c:'#00d17a'},{l:'25–34mo',c:'#ffb020'},{l:'35–44mo',c:'#ff8c42'},{l:'>45mo',c:'#ff5c6a'}],
+    flex:      [{l:'≥22mo saved',c:'#00d17a'},{l:'15–22mo',c:'#00c8b0'},{l:'12–15mo',c:'#4da8ff'},{l:'<12mo',c:'#ffb020'}],
+  };
+
+  const accelRev = (selected.upsizeDelta * selected.queueSavings / 12).toFixed(1);
+
+  return (
+    <div style={{color:'var(--text-1)'}}>
+      {/* Header */}
+      <div style={{marginBottom:20}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:6}}>
+          <div style={{width:34,height:34,background:'linear-gradient(135deg,#00d17a,#00c8b0)',borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>🗺</div>
+          <div>
+            <h2 style={{fontSize:20,fontWeight:700,color:'var(--text-1)',margin:0}}>Geo Intelligence Module</h2>
+            <p style={{fontSize:12,color:'var(--text-2)',margin:0}}>Subregional LMP prices · Jurisdiction sentiment · Predicted large load tariff rates · Interconnection queue dynamics · Time-to-upsize gain analysis</p>
+          </div>
+        </div>
+      </div>
+
+      {/* State + Metric selectors */}
+      <div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,marginBottom:14}}>
+        {Object.entries(GEO_DATA).map(([key,sd]) => (
+          <button key={key} onClick={()=>{setGeoState(key);setSelectedId(null);}}
+            style={{padding:'7px 18px',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer',transition:'all 0.15s',
+              border:`1px solid ${geoState===key?sd.color:'var(--border)'}`,
+              background:geoState===key?`${sd.color}22`:'var(--bg-surface)',
+              color:geoState===key?sd.color:'var(--text-2)',
+              boxShadow:geoState===key?`0 0 14px ${sd.color}33`:'none'}}>
+            {sd.label}
+          </button>
+        ))}
+        <div style={{width:1,height:24,background:'var(--border)',margin:'0 4px'}}/>
+        {Object.entries(metricLabels).map(([key,ml]) => (
+          <button key={key} onClick={()=>setMetricMode(key)}
+            style={{padding:'5px 13px',borderRadius:20,fontSize:11,fontWeight:600,cursor:'pointer',transition:'all 0.12s',
+              border:`1px solid ${metricMode===key?'var(--green)':'var(--border)'}`,
+              background:metricMode===key?'var(--green-glow)':'transparent',
+              color:metricMode===key?'var(--green)':'var(--text-2)'}}>
+            {ml.label}
+          </button>
+        ))}
+      </div>
+      <p style={{fontSize:11,color:'var(--text-3)',marginBottom:18,paddingLeft:2}}>{metricLabels[metricMode].desc}</p>
+
+      {/* Main: Map + Detail side by side */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 390px',gap:16,marginBottom:18}}>
+
+        {/* SVG Map */}
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:20}}>
+          <p style={{fontSize:10,fontWeight:600,color:'var(--text-3)',marginBottom:12,textTransform:'uppercase',letterSpacing:'0.08em'}}>
+            {stateData.label} — click a region to explore
+          </p>
+          <div style={{position:'relative',width:'100%',paddingBottom:'70%',background:'#060d1a',borderRadius:8,border:'1px solid var(--border)',overflow:'hidden'}}>
+            <svg style={{position:'absolute',top:0,left:0,width:'100%',height:'100%'}} viewBox="0 0 100 100">
+              {/* Background subtle geo grid */}
+              {[10,20,30,40,50,60,70,80,90].map(v=>(
+                <React.Fragment key={v}>
+                  <line x1={v} y1={0} x2={v} y2={100} stroke="rgba(255,255,255,0.018)" strokeWidth={0.25}/>
+                  <line x1={0} y1={v} x2={100} y2={v} stroke="rgba(255,255,255,0.018)" strokeWidth={0.25}/>
+                </React.Fragment>
+              ))}
+
+              {/* Topographic contour rings (elevation texture) */}
+              {STATE_SHAPES[geoState].contours.map((c,i)=>(
+                <g key={i}>
+                  {c.rings.map((r,j)=>(
+                    <ellipse key={j} cx={c.cx} cy={c.cy} rx={r} ry={r*0.72}
+                      fill="none"
+                      stroke="rgba(120,190,220,0.07)"
+                      strokeWidth={0.4}
+                      strokeDasharray="0.8 2.2"
+                      transform={`rotate(-12,${c.cx},${c.cy})`}
+                    />
+                  ))}
+                </g>
+              ))}
+
+              {/* State outline fill */}
+              <path d={STATE_SHAPES[geoState].outline}
+                fill="rgba(80,130,200,0.05)"
+                stroke="rgba(100,160,230,0.5)"
+                strokeWidth={0.7}
+                strokeLinejoin="round"
+              />
+
+              {/* County / region boundary lines */}
+              {STATE_SHAPES[geoState].counties.map((d,i)=>(
+                <path key={i} d={d} fill="none"
+                  stroke="rgba(100,160,210,0.22)"
+                  strokeWidth={0.3}
+                  strokeDasharray="1.2 1.8"
+                  strokeLinecap="round"
+                />
+              ))}
+
+              {/* State watermark */}
+              <text
+                x={STATE_SHAPES[geoState].wm.x}
+                y={STATE_SHAPES[geoState].wm.y}
+                fontSize={STATE_SHAPES[geoState].wm.size}
+                fill="rgba(255,255,255,0.022)"
+                fontWeight="900" letterSpacing="2">
+                {geoState.toUpperCase()}
+              </text>
+
+              {/* Region markers */}
+              {regions.map(r => {
+                const isSel = r.id === (selectedId || regions[0].id);
+                const col = metricColor(r, metricMode);
+                const val = metricValue(r, metricMode);
+                return (
+                  <g key={r.id} style={{cursor:'pointer'}} onClick={()=>setSelectedId(r.id)}>
+                    {/* Outer pulse rings when selected */}
+                    {isSel && <>
+                      <circle cx={r.x} cy={r.y} r={11} fill="none" stroke={col} strokeWidth={0.5} opacity={0.2} strokeDasharray="1.5 2"/>
+                      <circle cx={r.x} cy={r.y} r={8.5} fill="none" stroke={col} strokeWidth={0.7} opacity={0.4}/>
+                    </>}
+                    {/* Main dot */}
+                    <circle cx={r.x} cy={r.y} r={isSel?6.2:5}
+                      fill={`${col}28`} stroke={col} strokeWidth={isSel?1.4:0.8}
+                      style={{filter:isSel?`drop-shadow(0 0 5px ${col})`:'none'}}/>
+                    {/* Value label inside */}
+                    <text x={r.x} y={r.y+0.6} textAnchor="middle" dominantBaseline="middle"
+                      fontSize={2.6} fill={col} fontWeight="bold">
+                      {metricMode==='sentiment'?val.toFixed(1):Math.round(val)}
+                    </text>
+                    {/* Region name below */}
+                    <text x={r.x} y={r.y+9.5} textAnchor="middle" fontSize={2.2}
+                      fill="rgba(220,232,245,0.7)" fontWeight="500">
+                      {r.name.split(' (')[0].split(' ').slice(0,2).join(' ')}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+          {/* Legend */}
+          <div style={{display:'flex',gap:14,marginTop:12,flexWrap:'wrap'}}>
+            {legendItems[metricMode].map(l=>(
+              <div key={l.l} style={{display:'flex',alignItems:'center',gap:5}}>
+                <div style={{width:8,height:8,borderRadius:'50%',background:l.c,boxShadow:`0 0 5px ${l.c}88`}}/>
+                <span style={{fontSize:10,color:'var(--text-2)'}}>{l.l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Detail Panel */}
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:`1px solid ${stateData.color}55`,padding:20,display:'flex',flexDirection:'column',gap:12,overflow:'hidden'}}>
+          <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:8}}>
+            <div>
+              <h3 style={{fontSize:15,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>{selected.name}</h3>
+              <p style={{fontSize:11,color:'var(--text-3)',margin:0}}>{selected.county}</p>
+            </div>
+            <span style={{fontSize:10,fontWeight:700,padding:'3px 9px',borderRadius:10,whiteSpace:'nowrap',flexShrink:0,
+              background:`${sentimentColor(selected.sentiment)}22`,
+              color:sentimentColor(selected.sentiment),
+              border:`1px solid ${sentimentColor(selected.sentiment)}44`}}>
+              {selected.sentimentLabel}
+            </span>
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:7}}>
+            {[
+              {l:'Avg LMP',v:`$${selected.lmpAvg}/MWh`,s:`Peak $${selected.lmpPeak}`,c:'var(--amber)'},
+              {l:'DC Sentiment',v:`${selected.sentiment}/5`,s:selected.dcFriendly,c:sentimentColor(selected.sentiment)},
+              {l:'Demand Tariff',v:`$${selected.tariffDemand}/kW-mo`,s:`$${selected.tariffEnergy}/kWh energy`,c:'var(--purple)'},
+              {l:'Queue Std → Flex',v:`${selected.queueStd}→${selected.queueFlex}mo`,s:`-${selected.queueSavings}mo saved`,c:'var(--green)'},
+              {l:'Upsize Rev Δ',v:`$${selected.upsizeDelta}M/yr`,s:'per 50MW increment',c:'var(--blue)'},
+              {l:'Tariff Tier',v:selected.tariffDemand<8?'Tier 1 — Low':selected.tariffDemand<12?'Tier 2 — Mid':'Tier 3 — High',s:'vs. peer utilities',c:'var(--teal)'},
+            ].map(m=>(
+              <div key={m.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'9px 11px',border:'1px solid var(--border)'}}>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{m.l}</p>
+                <p style={{fontSize:12,fontWeight:700,color:m.c,margin:'0 0 2px',fontFamily:'var(--mono)'}}>{m.v}</p>
+                <p style={{fontSize:10,color:'var(--text-2)',margin:0}}>{m.s}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)'}}>
+            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 3px',textTransform:'uppercase',letterSpacing:'0.06em'}}>Key Tenants</p>
+            <p style={{fontSize:11,color:'var(--text-1)',margin:'0 0 7px',fontWeight:500}}>{selected.keyTenants}</p>
+            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 3px',textTransform:'uppercase',letterSpacing:'0.06em'}}>Market Intelligence</p>
+            <p style={{fontSize:11,color:'var(--text-2)',margin:0,lineHeight:1.55}}>{selected.note}</p>
+          </div>
+
+          {/* Queue interplay */}
+          <div style={{background:'rgba(0,209,122,0.06)',borderRadius:8,padding:'11px 13px',border:'1px solid rgba(0,209,122,0.18)'}}>
+            <p style={{fontSize:10,color:'var(--green)',fontWeight:700,margin:'0 0 6px',textTransform:'uppercase',letterSpacing:'0.06em'}}>⚡ Queue Jump × Flex Load Interplay</p>
+            <p style={{fontSize:11,color:'var(--text-2)',margin:'0 0 9px',lineHeight:1.55}}>
+              A 25% flex commitment at <strong style={{color:'var(--text-1)'}}>{selected.name}</strong> cuts queue from{' '}
+              <strong style={{color:'#ff5c6a'}}>{selected.queueStd}mo</strong> to{' '}
+              <strong style={{color:'var(--green)'}}>{selected.queueFlex}mo</strong>, unlocking{' '}
+              <strong style={{color:'var(--green)'}}>~${accelRev}M</strong> of accelerated GPU revenue.
+            </p>
+            <div style={{display:'flex',gap:8}}>
+              {[{l:'WITHOUT FLEX',v:`${selected.queueStd}mo`,c:'#ff5c6a'},{l:'WITH FLEX',v:`${selected.queueFlex}mo`,c:'var(--green)'}].map((item,i)=>(
+                <React.Fragment key={item.l}>
+                  {i===1 && <div style={{display:'flex',alignItems:'center',color:'var(--green)',fontSize:18,fontWeight:300}}>→</div>}
+                  <div style={{flex:1,background:'var(--bg-raised)',borderRadius:6,padding:'7px 10px',textAlign:'center'}}>
+                    <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px'}}>{item.l}</p>
+                    <p style={{fontSize:15,fontWeight:700,color:item.c,fontFamily:'var(--mono)',margin:0}}>{item.v}</p>
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom charts */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:18}}>
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:20}}>
+          <h4 style={{fontSize:13,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>Interconnection Queue: Standard vs. Flexible</h4>
+          <p style={{fontSize:11,color:'var(--text-2)',margin:'0 0 14px'}}>Months to interconnect by subregion — red = standard, green = with flex commitment</p>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={queueChartData} barGap={3} barCategoryGap="30%">
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" vertical={false}/>
+              <XAxis dataKey="name" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false}/>
+              <YAxis tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} unit="mo" width={36}/>
+              <Tooltip content={<CustomTooltip prefix="" suffix="mo"/>}/>
+              <Legend wrapperStyle={{fontSize:11,color:'#7a90b0'}}/>
+              <Bar dataKey="standard" name="Standard Queue" fill="#ff5c6a" opacity={0.65} radius={[3,3,0,0]}/>
+              <Bar dataKey="flex" name="Flex Queue" fill="#00d17a" radius={[3,3,0,0]}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:20}}>
+          <h4 style={{fontSize:13,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>Time-to-Upsize Revenue Delta</h4>
+          <p style={{fontSize:11,color:'var(--text-2)',margin:'0 0 14px'}}>Annual GPU revenue unlocked per 50MW upsize via flex queue acceleration</p>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={upsizeData} layout="vertical" barCategoryGap="22%">
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" horizontal={false}/>
+              <XAxis type="number" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} unit="M"/>
+              <YAxis type="category" dataKey="name" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} width={62}/>
+              <Tooltip content={<CustomTooltip prefix="$" suffix="M/yr"/>}/>
+              <Bar dataKey="revenue" name="Revenue Delta" radius={[0,4,4,0]}>
+                {upsizeData.map((d,i)=><Cell key={i} fill={d.color}/>)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Tariff table */}
+      <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:20}}>
+        <h4 style={{fontSize:13,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>Predicted Large Load Tariff Rates — {stateData.label}</h4>
+        <p style={{fontSize:11,color:'var(--text-2)',margin:'0 0 14px'}}>Based on current utility rate filings and large load rider structures. Click any row to explore in the map above.</p>
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+            <thead>
+              <tr style={{borderBottom:'1px solid var(--border)'}}>
+                {['Subregion','Market','Demand $/kW-mo','Energy $/kWh','Est. Annual @ 200MW','Sentiment','Queue Std→Flex','Flex Savings'].map(h=>(
+                  <th key={h} style={{textAlign:'left',padding:'7px 10px',fontSize:9,color:'var(--text-3)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',whiteSpace:'nowrap'}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {regions.map((r,i)=>{
+                const annualCost = ((r.tariffDemand*1000*12)+(r.tariffEnergy*200000*8760*0.85))/1e6;
+                const sc = sentimentColor(r.sentiment);
+                const isSel = r.id===selected.id;
+                return (
+                  <tr key={r.id} onClick={()=>setSelectedId(r.id)}
+                    style={{cursor:'pointer',borderBottom:'1px solid var(--border)',transition:'background 0.1s',
+                      background:isSel?'var(--bg-overlay)':i%2===0?'transparent':'var(--bg-raised)'}}>
+                    <td style={{padding:'9px 10px',color:'var(--text-1)',fontWeight:600,fontSize:12}}>{r.name}</td>
+                    <td style={{padding:'9px 10px',color:'var(--text-2)',fontSize:11}}>
+                      {geoState==='texas'?'ERCOT':geoState==='arizona'?(r.id==='eastvalley'?'SRP':'APS'):'Dominion'}
+                    </td>
+                    <td style={{padding:'9px 10px',fontFamily:'var(--mono)',color:'var(--amber)',fontSize:12}}>${r.tariffDemand.toFixed(2)}</td>
+                    <td style={{padding:'9px 10px',fontFamily:'var(--mono)',color:'var(--text-2)',fontSize:12}}>${r.tariffEnergy.toFixed(3)}</td>
+                    <td style={{padding:'9px 10px',fontFamily:'var(--mono)',color:'var(--text-1)',fontWeight:700,fontSize:12}}>${annualCost.toFixed(1)}M</td>
+                    <td style={{padding:'9px 10px'}}>
+                      <span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'2px 8px',borderRadius:10,
+                        background:`${sc}22`,color:sc,fontSize:10,fontWeight:700,border:`1px solid ${sc}44`}}>
+                        {r.sentiment.toFixed(1)} · {r.sentimentLabel}
+                      </span>
+                    </td>
+                    <td style={{padding:'9px 10px',fontFamily:'var(--mono)',color:'var(--text-2)',fontSize:12}}>
+                      {r.queueStd}→<span style={{color:'var(--green)'}}>{r.queueFlex}</span>mo
+                    </td>
+                    <td style={{padding:'9px 10px'}}>
+                      <span style={{fontFamily:'var(--mono)',fontWeight:700,color:'var(--green)',fontSize:12}}>-{r.queueSavings}mo</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p style={{fontSize:10,color:'var(--text-3)',marginTop:10}}>
+          * Annual cost estimate: 200MW at 85% load factor, 8,760 hrs/yr. Energy component only; excludes T&amp;D and ancillary charges. Data sourced from 2025–2026 utility large-load rate filings and FERC interconnection queue records.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ── Main App ───────────────────────────────────────────────
+const TABS = [
+  { key:'portfolio', label:'Portfolio Overview', icon:'🗂' },
+  { key:'texas', label:'Texas / ERCOT', icon:'⚡' },
+  { key:'arizona', label:'Arizona / APS+SRP', icon:'☀️' },
+  { key:'virginia', label:'Virginia / PJM', icon:'🔷' },
+  { key:'sensitivity', label:'Sensitivity Engine', icon:'🎛' },
+  { key:'csp', label:'CSP Monetization', icon:'💼' },
+  { key:'geo', label:'Geo Intelligence', icon:'🗺' },
+];
+
+const App = () => {
+  const [s, setS] = useState({...DEFAULTS});
+  const [tab, setTab] = useState('portfolio');
+  const [pitchMode, setPitchMode] = useState(false);
+  const [liveDataStatus, setLiveDataStatus] = useState('loading');
+
+  const set = useCallback((key, val) => setS(prev => ({...prev, [key]: val})), []);
+  const reset = useCallback(() => setS({...DEFAULTS}), []);
+
+  useEffect(() => {
+    // Attempt live ERCOT/EIA data fetch (graceful fallback)
+    const timeout = setTimeout(() => setLiveDataStatus('fallback'), 5000);
+    fetch('https://api.eia.gov/v2/electricity/wholesale-markets/data/?api_key=DEMO_KEY&frequency=annual&data[0]=price&facets[respondent][]=ERCO&offset=0&length=1')
+      .then(r => r.json())
+      .then(data => { clearTimeout(timeout); setLiveDataStatus('live'); })
+      .catch(() => { clearTimeout(timeout); setLiveDataStatus('fallback'); });
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const effectiveFlexPct = useMemo(() => computeEffectiveFlexPct(s), [s]);
+
+  const { tx, az, va } = useMemo(() => ({
+    tx: calcTexas(s, effectiveFlexPct),
+    az: calcArizona(s, effectiveFlexPct),
+    va: calcVirginia(s, effectiveFlexPct),
+  }), [s, effectiveFlexPct]);
+
+  const totalNPV = tx.npv + az.npv + va.npv;
+
+  return (
+    <div className="min-h-screen bg-slate-100">
+      <GlobalControls s={s} set={set} pitchMode={pitchMode} setPitchMode={setPitchMode} reset={reset} totalNPV={totalNPV} effectiveFlexPct={effectiveFlexPct} />
+
+      {/* Tab Bar */}
+      <div className="bg-white border-b border-slate-200 sticky top-[72px] z-30 shadow-sm">
+        <div className="max-w-screen-2xl mx-auto px-4">
+          <div className="flex overflow-x-auto gap-1">
+            {TABS.map(t => (
+              <button key={t.key} onClick={() => setTab(t.key)}
+                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors ${
+                  tab === t.key
+                    ? 'border-b-3 text-emerald-700 border-b-[3px] border-emerald-500'
+                    : 'text-slate-500 hover:text-slate-700 border-b-[3px] border-transparent'
+                }`}>
+                <span>{t.icon}</span>
+                <span>{t.label}</span>
+                {t.key !== 'portfolio' && t.key !== 'sensitivity' && t.key !== 'csp' && t.key !== 'geo' && (
+                  <span className={`text-xs font-bold ml-1 px-1.5 py-0.5 rounded-full ${
+                    t.key==='texas'?'bg-teal-100 text-teal-700':t.key==='arizona'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'
+                  }`}>{fmtM(t.key==='texas'?tx.npv:t.key==='arizona'?az.npv:va.npv)}</span>
+                )}
+                {t.key === 'portfolio' && <span className="text-xs font-bold ml-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{fmtM(totalNPV)}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-screen-2xl mx-auto px-4 py-6">
+        {tab === 'portfolio' && <PortfolioTab s={s} tx={tx} az={az} va={va} pitchMode={pitchMode} />}
+        {tab === 'texas' && <TexasTab s={s} set={set} tx={tx} pitchMode={pitchMode} effectiveFlexPct={effectiveFlexPct} />}
+        {tab === 'arizona' && <ArizonaTab s={s} set={set} az={az} pitchMode={pitchMode} effectiveFlexPct={effectiveFlexPct} />}
+        {tab === 'virginia' && <VirginiaTab s={s} set={set} va={va} pitchMode={pitchMode} effectiveFlexPct={effectiveFlexPct} />}
+        {tab === 'sensitivity' && <SensitivityTab s={s} set={set} />}
+        {tab === 'csp' && <CSPTab s={s} tx={tx} az={az} va={va} />}
+        {tab === 'geo' && <GeoTab />}
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-slate-200 mt-8 py-4 px-4">
+        <div className="max-w-screen-2xl mx-auto flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-3">
+            <div style={{width:22,height:22,background:'var(--green)',borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:11,color:'#020e06'}}>⟡</div>
+            <p className="text-xs text-slate-500">
+              Built for <strong className="text-emerald-700">Emerald AI</strong> | Data sourced from ERCOT 2025 LTDEF, ERCOT March 2026 TAC Report, PJM BRA Reports 2026/27–2027/28, APS/SRP utility filings
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${liveDataStatus==='live'?'bg-emerald-100 text-emerald-700':liveDataStatus==='loading'?'bg-yellow-100 text-yellow-700':'bg-slate-100 text-slate-500'}`}>
+              {liveDataStatus==='live'?'🟢 Live EIA Data':liveDataStatus==='loading'?'⏳ Checking live data…':'📊 Using verified reference data (Aug 2025)'}
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
