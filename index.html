@@ -1086,6 +1086,245 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
           </div>
         </div>
       )}
+
+      {/* ── ERCOT Market & Interconnection Explainer ── */}
+      <div style={{display:'flex',flexDirection:'column',gap:16}}>
+
+        {/* Header */}
+        <div style={{background:'linear-gradient(135deg,#011a14 0%,#021820 100%)',borderRadius:14,border:'1px solid #0a3d2a',padding:'20px 28px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
+            <div style={{width:36,height:36,background:'linear-gradient(135deg,#00d17a,#00b8c8)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>⚡</div>
+            <div>
+              <h3 style={{fontSize:16,fontWeight:700,color:'var(--text-1)',margin:0}}>ERCOT Market & Interconnection Guide</h3>
+              <p style={{fontSize:11,color:'var(--text-3)',margin:0}}>Regulatory structure · Load & generation interconnection · Battery deployment landscape</p>
+            </div>
+          </div>
+          <p style={{fontSize:12,color:'var(--text-2)',lineHeight:1.7,margin:0}}>
+            ERCOT (Electric Reliability Council of Texas) operates the most unique power market in North America — an islanded, deregulated, energy-only grid covering ~90% of Texas load.
+            Unlike PJM or CAISO, ERCOT has <strong style={{color:'var(--text-1)'}}>no capacity market</strong>, meaning generators and demand-response resources are compensated purely through real-time and day-ahead energy prices.
+            This creates extreme price volatility (from −$500/MWh to $5,000/MWh hard cap) and makes flexible load a uniquely valuable grid asset.
+          </p>
+        </div>
+
+        {/* Section 1 — ERCOT Structure */}
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'18px 22px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
+            <span style={{fontSize:15}}>🏛</span>
+            <span style={{fontSize:12,fontWeight:700,color:'var(--teal)',textTransform:'uppercase',letterSpacing:'0.07em'}}>ERCOT Regulatory Structure</span>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+            {[
+              {title:'Market Operator', icon:'🔧', color:'var(--teal)', body:'ERCOT is both the ISO (Independent System Operator) and the grid operator — it clears the day-ahead and real-time energy markets, manages ancillary services, and oversees the transmission planning process. ERCOT is regulated by the Public Utility Commission of Texas (PUCT), not FERC, making it exempt from most federal oversight.'},
+              {title:'Energy-Only Market', icon:'💲', color:'var(--amber)', body:'There is no forward capacity market (unlike PJM\'s BRA). Generators recover fixed costs through energy prices alone. When supply is tight, prices spike to the $5,000/MWh system cap — this is the primary revenue signal for peakers and flexible demand resources. Post-Winter Storm Uri, PUCT added an Ancillary Services Reserve (ORDC) adder that lifts effective prices as reserves thin.'},
+              {title:'Ancillary Services', icon:'⚖️', color:'var(--purple)', body:'ERCOT procures four core ancillary services: Responsive Reserve (RRS, ~2,800 MW), Regulation Service Up/Down (~300 MW each), Non-Spinning Reserve (NSRS, ~1,400 MW), and ECRS (ERCOT Contingency Reserve Service, new 2023, ~3,000 MW). Data centers with fast curtailment capability can qualify for RRS and ECRS — the highest-value AS products.'},
+              {title:'Nodal Pricing (LMPs)', icon:'📍', color:'var(--blue)', body:'ERCOT runs a nodal market with ~9,000 settlement points. Load-Serving Entities (LSEs) pay the Load Zone price (HB_NORTH, HB_WEST, HB_HOUSTON, HB_SOUTH) while generators receive their specific node LMP. Congestion costs appear as the difference — data centers should understand their zone and seek sites with favorable historical LMPs and low congestion risk.'},
+              {title:'PUCT Oversight', icon:'⚖️', color:'var(--red)', body:'Post-Uri, the PUCT has been more interventionist: mandating weatherization, approving the ECRS product, raising the price cap methodology, and exploring a Performance Credit Mechanism (PCM) — a quasi-capacity product that stalled in 2023. Any future PCM revival could create a new revenue stream for dispatchable demand response resources like flexible data centers.'},
+              {title:'Senate Bill 2 (2023)', icon:'📋', color:'var(--green)', body:'SB 2 created the Texas Energy Fund ($5B for new gas peaker plants) and the Backup Power Package ($1.8B for microgrids). It also directed ERCOT to study demand response as a dispatchable reliability resource. For data centers, this signals that the Texas legislature views controllable load — including GPU compute facilities — as a legitimate grid stability tool eligible for program funding.'},
+            ].map(card => (
+              <div key={card.title} style={{background:'var(--bg-raised)',borderRadius:10,padding:'14px 16px',border:`1px solid ${card.color}33`}}>
+                <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:8}}>
+                  <span style={{fontSize:14}}>{card.icon}</span>
+                  <span style={{fontSize:11,fontWeight:700,color:card.color}}>{card.title}</span>
+                </div>
+                <p style={{fontSize:11,color:'var(--text-2)',lineHeight:1.65,margin:0}}>{card.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Section 2 — Interconnection Guide */}
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'18px 22px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+            <span style={{fontSize:15}}>🔌</span>
+            <span style={{fontSize:12,fontWeight:700,color:'var(--teal)',textTransform:'uppercase',letterSpacing:'0.07em'}}>Interconnection Guide — Load & Generation</span>
+          </div>
+          <p style={{fontSize:11,color:'var(--text-3)',marginBottom:14}}>ERCOT's interconnection process differs fundamentally for load (data centers) vs. generation (solar, wind, batteries). Understanding both sides is critical for co-located or behind-the-meter deployments.</p>
+
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
+            {/* Load Side */}
+            <div style={{background:'rgba(0,209,122,0.05)',borderRadius:10,border:'1px solid rgba(0,209,122,0.25)',padding:'16px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12}}>
+                <div style={{width:28,height:28,background:'rgba(0,209,122,0.15)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>🏢</div>
+                <span style={{fontSize:12,fontWeight:700,color:'var(--green)'}}>LOAD SIDE — Data Center Interconnection</span>
+              </div>
+              {[
+                {step:'1', label:'Identify Transmission Service Provider (TSP)', body:'In ERCOT, the TSP is typically a utility (Oncor, AEP Texas, CenterPoint, Entergy TX) or a municipal utility (LCRA, etc.) depending on location. The TSP owns the distribution and transmission infrastructure up to the ERCOT transmission system. Your interconnection agreement will be with the TSP, not ERCOT directly.'},
+                {step:'2', label:'Submit Load Interconnection Request', body:'File a Large Load Interconnection Request (typically >1 MW) with the TSP. Required information: site address, requested MW, voltage level desired, in-service date, load profile estimates, and proposed metering configuration. TSPs use a queue-based system — earlier applications get priority study slots.'},
+                {step:'3', label:'Facilities Study & Cost Estimate', body:'TSP conducts a Distribution Facilities Study (DFS) or Transmission Facilities Study (TFS) depending on voltage level. Study identifies required network upgrades: substation transformers, feeder extensions, switching equipment. This produces a detailed cost estimate — typically $1–15M for a 100–200 MW load depending on proximity to existing infrastructure.'},
+                {step:'4', label:'Interconnection Agreement (IA)', body:'Negotiate and execute the IA covering: allocated upgrade costs, metering specifications, power quality requirements, protection settings, and load curtailment obligations (if any). Oncor large-load IAs now include "demand flexibility" provisions that can reduce interconnection costs 15–25% in exchange for curtailment program enrollment.'},
+                {step:'5', label:'Construction & Energization', body:'TSP constructs agreed-upon facilities (paid by customer up-front or amortized via tariff). Customer installs internal switchgear, transformers, and metering. ERCOT approves final registration of the load as a Load Resource (LR) for ancillary service participation. Typical timeline: 18–36 months standard; 10–20 months with flex commitment.'},
+              ].map(item => (
+                <div key={item.step} style={{display:'flex',gap:10,marginBottom:10}}>
+                  <div style={{width:22,height:22,borderRadius:'50%',background:'var(--green)',color:'#020e06',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:1}}>{item.step}</div>
+                  <div>
+                    <p style={{fontSize:11,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>{item.label}</p>
+                    <p style={{fontSize:10,color:'var(--text-2)',lineHeight:1.6,margin:0}}>{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Generation Side */}
+            <div style={{background:'rgba(255,176,32,0.05)',borderRadius:10,border:'1px solid rgba(255,176,32,0.25)',padding:'16px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12}}>
+                <div style={{width:28,height:28,background:'rgba(255,176,32,0.15)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>⚡</div>
+                <span style={{fontSize:12,fontWeight:700,color:'var(--amber)'}}>GENERATION SIDE — Power Plant Interconnection</span>
+              </div>
+              {[
+                {step:'1', label:'ERCOT Generation Interconnection Request (GIR)', body:'File directly with ERCOT (unlike load, which goes to the TSP). GIR requires: technology type, nameplate capacity (AC & DC), point of interconnection (POI), requested COD, and a $5,000–50,000 application fee. ERCOT assigns a queue position — there are currently ~238 GW in the queue (~3x current installed capacity), dominated by solar + storage.'},
+                {step:'2', label:'Synchronization Studies', body:'ERCOT conducts Synchronization Impact Studies to assess frequency, voltage, and stability impacts. For large projects (>100 MW), a full Stability Study may be required. Battery and solar projects typically have faster study timelines than gas because they use inverter-based resources (IBRs) — ERCOT is actively modernizing its IBR study process after grid stability concerns post-2021.'},
+                {step:'3', label:'Transmission Facilities Study (TFS)', body:'Identifies network upgrades needed to accommodate the new generation. Costs allocated to the project via the "participant funding" model — the generator pays 100% of the cost of their specific interconnection facilities and a share of any network upgrades triggered by their project. This is a key cost risk: a poorly-sited 200 MW project can face $50–150M in upgrade costs.'},
+                {step:'4', label:'Interconnection Agreement with TSP', body:'Execute the IA with both ERCOT and the relevant TSP. For BTM (behind-the-meter) co-located storage + load, a special "qualified scheduling entity" (QSE) must be engaged to represent the asset in ERCOT markets. QSEs are the market interface layer — every resource that participates in ERCOT real-time markets must have a QSE relationship.'},
+                {step:'5', label:'Registration & Market Participation', body:'Once energized, register with ERCOT as a Resource Entity. Generation assets register as Generation Resources (GRs) or Intermittent Renewable Resources (IRRs for wind/solar). BTM storage registers as an Energy Storage Resource (ESR) — a relatively new designation post-2021 that allows simultaneous charging/discharging optimization. ESRs can participate in energy arbitrage, regulation, RRS, ECRS, and non-spinning reserve simultaneously.'},
+              ].map(item => (
+                <div key={item.step} style={{display:'flex',gap:10,marginBottom:10}}>
+                  <div style={{width:22,height:22,borderRadius:'50%',background:'var(--amber)',color:'#020e06',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:1}}>{item.step}</div>
+                  <div>
+                    <p style={{fontSize:11,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>{item.label}</p>
+                    <p style={{fontSize:10,color:'var(--text-2)',lineHeight:1.6,margin:0}}>{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Queue Timeline Comparison */}
+          <div style={{background:'var(--bg-raised)',borderRadius:8,padding:'14px 16px',border:'1px solid var(--border)'}}>
+            <p style={{fontSize:10,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:10}}>⏱ Typical Timeline Comparison (ERCOT)</p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+              {[
+                {label:'Standard Load', time:'24–36 mo', note:'No flex commitment', color:'var(--red)'},
+                {label:'Flex Load (DR enrolled)', time:'10–16 mo', note:'Conductor program or DR rider', color:'var(--green)'},
+                {label:'Solar / Wind (gen)', time:'24–48 mo', note:'Congested queue; study-heavy', color:'var(--amber)'},
+                {label:'BESS (standalone)', time:'18–30 mo', note:'IBR studies; improving 2024+', color:'var(--purple)'},
+              ].map(item => (
+                <div key={item.label} style={{textAlign:'center',padding:'10px 8px',background:'var(--bg-overlay)',borderRadius:7,border:`1px solid ${item.color}33`}}>
+                  <p style={{fontSize:10,color:'var(--text-3)',margin:'0 0 4px'}}>{item.label}</p>
+                  <p style={{fontSize:18,fontWeight:700,color:item.color,fontFamily:'var(--mono)',margin:'0 0 3px'}}>{item.time}</p>
+                  <p style={{fontSize:9,color:'var(--text-3)',margin:0}}>{item.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3 — Battery Deployment */}
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'18px 22px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+            <span style={{fontSize:15}}>🔋</span>
+            <span style={{fontSize:12,fontWeight:700,color:'var(--teal)',textTransform:'uppercase',letterSpacing:'0.07em'}}>Battery Storage Deployment in ERCOT</span>
+          </div>
+          <p style={{fontSize:11,color:'var(--text-3)',marginBottom:14}}>Texas has become the fastest-growing battery storage market in the US, driven by ERCOT's price volatility, the lack of capacity payments forcing merchant economics, and co-location opportunities with the booming solar & data center build-out.</p>
+
+          {/* Stats bar */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,marginBottom:16}}>
+            {[
+              {l:'Installed BESS (2025)',   v:'~9 GW',    sub:'Up from 0.5 GW in 2021', c:'var(--green)'},
+              {l:'Queue (BESS)',            v:'~85 GW',   sub:'Pending interconnection', c:'var(--amber)'},
+              {l:'Avg Project Size',        v:'100–300 MW',sub:'4-hr duration dominant', c:'var(--blue)'},
+              {l:'Top Revenue Stream',      v:'Energy Arb',sub:'$40–120/MWh spread avg', c:'var(--purple)'},
+              {l:'BTM Co-location (DCs)',   v:'Emerging', sub:'5–10 projects active 2025', c:'var(--teal)'},
+            ].map(item => (
+              <div key={item.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:`1px solid ${item.c}33`,textAlign:'center'}}>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 4px',textTransform:'uppercase',letterSpacing:'0.05em'}}>{item.l}</p>
+                <p style={{fontSize:13,fontWeight:700,color:item.c,fontFamily:'var(--mono)',margin:'0 0 3px'}}>{item.v}</p>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:0}}>{item.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Deployment models */}
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:14}}>
+            {[
+              {icon:'🌅', title:'Front-of-Meter (FTM) Standalone', color:'var(--amber)',
+               desc:'Large merchant BESS plants (100–500 MW) connected directly to the ERCOT transmission system. Revenue from energy arbitrage (charge at low LMP, discharge at high), ancillary services (RRS, ECRS, RegUp/Down), and occasional capacity scarcity rents. Projects financed on merchant cash flows — hedged via battery tolling agreements with investment-grade offtakers.',
+               examples:['Broad Reach Power (2.2 GW portfolio)','Luminant / Vistra Energy (3+ GW)','LS Power (multiple TX sites)','Intersect Power, 8minute Solar'],
+               risk:'Merchant basis risk; ERCOT battery saturation compressing arbitrage spreads as fleet grows.'},
+              {icon:'☀️', title:'Solar + Storage (Hybrid / AC-coupled)', color:'var(--green)',
+               desc:'Co-located solar PV with battery (typically DC or AC-coupled). BESS charges from solar curtailment (free energy) and discharges to shift solar generation to evening peak hours ($150–300/MWh). The hybrid qualifies for the 30% ITC + bonus depreciation, making it highly capital efficient. ERCOT allows hybrid resources to register as both an IRR (solar) and ESR (storage) simultaneously.',
+               examples:['Terra-Gen, Intersect Power','Lightsource BP hybrid projects','Avangrid / Invenergy hybrids','NextEra Energy Resources TX fleet'],
+               risk:'Solar curtailment risk during midday; AC-coupling losses ~3–5%; interconnection cost sharing.'},
+              {icon:'🏢', title:'Behind-the-Meter (BTM) at Data Centers', color:'var(--teal)',
+               desc:'BESS co-located at a data center campus, behind the utility revenue meter. Functions as: (1) UPS backup replacing diesel generators, (2) demand charge reduction by shaving peak load, (3) ERCOT DR program participant — the BESS discharges to the grid during curtailment events instead of the DC reducing compute. This "virtual curtailment" keeps GPUs running while still earning DR revenue.',
+               examples:['Microsoft (Quincy-model BTM study)','Lancium Smart Campus (West TX)','Digital Realty exploring co-invest','Applied Digital pilot (ND→TX model)'],
+               risk:'Regulatory grey area — PUCT/ERCOT still finalizing BTM export rules. Current best path: register as Load Resource with limited export capability.'},
+            ].map(card => (
+              <div key={card.title} style={{background:'var(--bg-raised)',borderRadius:10,border:`1px solid ${card.color}33`,padding:'14px 16px',display:'flex',flexDirection:'column',gap:10}}>
+                <div>
+                  <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:6}}>
+                    <span style={{fontSize:16}}>{card.icon}</span>
+                    <span style={{fontSize:11,fontWeight:700,color:card.color,lineHeight:1.3}}>{card.title}</span>
+                  </div>
+                  <p style={{fontSize:10,color:'var(--text-2)',lineHeight:1.65,margin:0}}>{card.desc}</p>
+                </div>
+                <div>
+                  <p style={{fontSize:9,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:4}}>Active Participants</p>
+                  <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:2}}>
+                    {card.examples.map((ex,i) => (
+                      <li key={i} style={{fontSize:10,color:'var(--text-2)',display:'flex',gap:5,alignItems:'flex-start'}}>
+                        <span style={{color:card.color,flexShrink:0,marginTop:1}}>›</span>{ex}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div style={{background:`${card.color}10`,borderRadius:6,padding:'8px 10px',border:`1px solid ${card.color}22`}}>
+                  <p style={{fontSize:9,fontWeight:700,color:card.color,margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.05em'}}>Key Risk</p>
+                  <p style={{fontSize:10,color:'var(--text-2)',margin:0,lineHeight:1.5}}>{card.risk}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Revenue stack */}
+          <div style={{background:'var(--bg-raised)',borderRadius:10,border:'1px solid var(--border)',padding:'14px 16px'}}>
+            <p style={{fontSize:10,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:12}}>💰 BESS Revenue Stack in ERCOT — Annual $/MW-AC (Typical Merchant Project)</p>
+            <div style={{display:'flex',flexDirection:'column',gap:6}}>
+              {[
+                {product:'Energy Arbitrage',          lo:'$30,000',  hi:'$90,000',  note:'Charge off-peak (<$20/MWh), discharge peak ($150–$500/MWh). Most variable — depends on weather & renewables mix.', pct:45, color:'var(--amber)'},
+                {product:'ECRS (Contingency Reserve)', lo:'$15,000',  hi:'$40,000',  note:'New 2023 product. ~3,000 MW procured daily. 4-hr duration BESS qualifies fully. Capacity payment + activation when called.', pct:25, color:'var(--green)'},
+                {product:'RRS (Responsive Reserve)',  lo:'$8,000',   hi:'$20,000',  note:'Must respond within 10 min. Automated under-frequency relay (UFR) sets required. Highest $/MW of traditional AS.', pct:15, color:'var(--blue)'},
+                {product:'Regulation Up/Down',        lo:'$5,000',   hi:'$15,000',  note:'Fast-responding BESS (~4-sec response) earns Reg Up/Down. Paid capacity + mileage. Requires ERCOT AGC signal integration.', pct:10, color:'var(--purple)'},
+                {product:'Non-Spin Reserve (NSRS)',   lo:'$1,000',   hi:'$5,000',   note:'Lowest-value AS product. Respond in 30 min. Useful as fallback when other AS quotas are full.', pct:5, color:'var(--teal)'},
+              ].map(row => (
+                <div key={row.product} style={{display:'grid',gridTemplateColumns:'180px 100px 1fr',gap:10,alignItems:'center'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:7}}>
+                    <div style={{width:8,height:8,borderRadius:2,background:row.color,flexShrink:0}}/>
+                    <span style={{fontSize:11,color:'var(--text-1)',fontWeight:600}}>{row.product}</span>
+                  </div>
+                  <div style={{textAlign:'right'}}>
+                    <span style={{fontSize:10,fontFamily:'var(--mono)',color:row.color}}>{row.lo}–{row.hi}</span>
+                    <span style={{fontSize:9,color:'var(--text-3)'}}>/MW-yr</span>
+                  </div>
+                  <div>
+                    <div style={{height:4,background:'var(--bg-overlay)',borderRadius:2,marginBottom:4,overflow:'hidden'}}>
+                      <div style={{width:`${row.pct}%`,height:'100%',background:row.color,borderRadius:2}}/>
+                    </div>
+                    <p style={{fontSize:9,color:'var(--text-3)',margin:0,lineHeight:1.4}}>{row.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:12,padding:'10px 14px',background:'rgba(0,209,122,0.07)',borderRadius:7,border:'1px solid rgba(0,209,122,0.2)'}}>
+              <p style={{fontSize:10,color:'var(--text-2)',margin:0,lineHeight:1.6}}>
+                <strong style={{color:'var(--green)'}}>Data Center Relevance:</strong> A BTM battery co-located with a 200 MW GPU data center captures the same ERCOT revenue stack <em>without curtailing compute</em>.
+                The BESS discharges to the grid during DR/AS events while the GPUs run uninterrupted. At $100k–$150k/MW-yr blended revenue on a 50 MW BESS, that's $5–7.5M/yr of additional revenue —
+                partially offsetting battery capex (~$800k–$1.2M/MW installed) in 5–8 years, while providing UPS backup that displaces $2–4M of diesel generator infrastructure.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer note */}
+        <div style={{background:'var(--bg-raised)',borderRadius:8,padding:'12px 16px',border:'1px solid var(--border)',display:'flex',gap:10,alignItems:'flex-start'}}>
+          <span style={{fontSize:13,flexShrink:0}}>📌</span>
+          <p style={{fontSize:10,color:'var(--text-3)',margin:0,lineHeight:1.65}}>
+            <strong style={{color:'var(--text-2)'}}>Sources & Further Reading:</strong> ERCOT Nodal Protocols (updated Mar 2025) · PUCT Project 54528 (PCM/Performance Credit) · ERCOT Long-Term Load Forecast 2025 ·
+            TAC Report March 2026 · ERCOT Energy Storage Task Force Reports 2023–2025 · S&P Global Market Intelligence BESS Deployment Tracker · Wood Mackenzie U.S. Energy Storage Monitor Q1 2025.
+            All queue figures as of ERCOT GIS Report March 2026. Timeline estimates are indicative; actual timelines depend on TSP workload and project complexity.
+          </p>
+        </div>
+
+      </div>
     </div>
   );
 };
