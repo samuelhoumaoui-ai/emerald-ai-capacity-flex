@@ -673,9 +673,6 @@ const GlobalControls = ({ s, set, pitchMode, setPitchMode, reset, totalNPV, effe
                 <div className="min-w-[160px]">
                   <Slider label="GPU Revenue Rate" value={s.txGpuRate} min={1} max={6} step={0.1} onChange={v=>{set('txGpuRate',v);set('azGpuRate',v);set('vaGpuRate',v);}} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
                 </div>
-                <div className="min-w-[130px]">
-                  <Slider label="PUE (All Sites)" value={s.pue} min={1.1} max={2.0} step={0.05} onChange={v=>set('pue',v)} fmt={v=>v.toFixed(2)} />
-                </div>
               </>
             )}
           </div>
@@ -1687,7 +1684,7 @@ const CSPTab = ({ s, tx, az, va }) => {
 
   // ── Revenue model inputs ──
   // All rate assumptions match Excel Global Assumptions Section C
-  const pue = s.pue;  // global site input — set in header controls
+  const [pue, setPue]                     = useState(1.35);  // local to CSP tab — infrastructure display only
   const [kWPerRack, setKwPerRack]         = useState(40);
   const [gpuPerRack, setGpuPerRack]       = useState(8);
   const [utilization, setUtilization]     = useState(85);
@@ -1833,8 +1830,8 @@ const CSPTab = ({ s, tx, az, va }) => {
         <p style={{fontSize:11,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:12}}>📐 DC Infrastructure Assumptions</p>
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:16}}>
           {[
-            {l:'PUE (Power Usage Effectiveness)', v:pue, readOnly:true,
-             sub:`IT Load: ${(totalMW/pue).toFixed(0)} MW · set globally in header`},
+            {l:'PUE (Power Usage Effectiveness)', v:pue, min:1.1, max:2.0, step:0.05, fmt:v=>v.toFixed(2), set:setPue,
+             sub:`IT Load: ${(totalMW/pue).toFixed(0)} MW · affects rack & GPU count`},
             {l:'kW per Rack (avg density)',        v:kWPerRack, min:10,max:100,step:5,unit:'kW',set:setKwPerRack,
              sub:`${rackCount.toLocaleString()} racks total`},
             {l:'GPUs per Rack',                    v:gpuPerRack, min:4,max:16,step:1,set:setGpuPerRack,
