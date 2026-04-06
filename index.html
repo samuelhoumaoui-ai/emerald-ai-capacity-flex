@@ -229,10 +229,125 @@ pre.font-mono { background-color: #030810 !important; border-color: var(--border
 .bg-emerald-50 { background-color: #010e07 !important; }
 
 /* ── Scrollbar ───────────────────────────── */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
+
+/* ══════════════════════════════════════════
+   SHARPENING PASS — polish & refinement
+   ══════════════════════════════════════════ */
+
+/* Font rendering */
+*, *::before, *::after {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tighter, more visible grid */
+body {
+  background-size: 40px 40px !important;
+  background-image:
+    linear-gradient(rgba(0,209,122,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,209,122,0.045) 1px, transparent 1px) !important;
+}
+
+/* Deeper card shadows with green micro-rim */
+.shadow-sm {
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.04),
+    0 4px 20px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(0,209,122,0.09) !important;
+}
+
+/* Sharper radii */
+.rounded-xl  { border-radius: 14px !important; }
+.rounded-lg  { border-radius: 10px !important; }
+.rounded-md  { border-radius:  8px !important; }
+
+/* Premium slider thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--green); cursor: pointer;
+  border: 2px solid var(--bg-base);
+  box-shadow: 0 0 10px rgba(0,209,122,0.55), 0 0 0 1px rgba(0,209,122,0.3);
+}
+input[type=range]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--green); cursor: pointer;
+  border: 2px solid var(--bg-base);
+  box-shadow: 0 0 10px rgba(0,209,122,0.55);
+}
+input[type=range] { height: 4px; }
+
+/* Tight letter-spacing on large numbers */
+.text-3xl, .text-2xl, .text-xl { letter-spacing: -0.025em; }
+.text-lg  { letter-spacing: -0.015em; }
+
+/* Extended KPI glow — all brand colors */
+.text-3xl.font-bold.text-emerald-600,
+.text-3xl.font-bold.text-emerald-700 { text-shadow: 0 0 28px rgba(0,209,122,0.55); }
+.text-3xl.font-bold.text-teal-600,
+.text-3xl.font-bold.text-teal-700    { text-shadow: 0 0 22px rgba(0,200,176,0.45); }
+.text-3xl.font-bold.text-blue-600,
+.text-3xl.font-bold.text-blue-700    { text-shadow: 0 0 22px rgba(77,168,255,0.45); }
+.text-3xl.font-bold.text-purple-600,
+.text-3xl.font-bold.text-purple-700  { text-shadow: 0 0 22px rgba(184,127,255,0.45); }
+.text-3xl.font-bold.text-amber-600,
+.text-3xl.font-bold.text-amber-700   { text-shadow: 0 0 22px rgba(255,176,32,0.45); }
+
+/* Active tab pill */
+.border-b-\[3px\].border-emerald-500 {
+  background: rgba(0,209,122,0.07) !important;
+  border-radius: 7px 7px 0 0 !important;
+}
+
+/* Header portfolio NPV — extra emphasis */
+.text-xl.font-bold.text-emerald-600 {
+  text-shadow: 0 0 22px rgba(0,209,122,0.5);
+  letter-spacing: -0.03em;
+}
+
+/* Subtle inner highlight on cards */
+.bg-white.rounded-xl,
+.bg-white.rounded-lg {
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.038) 0%,
+    var(--bg-surface) 40%
+  ) !important;
+}
+
+/* Uppercase labels — tighter tracking */
+.text-xs.font-semibold.text-slate-500,
+.text-xs.font-medium.text-slate-600 { letter-spacing: 0.06em; }
+
+/* KPI card left border glow */
+.border-l-4 {
+  box-shadow:
+    -2px 0 12px -2px rgba(0,209,122,0.25),
+    0 4px 20px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(0,209,122,0.08) !important;
+}
+.border-l-4.border-teal-500   { box-shadow: -2px 0 12px -2px rgba(0,200,176,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,200,176,0.08) !important; }
+.border-l-4.border-blue-500   { box-shadow: -2px 0 12px -2px rgba(77,168,255,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(77,168,255,0.08) !important; }
+.border-l-4.border-purple-500 { box-shadow: -2px 0 12px -2px rgba(184,127,255,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(184,127,255,0.08) !important; }
+.border-l-4.border-amber-400  { box-shadow: -2px 0 12px -2px rgba(255,176,32,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,176,32,0.08) !important; }
+.border-l-4.border-red-400    { box-shadow: -2px 0 12px -2px rgba(255,92,106,0.3), 0 4px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,92,106,0.08) !important; }
+
+/* Mono numbers — Space Mono already loaded; ensure crisp rendering */
+.font-mono, [style*="var(--mono)"] { font-feature-settings: "tnum" 1, "zero" 1; }
+
+/* Tab bar — slightly deeper background */
+.sticky.top-\[72px\] {
+  background-color: rgba(7,11,22,0.97) !important;
+  box-shadow: 0 1px 0 0 var(--border), 0 4px 16px rgba(0,0,0,0.5) !important;
+}
+
+/* Separator lines — slightly brighter */
+.border-b { border-bottom-width: 1px !important; }
 </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -468,15 +583,17 @@ const Slider = ({ label, value, min, max, step=1, unit='', onChange, fmt }) => {
 const KPICard = ({ title, value, sub, color='emerald', icon }) => {
   const borderColor = {emerald:'border-emerald-500', blue:'border-blue-500', purple:'border-purple-500', teal:'border-teal-500', amber:'border-amber-400', red:'border-red-400'}[color];
   const valColor = {emerald:'text-emerald-600', blue:'text-blue-600', purple:'text-purple-600', teal:'text-teal-600', amber:'text-amber-600', red:'text-red-600'}[color];
+  const accentRgb = {emerald:'0,209,122', blue:'77,168,255', purple:'184,127,255', teal:'0,200,176', amber:'255,176,32', red:'255,92,106'}[color];
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 ${borderColor} p-5`}>
+    <div className={`bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 ${borderColor} p-5`}
+      style={{borderTop:`1px solid rgba(${accentRgb},0.15)`}}>
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{title}</p>
-          <p className={`text-3xl font-bold ${valColor}`}>{value}</p>
-          {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
+        <div style={{flex:1}}>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5" style={{letterSpacing:'0.07em'}}>{title}</p>
+          <p className={`text-3xl font-bold ${valColor}`} style={{lineHeight:1.1}}>{value}</p>
+          {sub && <p className="text-xs text-slate-500 mt-1.5" style={{lineHeight:1.5}}>{sub}</p>}
         </div>
-        {icon && <span className="text-2xl">{icon}</span>}
+        {icon && <span style={{fontSize:22,opacity:0.7,marginLeft:8,flexShrink:0}}>{icon}</span>}
       </div>
     </div>
   );
@@ -512,8 +629,8 @@ const FormulaBox = ({ children }) => (
 
 const SectionTitle = ({ children, sub }) => (
   <div className="mb-4">
-    <h3 className="text-lg font-semibold text-slate-800">{children}</h3>
-    {sub && <p className="text-sm text-slate-500 mt-0.5">{sub}</p>}
+    <h3 className="text-lg font-semibold text-slate-800" style={{letterSpacing:'-0.02em',lineHeight:1.25}}>{children}</h3>
+    {sub && <p className="text-sm text-slate-500 mt-1" style={{lineHeight:1.55}}>{sub}</p>}
   </div>
 );
 
