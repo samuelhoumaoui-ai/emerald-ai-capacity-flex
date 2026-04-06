@@ -1857,15 +1857,19 @@ const CSPTab = ({ s, tx, az, va }) => {
         <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12}}>
           {[
             {l:'GPU Utilization Rate', v:utilization, min:50,max:100,step:1,unit:'%',set:setUtilization,
-             sub:`${(billedGPUhrs/1e9).toFixed(1)}B billed GPU-hrs/yr`},
-            {l:'Firm Tier Rate (blended basis)',  v:firmGpuRate,min:1.0,max:8.0,step:0.1,fmt:v=>`$${v.toFixed(2)}M/MW/yr`,set:setFirmGpuRate,
-             sub:'Inference-class / SLA-guaranteed capacity'},
+             sub:`${((totalGPUs * utilization / 100 * 8760)/1e9).toFixed(1)}B billed GPU-hrs/yr`},
+            {l:'Firm Tier Rate (computed)', v:firmRateAdj, readOnly:true,
+             fmt:v=>`$${v.toFixed(3)}M/MW/yr`,
+             sub:`Base $${gpuRateBase}M + ${firmPremiumPct}% SLA premium → set in pricing panel below`},
           ].map(inp=>(
-            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)'}}>
+            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:`1px solid ${inp.readOnly?'rgba(0,209,122,0.25)':'var(--border)'}`}}>
               <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{inp.l}</p>
               <p style={{fontSize:15,fontWeight:700,color:'var(--blue)',fontFamily:'var(--mono)',margin:'0 0 4px'}}>{inp.fmt?inp.fmt(inp.v):inp.v}{!inp.fmt&&inp.unit?inp.unit:''}</p>
               <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>{inp.sub}</p>
-              <Slider label="" value={inp.v} min={inp.min} max={inp.max} step={inp.step||1} onChange={inp.set} fmt={inp.fmt} unit={!inp.fmt?(inp.unit||''):''}/>
+              {inp.readOnly
+                ? <p style={{fontSize:9,color:'var(--green)',margin:0,fontStyle:'italic'}}>← computed from pricing inputs below</p>
+                : <Slider label="" value={inp.v} min={inp.min} max={inp.max} step={inp.step||1} onChange={inp.set} fmt={inp.fmt} unit={!inp.fmt?(inp.unit||''):''}/>
+              }
             </div>
           ))}
         </div>
