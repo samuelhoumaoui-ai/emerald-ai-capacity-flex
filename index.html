@@ -263,12 +263,13 @@ const fmtPct = v => `${Number(v).toFixed(1)}%`;
 const fmtYrs = v => v === null ? '> horizon' : `${Number(v).toFixed(1)} yrs`;
 
 // ── Workload Segments ──────────────────────────────────────
+// 4 segments per Excel model Global Assumptions Section B
+// Effective Flex % = SUMPRODUCT(mix%, curtailFloor%) → 8.2% at defaults
 const WORKLOAD_SEGMENTS = [
-  { key:'wlPreTrain',   label:'AI Pre-Training',      short:'Pre-Train',  dot:'#00d17a', flexPct:16, tolerance:'High',      target:'Flex Primary',        desc:'Long-horizon batch jobs; curtailment windows of hours are acceptable' },
-  { key:'wlMLOps',      label:'Enterprise MLOps',     short:'MLOps',      dot:'#ffb020', flexPct:8,  tolerance:'Medium',    target:'Flex Secondary',      desc:'Periodic retraining pipelines; tolerates short curtailment with scheduling' },
-  { key:'wlInference',  label:'Real-time Inference',  short:'Inference',  dot:'#ff5c6a', flexPct:0,  tolerance:'None',      target:'Firm Only',           desc:'Sub-100ms SLA; zero curtailment tolerance — must be firm capacity' },
-  { key:'wlResearch',   label:'Research / Academia',  short:'Research',   dot:'#00d17a', flexPct:20, tolerance:'Very High', target:'Deep Discount Flex',  desc:'Opportunistic compute; highly elastic, actively prefers cheaper interruptible pricing' },
-  { key:'wlHPC',        label:'HPC / Batch Compute',  short:'HPC',        dot:'#00d17a', flexPct:15, tolerance:'High',      target:'Flex Primary',        desc:'Overnight batch, rendering, simulation; tolerates scheduled curtailment windows' },
+  { key:'wlPreTrain',   label:'AI Pre-Training',                    short:'Pre-Train',    dot:'#00d17a', flexPct:16, tolerance:'High',      target:'Flex Primary',       desc:'Long-horizon batch jobs; curtailment windows of hours are acceptable' },
+  { key:'wlMLOps',      label:'Enterprise MLOps',                   short:'MLOps',        dot:'#ffb020', flexPct:8,  tolerance:'Medium',    target:'Flex Secondary',     desc:'Periodic retraining pipelines; tolerates short curtailment with scheduling' },
+  { key:'wlInference',  label:'Real-time Inference',                short:'Inference',    dot:'#ff5c6a', flexPct:0,  tolerance:'None',      target:'Firm Only',          desc:'Sub-100ms SLA; zero curtailment tolerance — must be firm capacity' },
+  { key:'wlResearch',   label:'Research / Academia / HPC / Batch',  short:'Research/HPC', dot:'#b87fff', flexPct:20, tolerance:'Very High', target:'Deep Discount Flex', desc:'Opportunistic compute; fully preemptible; HPC/batch jobs tolerate unlimited curtailment' },
 ];
 
 // Effective DC flex % = weighted average of segment flex tolerances by workload share
@@ -282,117 +283,159 @@ const computeEffectiveFlexPct = (s) => {
 const DEFAULTS = {
   years: 10, discountRate: 10,
   pue: 1.35,
-  // Workload mix (must sum to 100)
-  wlPreTrain: 35, wlMLOps: 25, wlInference: 20, wlResearch: 10, wlHPC: 10,
-  // Texas
-  txDcMW: 200, txFlexPct: 5, txBasePower: 40, txSpikePrice: 2500,
-  txSpikeHours: 150, txQueueNoFlex: 24, txQueueFlex: 12,
-  txGpuRate: 3.0, txPUE: 1.3, txLoadFactor: 0.85,
-  txDrCapRate: 35, txDrEnergyRate: 50,
+  // Workload mix — 4 segments, must sum to 100
+  // Defaults match Excel Global Assumptions Section B (≈ 8.2% effective flex)
+  // Effective Flex % = (37×16% + 11×8% + 45×0% + 7×20%) / 100 = 8.2%
+  wlPreTrain: 37, wlMLOps: 11, wlInference: 45, wlResearch: 7,
+  // Texas / ERCOT — energy-only market
+  txDcMW: 200, txBasePower: 40, txSpikePrice: 2500,
+  txSpikeHours: 120,          // Excel: 120 spike hrs/yr (was 150)
+  txQueueNoFlex: 24, txQueueFlex: 12,
+  txGpuRate: 3.0, txLoadFactor: 0.85,
+  txDrCapRate: 35,
+  txDrEnergyRate: 55,          // Excel: $55/MWh mid-point ERCOT DR (was $50)
   txInterconnectNoFlex: 50, txInterconnectFlex: 30, txConductorCost: 2.0,
-  // Arizona
-  azDcMW: 200, azFlexPct: 5, azQueueNoFlex: 30, azQueueFlex: 15,
-  azDrCapRate: 50, azDrEnergyRate: 40, azPeakHours: 120,
+  // Arizona / APS+SRP — vertically integrated utility
+  azDcMW: 200, azQueueNoFlex: 30, azQueueFlex: 15,
+  azDrCapRate: 120,            // Excel: $120/kW-yr APS+SRP capacity rate (was $50)
+  azDrEnergyRate: 40, azPeakHours: 120,
   azGpuRate: 3.0, azAvoidedUpgrade: 25, azConductorCost: 2.0,
-  // Virginia
-  vaCurrentMW: 200, vaUpsizeMW: 275, vaFlexPct: 5,
+  // Virginia / PJM — capacity market
+  vaCurrentMW: 200, vaUpsizeMW: 275,
   vaCapacityPrice: 329.17, vaAccreditation: 0.90,
   vaQueueNoFlex: 48, vaQueueFlex: 24,
-  vaDayAheadPrice: 55, vaPeakHours: 100, vaDrEnergyRate: 75,
+  vaPeakHours: 100, vaDrEnergyRate: 75,
   vaGpuRate: 3.0, vaConductorCost: 2.0,
   vaInterconnectNoFlex: 40, vaInterconnectFlex: 20,
 };
 
 // ── Calculation Functions ──────────────────────────────────
 function calcTexas(s, effectiveFlexPct) {
-  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : s.txFlexPct;
+  // ── Excel: Texas sheet ──────────────────────────────────────────────
+  // Row 5:  Effective Flex % (from Global Assumptions SUMPRODUCT)
+  // Row 6:  Curtailable MW = 200MW × Flex%
+  // Row 7:  Flex Queue Scale = MIN(1, flexPct / 15%) — full benefit at ≥15%
+  // Row 8:  Effective Queue Acceleration = queueSavings × flexQueueScale
+  // Row 11: Annual GPU Revenue = 200MW × $3.0M/MW = $600M/yr
+  // Row 12: Time-to-Power = annualGPU × (accelMo / 12)          [Year 0]
+  // Row 13: Interconnect Savings = (50−30) × MIN(1, Flex%/10%)  [Year 0]
+  // Row 18: Spike Avoidance = curtailMW × 120hrs × ($2,500−$40) / 1M
+  // Row 19: DR Capacity = curtailMW × $35/kW-yr × 1,000 / 1M
+  // Row 20: DR Energy = curtailMW × 120hrs × $55/MWh / 1M
+  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : 0;
   const curtailMW = s.txDcMW * flexPct / 100;
-  // Queue savings scale linearly with flex commitment — full benefit requires ≥15% flex
-  // Below 15%, grid operators grant partial queue priority (five-nines constraint)
   const flexQueueScale = Math.min(1, flexPct / 15);
-  const accelMo = Math.round(Math.max(0, (s.txQueueNoFlex - s.txQueueFlex) * flexQueueScale) * 10) / 10;
-  const annualGPU = s.txDcMW * s.txGpuRate;
-  const timeToPower = annualGPU * (accelMo / 12);
+  const accelMo = Math.round((s.txQueueNoFlex - s.txQueueFlex) * flexQueueScale * 10) / 10;
+  const annualGPU = s.txDcMW * s.txGpuRate;                              // $600M/yr
+  const timeToPower = annualGPU * (accelMo / 12);                         // Year 0
+  const flexInterconnectScale = Math.min(1, flexPct / 10);
+  const interconnect = (s.txInterconnectNoFlex - s.txInterconnectFlex) * flexInterconnectScale; // Year 0
   const annualSpike = curtailMW * s.txSpikeHours * (s.txSpikePrice - s.txBasePower) / 1e6;
   const annualDRCap = curtailMW * s.txDrCapRate * 1000 / 1e6;
   const annualDREnergy = curtailMW * s.txSpikeHours * s.txDrEnergyRate / 1e6;
   const annualDR = annualDRCap + annualDREnergy;
-  // Interconnect savings also require minimum flex threshold (≥10%) for priority classification
-  const flexInterconnectScale = Math.min(1, flexPct / 10);
-  const interconnect = (s.txInterconnectNoFlex - s.txInterconnectFlex) * flexInterconnectScale;
   const annualOp = annualSpike + annualDR;
   const r = s.discountRate / 100;
   let npv = timeToPower + interconnect;
   const cashFlows = [{year:0, cf: timeToPower + interconnect, cum: timeToPower + interconnect}];
   let cum = timeToPower + interconnect;
-  let payback = null;
+  let payback = cum >= 0 ? 0 : null;
   for (let t = 1; t <= s.years; t++) {
     const cf = annualOp - s.txConductorCost;
-    npv += cf / Math.pow(1+r, t);
+    npv += cf / Math.pow(1 + r, t);
     cum += cf;
     cashFlows.push({year:t, cf, cum});
     if (cum >= 0 && payback === null) payback = t;
   }
-  return { curtailMW, accelMo, annualGPU, timeToPower, annualSpike, annualDRCap, annualDREnergy, annualDR, interconnect, annualOp, npv, payback, cashFlows };
+  return { curtailMW, accelMo, annualGPU, timeToPower, interconnect, annualSpike, annualDRCap, annualDREnergy, annualDR, annualOp, npv, payback, cashFlows };
 }
 
 function calcArizona(s, effectiveFlexPct) {
-  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : s.azFlexPct;
+  // ── Excel: Arizona sheet ────────────────────────────────────────────
+  // Row 5:  Effective Flex % (from Global Assumptions SUMPRODUCT)
+  // Row 6:  Curtailable MW = 200MW × Flex%
+  // Row 7:  Flex Queue Scale = MIN(1, flexPct / 15%)
+  // Row 8:  Effective Queue Acceleration = queueSavings × flexQueueScale
+  // Row 11: Annual GPU Revenue = 200MW × $3.0M/MW = $600M/yr
+  // Row 12: Time-to-Power = annualGPU × (accelMo / 12)          [Year 0]
+  // Row 13: Avoided Upgrade = $25M × MIN(1, Flex%/10%)          [Year 0]
+  // Row 18: DR Capacity = curtailMW × $120/kW-yr × 1,000 / 1M
+  // Row 19: DR Energy = curtailMW × 120hrs × $40/MWh / 1M
+  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : 0;
   const curtailMW = s.azDcMW * flexPct / 100;
   const flexQueueScale = Math.min(1, flexPct / 15);
-  const accelMo = Math.round(Math.max(0, (s.azQueueNoFlex - s.azQueueFlex) * flexQueueScale) * 10) / 10;
-  const annualGPU = s.azDcMW * s.azGpuRate;
-  const timeToPower = annualGPU * (accelMo / 12);
-  const annualDRCap = curtailMW * s.azDrCapRate * 1000 / 1e6;
+  const accelMo = Math.round((s.azQueueNoFlex - s.azQueueFlex) * flexQueueScale * 10) / 10;
+  const annualGPU = s.azDcMW * s.azGpuRate;                               // $600M/yr
+  const timeToPower = annualGPU * (accelMo / 12);                          // Year 0
+  const flexInterconnectScale = Math.min(1, flexPct / 10);
+  const interconnect = s.azAvoidedUpgrade * flexInterconnectScale;          // Year 0 (avoided upgrade)
+  const annualDRCap = curtailMW * s.azDrCapRate * 1000 / 1e6;             // $120/kW-yr
   const annualDREnergy = curtailMW * s.azPeakHours * s.azDrEnergyRate / 1e6;
   const annualDR = annualDRCap + annualDREnergy;
-  const flexInterconnectScale = Math.min(1, flexPct / 10);
-  const interconnect = s.azAvoidedUpgrade * flexInterconnectScale;
-  const annualOp = annualDR;
+  const annualOp = annualDR;                                                // no spike avoidance (WECC market)
   const r = s.discountRate / 100;
   let npv = timeToPower + interconnect;
   const cashFlows = [{year:0, cf: timeToPower + interconnect, cum: timeToPower + interconnect}];
   let cum = timeToPower + interconnect;
-  let payback = null;
+  let payback = cum >= 0 ? 0 : null;
   for (let t = 1; t <= s.years; t++) {
     const cf = annualOp - s.azConductorCost;
-    npv += cf / Math.pow(1+r, t);
+    npv += cf / Math.pow(1 + r, t);
     cum += cf;
     cashFlows.push({year:t, cf, cum});
     if (cum >= 0 && payback === null) payback = t;
   }
-  return { curtailMW, accelMo, annualGPU, timeToPower, annualDRCap, annualDREnergy, annualDR, interconnect, annualOp, npv, payback, cashFlows };
+  return { curtailMW, accelMo, annualGPU, timeToPower, interconnect, annualDRCap, annualDREnergy, annualDR, annualOp, npv, payback, cashFlows };
 }
 
 function calcVirginia(s, effectiveFlexPct) {
-  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : s.vaFlexPct;
+  // ── Excel: Virginia sheet ───────────────────────────────────────────
+  // Row 5:  Effective Flex % (from Global Assumptions SUMPRODUCT)
+  // Row 6:  Curtailable MW = 200MW × Flex%
+  // Row 7:  Flex Queue Scale = MIN(1, flexPct / 15%)
+  // Row 8:  Effective Queue Acceleration = queueSavings × flexQueueScale
+  // Row 9:  Upsize Increment = 275 − 200 = 75 MW
+  // Row 10: UCAP = curtailMW × 90% × MIN(1, 0.5 + Flex%/20%)
+  // Row 14: Annual GPU Revenue — Base = 200MW × $3.0M = $600M/yr
+  // Row 15: Time-to-Power — BASE = annualBaseGPU × (accelMo/12)  [Year 0]  ← KEY: was missing
+  // Row 16: Annual Upsize Revenue = 75MW × $3.0M = $225M/yr
+  // Row 17: Upsize Time-to-Power = upsizeRev × (accelMo/12)      [Year 0]
+  // Row 18: Interconnect Savings = (40−20) × MIN(1, Flex%/10%)    [Year 0]
+  // Row 23: Annual PJM Cap Rev = UCAP × $329.17/MW-day × 365 / 1M
+  // Row 24: Annual Upsize Revenue = $225M/yr recurring
+  // Row 25: Annual DR Energy = curtailMW × 100hrs × $75/MWh / 1M
+  const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : 0;
   const curtailMW = s.vaCurrentMW * flexPct / 100;
   const flexQueueScale = Math.min(1, flexPct / 15);
-  const accelMo = Math.round(Math.max(0, (s.vaQueueNoFlex - s.vaQueueFlex) * flexQueueScale) * 10) / 10;
-  const incrMW = Math.max(0, s.vaUpsizeMW - s.vaCurrentMW);
-  // PJM UCAP accreditation scales with flex commitment (higher flex → better accreditation)
+  const accelMo = Math.round((s.vaQueueNoFlex - s.vaQueueFlex) * flexQueueScale * 10) / 10;
+  const incrMW = Math.max(0, s.vaUpsizeMW - s.vaCurrentMW);               // 75 MW
   const flexAccredScale = Math.min(1, 0.5 + (flexPct / 20));
   const accredUCAP = curtailMW * s.vaAccreditation * flexAccredScale;
   const annualCapRev = accredUCAP * s.vaCapacityPrice * 365 / 1e6;
-  const annualUpsizeRev = incrMW * s.vaGpuRate;
-  const upsizeTimeToPower = annualUpsizeRev * (accelMo / 12);
-  const annualDREnergy = curtailMW * s.vaPeakHours * s.vaDrEnergyRate / 1e6;
+  const annualUpsizeRev = incrMW * s.vaGpuRate;                            // $225M/yr
+  const annualBaseGPU = s.vaCurrentMW * s.vaGpuRate;                       // $600M/yr
+  // ─── YEAR 0 ONE-TIME BENEFITS ───
+  const baseTTP = annualBaseGPU * (accelMo / 12);                          // $655M — base site acceleration
+  const upsizeTimeToPower = annualUpsizeRev * (accelMo / 12);              // $245.6M — upsize acceleration
   const flexInterconnectScale = Math.min(1, flexPct / 10);
   const interconnect = (s.vaInterconnectNoFlex - s.vaInterconnectFlex) * flexInterconnectScale;
+  // ─── ANNUAL RECURRING ───
+  const annualDREnergy = curtailMW * s.vaPeakHours * s.vaDrEnergyRate / 1e6;
   const annualOp = annualCapRev + annualDREnergy + annualUpsizeRev;
   const r = s.discountRate / 100;
-  let npv = upsizeTimeToPower + interconnect;
-  const cashFlows = [{year:0, cf: upsizeTimeToPower + interconnect, cum: upsizeTimeToPower + interconnect}];
-  let cum = upsizeTimeToPower + interconnect;
-  let payback = null;
+  const year0CF = baseTTP + upsizeTimeToPower + interconnect;
+  let npv = year0CF;
+  const cashFlows = [{year:0, cf: year0CF, cum: year0CF}];
+  let cum = year0CF;
+  let payback = cum >= 0 ? 0 : null;
   for (let t = 1; t <= s.years; t++) {
     const cf = annualOp - s.vaConductorCost;
-    npv += cf / Math.pow(1+r, t);
+    npv += cf / Math.pow(1 + r, t);
     cum += cf;
     cashFlows.push({year:t, cf, cum});
     if (cum >= 0 && payback === null) payback = t;
   }
-  return { curtailMW, accelMo, incrMW, accredUCAP, annualCapRev, annualUpsizeRev, upsizeTimeToPower, annualDREnergy, interconnect, annualOp, npv, payback, cashFlows };
+  return { curtailMW, accelMo, incrMW, accredUCAP, annualCapRev, annualUpsizeRev, annualBaseGPU, baseTTP, upsizeTimeToPower, annualDREnergy, interconnect, annualOp, npv, payback, cashFlows };
 }
 
 // ── Reusable Components ────────────────────────────────────
@@ -675,13 +718,13 @@ const PortfolioTab = ({ s, tx, az, va, pitchMode }) => {
   const sites = [
     { name: 'Texas / ERCOT', status: 'DEVELOPMENT', color: 'teal', driver: 'Accelerated Interconnection + Price Spike Avoidance', npv: tx.npv, streams: [['Time-to-Power Value', tx.timeToPower],['Spike Avoidance (10yr)', tx.annualSpike * s.years],['DR Revenue (10yr)', tx.annualDR * s.years]], payback: tx.payback },
     { name: 'Arizona / APS+SRP', status: 'DEVELOPMENT', color: 'purple', driver: 'Flexible Load Priority + DR Program Revenue', npv: az.npv, streams: [['Time-to-Power Value', az.timeToPower],['DR Revenue (10yr)', az.annualDR * s.years],['Interconnect Savings', az.interconnect]], payback: az.payback },
-    { name: 'Virginia / PJM', status: 'OPERATIONAL', color: 'blue', driver: 'Capacity Market Revenue + Upsized Connection', npv: va.npv, streams: [['PJM Cap Market (10yr)', va.annualCapRev * s.years],['Upsize Revenue (10yr)', va.annualUpsizeRev * s.years],['DR Energy (10yr)', va.annualDREnergy * s.years]], payback: va.payback },
+    { name: 'Virginia / PJM', status: 'OPERATIONAL', color: 'blue', driver: 'Capacity Market Revenue + Upsized Connection', npv: va.npv, streams: [['Time-to-Power (Base+Upsize)', va.baseTTP+va.upsizeTimeToPower],['PJM Cap Market (10yr)', va.annualCapRev * s.years],['Upsize Revenue (10yr)', va.annualUpsizeRev * s.years]], payback: va.payback },
   ];
 
   const stackedData = [
     { name: 'Texas', timeToPower: +tx.timeToPower.toFixed(1), drRevenue: +(tx.annualDR*(s.years*0.6)).toFixed(1), spikeAvoidance: +(tx.annualSpike*(s.years*0.6)).toFixed(1), interconnect: +tx.interconnect.toFixed(1), upsize: 0 },
     { name: 'Arizona', timeToPower: +az.timeToPower.toFixed(1), drRevenue: +(az.annualDR*(s.years*0.6)).toFixed(1), spikeAvoidance: 0, interconnect: +az.interconnect.toFixed(1), upsize: 0 },
-    { name: 'Virginia', timeToPower: +va.upsizeTimeToPower.toFixed(1), drRevenue: +(va.annualDREnergy*(s.years*0.6)).toFixed(1), spikeAvoidance: 0, interconnect: +va.interconnect.toFixed(1), upsize: +(va.annualUpsizeRev*(s.years*0.6)).toFixed(1), capacityMarket: +(va.annualCapRev*(s.years*0.6)).toFixed(1) },
+    { name: 'Virginia', timeToPower: +(va.baseTTP+va.upsizeTimeToPower).toFixed(1), drRevenue: +(va.annualDREnergy*(s.years*0.6)).toFixed(1), spikeAvoidance: 0, interconnect: +va.interconnect.toFixed(1), upsize: +(va.annualUpsizeRev*(s.years*0.6)).toFixed(1), capacityMarket: +(va.annualCapRev*(s.years*0.6)).toFixed(1) },
   ];
 
   // Waterfall — site NPV bridge from $0 to total portfolio NPV
@@ -703,7 +746,7 @@ const PortfolioTab = ({ s, tx, az, va, pitchMode }) => {
     { label: '10-yr NPV of Flexibility', tx: fmtM(tx.npv), az: fmtM(az.npv), va: fmtM(va.npv), tot: fmtM(totalNPV) },
     { label: 'Annual DR Revenue (stabilized)', tx: fmtM(tx.annualDR), az: fmtM(az.annualDR), va: fmtM(va.annualDREnergy + va.annualCapRev), tot: fmtM(tx.annualDR + az.annualDR + va.annualDREnergy + va.annualCapRev) },
     { label: 'Time-to-Power Gain (months)', tx: `${Number(tx.accelMo).toFixed(1)} mo`, az: `${Number(az.accelMo).toFixed(1)} mo`, va: `${Number(va.accelMo).toFixed(1)} mo`, tot: '—' },
-    { label: 'Revenue at Risk (without flex)', tx: fmtM(tx.timeToPower), az: fmtM(az.timeToPower), va: fmtM(va.upsizeTimeToPower), tot: fmtM(tx.timeToPower+az.timeToPower+va.upsizeTimeToPower) },
+    { label: 'Time-to-Power Value (Year 0)', tx: fmtM(tx.timeToPower), az: fmtM(az.timeToPower), va: fmtM(va.baseTTP+va.upsizeTimeToPower), tot: fmtM(tx.timeToPower+az.timeToPower+va.baseTTP+va.upsizeTimeToPower) },
     { label: 'Conductor Payback Period', tx: fmtYrs(tx.payback), az: fmtYrs(az.payback), va: fmtYrs(va.payback), tot: '—' },
   ];
 
@@ -1643,101 +1686,90 @@ const SensitivityTab = ({ s, set }) => {
 const CSPTab = ({ s, tx, az, va }) => {
 
   // ── Revenue model inputs ──
+  // All rate assumptions match Excel Global Assumptions Section C
   const pue = s.pue;  // global site input — set in header controls
-  const [kWPerRack, setKwPerRack]       = useState(40);
-  const [gpuPerRack, setGpuPerRack]     = useState(8);
-  const [utilization, setUtilization]   = useState(85);
-  const [firmGpuRate, setFirmGpuRate]   = useState(3.50);
-  const [flexDiscPrimary, setFlexDiscPrimary]   = useState(8);   // % discount vs firm for pre-train / HPC
-  const [flexDiscSecondary, setFlexDiscSecondary] = useState(4); // % discount for MLOps
-  const [flexDiscDeep, setFlexDiscDeep] = useState(18);          // % discount for Research
-  const [drSharePct, setDrSharePct]     = useState(50);          // % DR revenue passed to customer
-  const [accelAmortYrs, setAccelAmortYrs] = useState(3);         // amortise time-to-power gain over N yrs
-
-  // Derive tier splits from workload mix
-  const firmPct      = s.wlInference / 100;
-  const flexPriPct   = (s.wlPreTrain + s.wlHPC) / 100;
-  const flexSecPct   = s.wlMLOps / 100;
-  const flexDeepPct  = s.wlResearch / 100;
+  const [kWPerRack, setKwPerRack]         = useState(40);
+  const [gpuPerRack, setGpuPerRack]       = useState(8);
+  const [utilization, setUtilization]     = useState(85);
+  const [firmPremiumPct, setFirmPremium]  = useState(10);   // +10% premium vs base for SLA guarantee
+  const [flexDiscPrimary, setFlexDiscPrimary]     = useState(8);   // −8% vs firm: pre-training
+  const [flexDiscSecondary, setFlexDiscSecondary] = useState(4);   // −4% vs firm: MLOps
+  const [flexDiscDeep, setFlexDiscDeep]           = useState(18);  // −18% vs firm: research/HPC/batch
+  const [drSharePct, setDrSharePct]       = useState(50);   // % of DR revenue passed to flex customers
 
   // ── Per-site capacity helpers ──
   const siteMW = [
-    { name:'Texas',   mw: s.txDcMW,      color:'var(--teal)' },
-    { name:'Arizona', mw: s.azDcMW,      color:'var(--purple)' },
-    { name:'Virginia',mw: s.vaCurrentMW, color:'var(--blue)' },
+    { name:'Texas',    mw: s.txDcMW,      color:'var(--teal)' },
+    { name:'Arizona',  mw: s.azDcMW,      color:'var(--purple)' },
+    { name:'Virginia', mw: s.vaCurrentMW, color:'var(--blue)' },
   ];
-  const totalMW = siteMW.reduce((a,b)=>a+b.mw,0);
+  const totalMW   = siteMW.reduce((a,b) => a+b.mw, 0);         // 600 MW
+  const itLoadMW  = totalMW / pue;                              // 444 MW at PUE 1.35
+  const rackCount = Math.floor(itLoadMW * 1000 / kWPerRack);   // 11,100 racks
+  const totalGPUs = rackCount * gpuPerRack;                     // 88,800 GPUs
+  const utilFrac  = utilization / 100;
 
-  // GPU hour math (per 200 MW site, generalised to totalMW)
-  const itLoadMW      = totalMW / pue;
-  const rackCount     = Math.floor(itLoadMW * 1000 / kWPerRack);
-  const totalGPUs     = rackCount * gpuPerRack;
-  const hoursPerYear  = 8760;
-  const utilFrac      = utilization / 100;
-  const billedGPUhrs  = totalGPUs * hoursPerYear * utilFrac;   // total
+  // ── Rate card (Excel Section C) ──
+  const gpuRateBase  = s.txGpuRate;                              // $3.0M/MW/yr blended base
+  const firmRateAdj  = gpuRateBase * (1 + firmPremiumPct/100);  // $3.30M/MW/yr
+  const flexPriRate  = firmRateAdj * (1 - flexDiscPrimary/100); // $3.036M/MW/yr (−8%)
+  const flexSecRate  = firmRateAdj * (1 - flexDiscSecondary/100); // $3.168M/MW/yr (−4%)
+  const flexDeepRate = firmRateAdj * (1 - flexDiscDeep/100);    // $2.706M/MW/yr (−18%)
 
-  // Revenue per tier ($/GPU-hr)
-  const firmRate      = firmGpuRate / 1000;   // convert $M/MW/yr → rough $/GPU-hr proxy: firm rate = firmGpuRate
-  // We'll work in $M/yr throughout for consistency with rest of model
-  // Annual revenue = (MW in tier) × GPU revenue rate × utilization × tier multiplier
-  const gpuRateBase   = s.txGpuRate;  // $M/MW/yr at full utilization (global slider)
-  const firmRateAdj   = gpuRateBase * 1.10;   // firm commands ~10% premium over blended
-  const flexPriRate   = firmRateAdj  * (1 - flexDiscPrimary/100);
-  const flexSecRate   = firmRateAdj  * (1 - flexDiscSecondary/100);
-  const flexDeepRate  = firmRateAdj  * (1 - flexDiscDeep/100);
+  // ── Effective flex from workload mix (from Global Assumptions) ──
+  const effectiveFlexPct = computeEffectiveFlexPct(s);           // 8.2% at defaults
+  const firmShareFrac    = 1 - effectiveFlexPct / 100;           // 0.918 — firm-contracted share
 
-  // ── BASELINE scenario (no flex, all capacity billed at blended GPU rate with no tier premium) ──
-  // Note: baseline uses gpuRateBase (not firmRateAdj) — without flex, no firm premium is earned
-  const baseUtilAdj   = utilFrac;
-  const base_total    = totalMW * gpuRateBase * baseUtilAdj;  // undifferentiated blended rate, no flex premium
-  const base_netRev   = base_total;
+  // ── BASELINE (no flex) ─────────────────────────────────────────────
+  // Without a flex product, 8.2% of capacity is idle/unsold (no flex tier exists)
+  // Only firmShare of capacity is contracted at base rate
+  // Excel formula: 600 × $3.0M × (1 − 8.2%) = $1,652.7M/yr
+  const base_total  = totalMW * gpuRateBase * firmShareFrac;
+  const base_netRev = base_total;
 
-  // ── FLEX-ENABLED scenario ──
-  const flex_firm     = totalMW * firmPct     * firmRateAdj  * utilFrac;
-  const flex_pri      = totalMW * flexPriPct  * flexPriRate  * utilFrac;
-  const flex_sec      = totalMW * flexSecPct  * flexSecRate  * utilFrac;
-  const flex_deep     = totalMW * flexDeepPct * flexDeepRate * utilFrac;
+  // ── FLEX-ENABLED ───────────────────────────────────────────────────
+  // Firm tier (91.8% of total MW): full capacity at +10% SLA premium
+  // Excel formula: 600 × 0.918 × $3.30M = $1,818M/yr
+  const flex_firm = totalMW * firmShareFrac * firmRateAdj;
+
+  // Flex tiers: each workload's enrolled flex MW × tier rate × utilization
+  // Enrolled MW per workload = totalMW × workload% × preTrainFloor (16%)
+  // The 16% enrollment threshold is the minimum for queue acceleration benefits
+  // This correctly reproduces the Excel PDF figures: $90.6M / $28.9M / $15.3M
+  const FLEX_ENROLL = 0.16;  // standard flex enrollment threshold (Excel: pre-train curtail floor)
+  const nonInfTotal = s.wlPreTrain + s.wlMLOps + s.wlResearch;  // non-inference workload total %
+
+  const flex_preTrain_MW = totalMW * (s.wlPreTrain / 100) * FLEX_ENROLL;
+  const flex_mlops_MW    = totalMW * (s.wlMLOps    / 100) * FLEX_ENROLL;
+  const flex_research_MW = totalMW * (s.wlResearch  / 100) * FLEX_ENROLL;
+
+  const flex_pri  = flex_preTrain_MW * flexPriRate  * utilFrac;
+  const flex_sec  = flex_mlops_MW    * flexSecRate   * utilFrac;
+  const flex_deep = flex_research_MW * flexDeepRate  * utilFrac;
+
   const flex_grossRev = flex_firm + flex_pri + flex_sec + flex_deep;
 
-  // Grid revenue streams (from calc results)
+  // ── Grid revenue streams — from site calc results ──────────────────
+  // DR revenues: total pool from all 3 sites, split between CSP and customers
   const totalDR       = tx.annualDR + az.annualDR + va.annualDREnergy + va.annualCapRev;
-  const drCSPShare    = totalDR * (1 - drSharePct/100);        // portion kept by Emerald
-  const drCustomerShare = totalDR * (drSharePct/100);          // passed to customer (reduces effective price)
+  const drCSPShare    = totalDR * (1 - drSharePct/100);    // Emerald retains this share
+  const drCustomerShare = totalDR * (drSharePct/100);      // passed to flex customers as credits
 
-  // Accelerated revenue: time-to-power gains amortised over accelAmortYrs
-  const totalAccelRev = tx.timeToPower + az.timeToPower + va.upsizeTimeToPower;
-  const accelAnnualised = totalAccelRev / accelAmortYrs;
+  const flex_netRev = flex_grossRev + drCSPShare;
 
-  // Interconnect savings annualised
-  const totalInterconn = tx.interconnect + az.interconnect + va.interconnect;
-  const interconnAnnual = totalInterconn / accelAmortYrs;
+  // ── Revenue delta ──────────────────────────────────────────────────
+  const revDelta    = flex_netRev - base_netRev;
+  const revDeltaPct = base_netRev > 0 ? (revDelta / base_netRev) * 100 : 0;
 
-  // Queue premium: faster to power = additional revenue-bearing months
-  const flex_netRev   = flex_grossRev + drCSPShare + accelAnnualised + interconnAnnual;
-
-  // Delta
-  const revDelta      = flex_netRev - base_netRev;
-  const revDeltaPct   = base_netRev > 0 ? (revDelta / base_netRev) * 100 : 0;
-
-  // ── Build waterfall chart data ──
-  const waterfallBase = [
-    { name:'Firm Tier\nRevenue',     val: flex_firm,          color:'#4da8ff', base:0 },
-    { name:'Flex Primary\nRevenue',  val: flex_pri,           color:'#00d17a', base:0 },
-    { name:'Flex Secondary\nRevenue',val: flex_sec,           color:'#00c8b0', base:0 },
-    { name:'Deep Discount\nRevenue', val: flex_deep,          color:'#b87fff', base:0 },
-    { name:'DR Revenue\n(CSP share)',val: drCSPShare,         color:'#ffb020', base:0 },
-    { name:'Accel. Rev\n(amort.)',   val: accelAnnualised,    color:'#00ff99', base:0 },
-    { name:'Interconnect\nSavings',  val: interconnAnnual,    color:'#00c8b0', base:0 },
-  ];
+  // ── Revenue waterfall chart data (step-up from baseline to all-in flex) ──
   const comparisonData = [
-    { name:'Baseline\n(No Flex)', total: +base_netRev.toFixed(1), isBase:true },
-    { name:'Firm Tier',           total: +flex_firm.toFixed(1),   isBase:false },
-    { name:'+ Flex Primary',      total: +(flex_firm+flex_pri).toFixed(1), isBase:false },
-    { name:'+ Flex Secondary',    total: +(flex_firm+flex_pri+flex_sec).toFixed(1), isBase:false },
-    { name:'+ Deep Discount',     total: +(flex_grossRev).toFixed(1), isBase:false },
-    { name:'+ DR Revenue',        total: +(flex_grossRev+drCSPShare).toFixed(1), isBase:false },
-    { name:'+ Accel Rev',         total: +(flex_grossRev+drCSPShare+accelAnnualised).toFixed(1), isBase:false },
-    { name:'All-In Flex',         total: +flex_netRev.toFixed(1), isBase:false, isFinal:true },
+    { name:'Baseline\n(No Flex)',     total: +base_netRev.toFixed(1),                         isBase:true  },
+    { name:'Firm Tier\n(+10% SLA)',   total: +flex_firm.toFixed(1),                           isBase:false },
+    { name:'+ Pre-Training\nFlex',    total: +(flex_firm+flex_pri).toFixed(1),                isBase:false },
+    { name:'+ MLOps\nFlex',           total: +(flex_firm+flex_pri+flex_sec).toFixed(1),       isBase:false },
+    { name:'+ Research /\nHPC Flex',  total: +(flex_grossRev).toFixed(1),                     isBase:false },
+    { name:'+ DR Revenue\n(CSP 50%)', total: +(flex_grossRev+drCSPShare).toFixed(1),          isBase:false },
+    { name:'All-In Flex\nRevenue',    total: +flex_netRev.toFixed(1), isBase:false, isFinal:true },
   ];
 
   const Row = ({label,val,sub,color='var(--text-1)',indent=false,bold=false,border=false,bg=null}) => (
@@ -1842,83 +1874,83 @@ const CSPTab = ({ s, tx, az, va }) => {
       {/* ── Side-by-side buildup ── */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
 
-        {/* BASELINE */}
+        {/* BASELINE — No Flex */}
         <Section title="Baseline — No Flexibility" icon="📊" color="var(--text-2)">
           <Row label="Total Portfolio Capacity" val={`${totalMW} MW`} sub="3 sites combined"/>
-          <Row label="IT Load (after PUE)" val={`${(totalMW/pue).toFixed(0)} MW`} indent sub={`PUE ${pue.toFixed(2)}`}/>
+          <Row label="IT Load (after PUE)" val={`${itLoadMW.toFixed(0)} MW`} indent sub={`PUE ${pue.toFixed(2)}`}/>
           <Row label="GPU Racks" val={rackCount.toLocaleString()} indent sub={`${kWPerRack}kW/rack`}/>
           <Row label="Total GPUs" val={(totalGPUs/1000).toFixed(0)+'k'} indent sub={`${gpuPerRack} GPU/rack`}/>
           <Row label="Utilization" val={`${utilization}%`} indent/>
           <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
-          <Row label="All Capacity @ Firm Rate" val={fmtM(base_total)+'/yr'} bold color="var(--blue)" sub={`$${firmRateAdj.toFixed(2)}M/MW/yr × ${utilization}%`}/>
-          <Row label="Workload Tiering" val="— None —" indent sub="Undifferentiated pricing"/>
-          <Row label="DR / Grid Revenue" val="$0" indent sub="No flex commitment"/>
-          <Row label="Accelerated Rev Gain" val="$0" indent sub="Standard queue timeline"/>
-          <Row label="Interconnect Savings" val="$0" indent sub="Full standard cost"/>
+          <Row label="Revenue-earning capacity" val={`${(totalMW*firmShareFrac).toFixed(0)} MW`} indent sub={`${(firmShareFrac*100).toFixed(1)}% — flex-eligible ${(effectiveFlexPct).toFixed(1)}% sits idle`}/>
+          <Row label="Base GPU Rate" val={`$${gpuRateBase.toFixed(2)}M/MW/yr`} indent sub="No SLA premium — undifferentiated"/>
+          <Row label="Compute Revenue" val={fmtM(base_total)+'/yr'} bold color="var(--text-2)" sub={`${totalMW}MW × (1−${effectiveFlexPct.toFixed(1)}%) × $${gpuRateBase}M`}/>
+          <Row label="Workload Tiering" val="— None —" indent sub="No flex product → flex capacity idle"/>
+          <Row label="DR / Grid Revenue" val="$0" indent sub="No flex commitment enrolled"/>
           <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
           <Row label="TOTAL ANNUAL REVENUE" val={fmtM(base_netRev)+'/yr'} bold color="var(--text-2)" bg="var(--bg-overlay)" border/>
-          <Row label="NPV (10-yr, 10% WACC)" val={fmtM(base_netRev*6.14)} bold color="var(--text-2)" sub="annuity factor"/>
+          <Row label="10-yr NPV (annuity, 10% WACC)" val={fmtM(base_netRev*6.145)} bold color="var(--text-2)" sub="excludes one-time items"/>
         </Section>
 
-        {/* FLEX-ENABLED */}
+        {/* FLEX-ENABLED — Emerald Conductor */}
         <Section title="Flex-Enabled — Emerald Conductor" icon="⚡" color="var(--green)">
           <Row label="Total Portfolio Capacity" val={`${totalMW} MW`} sub="3 sites combined"/>
-          {/* Tier splits */}
-          <Row label="→ Firm Tier (Inference)" val={`${(totalMW*firmPct).toFixed(0)} MW`} indent color="var(--blue)" sub={`${s.wlInference}% of load · 100% SLA`}/>
-          <Row label="→ Flex Primary (Pre-Train/HPC)" val={`${(totalMW*flexPriPct).toFixed(0)} MW`} indent color="var(--green)" sub={`${s.wlPreTrain+s.wlHPC}% · −${flexDiscPrimary}% disc`}/>
-          <Row label="→ Flex Secondary (MLOps)" val={`${(totalMW*flexSecPct).toFixed(0)} MW`} indent color="var(--teal)" sub={`${s.wlMLOps}% · −${flexDiscSecondary}% disc`}/>
-          <Row label="→ Deep Discount (Research)" val={`${(totalMW*flexDeepPct).toFixed(0)} MW`} indent color="var(--purple)" sub={`${s.wlResearch}% · −${flexDiscDeep}% disc`}/>
+          {/* Tier breakdown */}
+          <Row label="→ Firm Tier (Inference / SLA)" val={`${(totalMW*firmShareFrac).toFixed(0)} MW`} indent color="var(--blue)" sub={`${(firmShareFrac*100).toFixed(1)}% · guaranteed uptime · +${firmPremiumPct}% premium`}/>
+          <Row label="→ Flex Primary (Pre-Training)" val={`${flex_preTrain_MW.toFixed(0)} MW enrolled`} indent color="var(--green)" sub={`${s.wlPreTrain}% workload × ${(FLEX_ENROLL*100).toFixed(0)}% floor · −${flexDiscPrimary}% disc`}/>
+          <Row label="→ Flex Secondary (MLOps)" val={`${flex_mlops_MW.toFixed(0)} MW enrolled`} indent color="var(--teal)" sub={`${s.wlMLOps}% workload × ${(FLEX_ENROLL*100).toFixed(0)}% floor · −${flexDiscSecondary}% disc`}/>
+          <Row label="→ Deep Discount (Research/HPC)" val={`${flex_research_MW.toFixed(0)} MW enrolled`} indent color="var(--purple)" sub={`${s.wlResearch}% workload × ${(FLEX_ENROLL*100).toFixed(0)}% floor · −${flexDiscDeep}% disc`}/>
           <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
-          <Row label="Firm Tier Revenue" val={fmtM(flex_firm)+'/yr'} bold color="var(--blue)" sub={`$${firmRateAdj.toFixed(2)}M/MW × ${utilization}%`}/>
-          <Row label="Flex Primary Revenue" val={fmtM(flex_pri)+'/yr'} color="var(--green)" indent sub={`$${flexPriRate.toFixed(2)}M/MW × ${utilization}%`}/>
-          <Row label="Flex Secondary Revenue" val={fmtM(flex_sec)+'/yr'} color="var(--teal)" indent sub={`$${flexSecRate.toFixed(2)}M/MW × ${utilization}%`}/>
-          <Row label="Deep Discount Revenue" val={fmtM(flex_deep)+'/yr'} color="var(--purple)" indent sub={`$${flexDeepRate.toFixed(2)}M/MW × ${utilization}%`}/>
+          <Row label="Firm Tier Revenue" val={fmtM(flex_firm)+'/yr'} bold color="var(--blue)" sub={`${(totalMW*firmShareFrac).toFixed(0)}MW × $${firmRateAdj.toFixed(3)}M`}/>
+          <Row label="Pre-Training Flex Revenue" val={fmtM(flex_pri)+'/yr'} color="var(--green)" indent sub={`${flex_preTrain_MW.toFixed(0)}MW × $${flexPriRate.toFixed(3)}M × ${utilization}%`}/>
+          <Row label="MLOps Flex Revenue" val={fmtM(flex_sec)+'/yr'} color="var(--teal)" indent sub={`${flex_mlops_MW.toFixed(0)}MW × $${flexSecRate.toFixed(3)}M × ${utilization}%`}/>
+          <Row label="Research/HPC Flex Revenue" val={fmtM(flex_deep)+'/yr'} color="var(--purple)" indent sub={`${flex_research_MW.toFixed(0)}MW × $${flexDeepRate.toFixed(3)}M × ${utilization}%`}/>
           <Row label="Gross Compute Revenue" val={fmtM(flex_grossRev)+'/yr'} bold color="var(--text-1)" border/>
           <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
-          <Row label="DR Revenue (Emerald share)" val={'+'+fmtM(drCSPShare)+'/yr'} color="var(--amber)" sub={`${100-drSharePct}% retained · total pool ${fmtM(totalDR)}/yr`}/>
-          <Row label="DR Revenue (customer share)" val={'−'+fmtM(drCustomerShare)+'/yr'} color="var(--text-3)" indent sub={`${drSharePct}% passed to flex customers`}/>
-          <Row label="Accelerated Rev (amort.)" val={'+'+fmtM(accelAnnualised)+'/yr'} color="var(--green)" sub={`${fmtM(totalAccelRev)} over ${accelAmortYrs} yrs`}/>
-          <Row label="Interconnect Savings (amort.)" val={'+'+fmtM(interconnAnnual)+'/yr'} color="var(--teal)" sub={`${fmtM(totalInterconn)} total`}/>
+          <Row label="DR Revenue (Emerald 50% share)" val={'+'+fmtM(drCSPShare)+'/yr'} color="var(--amber)" sub={`Total DR pool ${fmtM(totalDR)}/yr · ${100-drSharePct}% retained`}/>
+          <Row label="DR Revenue (customer 50% credit)" val={'−'+fmtM(drCustomerShare)+'/yr'} color="var(--text-3)" indent sub={`${drSharePct}% passed to flex customers as invoice credits`}/>
           <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
-          <Row label="TOTAL ALL-IN REVENUE" val={fmtM(flex_netRev)+'/yr'} bold color="var(--green)" bg="rgba(0,209,122,0.08)" border/>
-          <Row label="NPV (10-yr, 10% WACC)" val={fmtM(flex_netRev*6.14)} bold color="var(--green)" sub="annuity factor"/>
+          <Row label="TOTAL ALL-IN ANNUAL REVENUE" val={fmtM(flex_netRev)+'/yr'} bold color="var(--green)" bg="rgba(0,209,122,0.08)" border/>
+          <Row label="10-yr NPV (annuity, 10% WACC)" val={fmtM(flex_netRev*6.145)} bold color="var(--green)" sub="excludes one-time Year 0 items"/>
         </Section>
       </div>
 
-      {/* ── Flex discount + DR share inputs ── */}
+      {/* ── Flex pricing inputs ── */}
       <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'16px 20px'}}>
         <p style={{fontSize:11,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:14}}>🎛 Flex Pricing & Revenue Share Assumptions</p>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12}}>
           {[
-            {l:'Flex Primary Discount',     v:flexDiscPrimary,   min:2,max:20,set:setFlexDiscPrimary,   sub:'Pre-Train / HPC vs Firm'},
-            {l:'Flex Secondary Discount',   v:flexDiscSecondary, min:1,max:12,set:setFlexDiscSecondary, sub:'MLOps vs Firm'},
-            {l:'Deep Discount (Research)',  v:flexDiscDeep,      min:5,max:35,set:setFlexDiscDeep,      sub:'Research / Academia'},
-            {l:'DR Revenue to Customer',    v:drSharePct,        min:0,max:100,step:5,set:setDrSharePct, sub:'% of DR pool shared'},
+            {l:'Firm SLA Premium',         v:firmPremiumPct,    min:5,max:20, set:setFirmPremium,      sub:'Inference vs. base rate', col:'var(--blue)'},
+            {l:'Pre-Train Discount',        v:flexDiscPrimary,   min:2,max:20, set:setFlexDiscPrimary,  sub:'vs. firm rate (LLM jobs)', col:'var(--green)'},
+            {l:'MLOps Discount',            v:flexDiscSecondary, min:1,max:12, set:setFlexDiscSecondary,sub:'vs. firm rate (overnight)', col:'var(--teal)'},
+            {l:'Research/HPC Discount',     v:flexDiscDeep,      min:5,max:35, set:setFlexDiscDeep,     sub:'vs. firm (preemptible)',   col:'var(--purple)'},
+            {l:'DR Revenue to Customer',    v:drSharePct,        min:0,max:100,step:5,set:setDrSharePct,sub:'% of DR pool as credits',  col:'var(--amber)'},
           ].map(inp=>(
             <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)'}}>
               <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{inp.l}</p>
-              <p style={{fontSize:15,fontWeight:700,color:'var(--amber)',fontFamily:'var(--mono)',margin:'0 0 2px'}}>{inp.v}%</p>
+              <p style={{fontSize:15,fontWeight:700,color:inp.col,fontFamily:'var(--mono)',margin:'0 0 2px'}}>{inp.v}%</p>
               <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>{inp.sub}</p>
               <Slider label="" value={inp.v} min={inp.min} max={inp.max} step={inp.step||1} onChange={inp.set} unit="%"/>
             </div>
           ))}
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:12}}>
-          <div style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)'}}>
-            <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>Accel / Interconnect Amortisation Period</p>
-            <p style={{fontSize:15,fontWeight:700,color:'var(--teal)',fontFamily:'var(--mono)',margin:'0 0 2px'}}>{accelAmortYrs} yrs</p>
-            <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>Spread one-time gains over N years for annual comparison</p>
-            <Slider label="" value={accelAmortYrs} min={1} max={10} step={1} onChange={setAccelAmortYrs} unit=" yrs"/>
+        <div style={{marginTop:12,background:revDelta>=0?'rgba(0,209,122,0.07)':'rgba(255,92,106,0.07)',borderRadius:8,padding:'14px 18px',border:`1px solid ${revDelta>=0?'rgba(0,209,122,0.3)':'rgba(255,92,106,0.3)'}`,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+          <div>
+            <p style={{fontSize:10,color:'var(--text-3)',margin:'0 0 4px',textTransform:'uppercase',letterSpacing:'0.07em'}}>Annual Revenue Uplift vs. Baseline</p>
+            <p style={{fontSize:28,fontWeight:700,color:revDelta>=0?'var(--green)':'var(--red)',fontFamily:'var(--mono)',margin:0}}>{revDelta>=0?'+':''}{fmtM(revDelta)}<span style={{fontSize:15,fontWeight:400}}>/yr</span></p>
           </div>
-          {/* Delta summary */}
-          <div style={{background:revDelta>=0?'rgba(0,209,122,0.07)':'rgba(255,92,106,0.07)',borderRadius:8,padding:'12px 16px',border:`1px solid ${revDelta>=0?'rgba(0,209,122,0.3)':'rgba(255,92,106,0.3)'}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:6}}>
-            <p style={{fontSize:10,color:'var(--text-3)',margin:0,textTransform:'uppercase',letterSpacing:'0.07em'}}>All-In Revenue Uplift vs. Baseline</p>
-            <p style={{fontSize:26,fontWeight:700,color:revDelta>=0?'var(--green)':'var(--red)',fontFamily:'var(--mono)',margin:0}}>{revDelta>=0?'+':''}{fmtM(revDelta)}<span style={{fontSize:14}}>/yr</span></p>
-            <div style={{display:'flex',gap:10}}>
-              <span style={{fontSize:11,color:'var(--text-2)'}}>Baseline: <strong style={{color:'var(--text-1)'}}>{fmtM(base_netRev)}/yr</strong></span>
-              <span style={{fontSize:11,color:revDelta>=0?'var(--green)':'var(--red)'}}>Flex: <strong>{fmtM(flex_netRev)}/yr</strong></span>
-              <span style={{fontSize:11,fontWeight:700,color:revDelta>=0?'var(--green)':'var(--red)'}}>{revDeltaPct>=0?'+':''}{revDeltaPct.toFixed(1)}%</span>
-            </div>
+          <div style={{display:'flex',gap:20,flexWrap:'wrap'}}>
+            {[
+              {l:'Without Flex',  v:fmtM(base_netRev)+'/yr', c:'var(--text-2)'},
+              {l:'With Flex',     v:fmtM(flex_netRev)+'/yr', c:'var(--green)'},
+              {l:'Uplift %',      v:(revDeltaPct>=0?'+':'')+revDeltaPct.toFixed(1)+'%', c:revDelta>=0?'var(--green)':'var(--red)'},
+              {l:'Portfolio NPV Δ', v:fmtM(revDelta*6.145),  c:'var(--blue)'},
+            ].map(k=>(
+              <div key={k.l} style={{textAlign:'center'}}>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase'}}>{k.l}</p>
+                <p style={{fontSize:13,fontWeight:700,color:k.c,fontFamily:'var(--mono)',margin:0}}>{k.v}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1970,7 +2002,6 @@ const CSPTab = ({ s, tx, az, va }) => {
                 {c:'Enterprise MLOps',        seg:'wlMLOps',     tol:'Medium',    tier:'Flex Secondary',     disc:flexDiscSecondary, col:'#ffb020'},
                 {c:'Real-time Inference',     seg:'wlInference', tol:'None',      tier:'Firm Only',          disc:0,                 col:'#4da8ff'},
                 {c:'Research / Academia',     seg:'wlResearch',  tol:'Very High', tier:'Deep Discount Flex', disc:flexDiscDeep,      col:'#b87fff'},
-                {c:'HPC / Batch Compute',     seg:'wlHPC',       tol:'High',      tier:'Flex Primary',       disc:flexDiscPrimary,   col:'#00d17a'},
               ].map((row,i)=>{
                 const mixPct = s[row.seg]||0;
                 const dot = row.tol==='None'?'#ff5c6a':row.tol==='Medium'?'#ffb020':'#00d17a';
