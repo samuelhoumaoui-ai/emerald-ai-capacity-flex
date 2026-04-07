@@ -1938,9 +1938,13 @@ const SensitivityTab = ({ s, set }) => {
 
   const computeNPV = (overrides) => {
     const merged = {...s, ...overrides};
-    const tx = calcTexas(merged);
-    const az = calcArizona(merged);
-    const va = calcVirginia(merged);
+    // txFlexPct/azFlexPct used as direct sensitivity override; else derive from workload mix
+    const effFlex = overrides.txFlexPct !== undefined
+      ? overrides.txFlexPct
+      : computeEffectiveFlexPct(merged);
+    const tx = calcTexas(merged, effFlex);
+    const az = calcArizona(merged, effFlex);
+    const va = calcVirginia(merged, effFlex);
     return tx.npv + az.npv + va.npv;
   };
 
@@ -1990,7 +1994,10 @@ const SensitivityTab = ({ s, set }) => {
   };
   const scenarioResults = ['bear','base','bull'].map(sc => {
     const params = {...s, ...SCENARIOS[sc]};
-    const tx = calcTexas(params), az = calcArizona(params), va = calcVirginia(params);
+    const effFlex = SCENARIOS[sc].txFlexPct !== undefined
+      ? SCENARIOS[sc].txFlexPct
+      : computeEffectiveFlexPct(params);
+    const tx = calcTexas(params, effFlex), az = calcArizona(params, effFlex), va = calcVirginia(params, effFlex);
     return { sc, npv: tx.npv+az.npv+va.npv, dr: tx.annualDR+az.annualDR+va.annualDREnergy+va.annualCapRev, payback: [tx.payback,az.payback,va.payback].filter(Boolean).reduce((a,b,_,arr)=>a+b,0)/3||null };
   });
 
@@ -3376,7 +3383,7 @@ KEY MODEL FACTS:
 - GPU base rate: $${s.txGpuRate}M/MW/yr (Texas blended)
 - Portfolio 10-yr NPV: $${(totalNPV/1000).toFixed(2)}B
 - Texas NPV: $${(tx.npv/1e3).toFixed(0)}M | Arizona NPV: $${(az.npv/1e3).toFixed(0)}M | Virginia NPV: $${(va.npv/1e3).toFixed(0)}M
-- ERCOT spike price: $${s.txSpikePrice}/MWh | Texas DR program rate: $${s.txDrRate}/MWh
+- ERCOT spike price: $${s.txSpikePrice}/MWh | TX DR cap rate: $${s.txDrCapRate}/kW-yr | TX DR energy rate: $${s.txDrEnergyRate}/MWh
 - Interconnection acceleration: Texas ${s.txAccelMo}mo faster | Arizona ${s.azAccelMo}mo faster
 
 CALCULATION LOGIC:
