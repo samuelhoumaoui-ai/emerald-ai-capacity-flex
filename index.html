@@ -2572,55 +2572,68 @@ const CSPTab = ({ s, tx, az, va }) => {
 
       {/* ── Section A — Named Scenarios ── */}
       {(() => {
+        // ── Excel Model: GPU_Flex_Model_Final_v5 — Scenario Analysis Sheet ──
+        // Formula methodology aligned to Excel (Apr 2026 audit):
+        //   annualSpend = totalMW × gpuRate  (reference list price, no util)
+        //   blendedDisc = SUMPRODUCT(wl_share × discount) / total_non_inf_share
+        //   L1          = flexMW × gpuRate × blendedDisc  (NO utilization factor)
+        //   L2          = drEligMW × drRate × curtailHrs × 50% / 1e6
+        //   cspFirmPrem = firmMW × gpuRate × 10%
+        //   cspFlexRev  = flexMW × gpuRate × (1 − blendedDisc)
+        //   valueSplit  = totalBenefit / cspTotalRev
+        // Inputs below match Excel Scenario Analysis Section A exactly.
         const NAMED_SCENARIOS = [
-          { id:'bear',        name:'Bear Case',         badge:'🐻', color:'var(--red)',
-            gpuRate:2.5,  flexPct:5,   drRate:40,  curtailHrs:150, firmPremPct:8,  flexDiscPct:6,  drSharePct:50,
-            desc:'Aggressive H100 price compression from commodity GPU supply. Minimal flex adoption as customers prioritize cost certainty over grid participation.' },
-          { id:'base',        name:'Base Case',         badge:'📊', color:'var(--text-2)',
-            gpuRate:3.0,  flexPct:8.2, drRate:75,  curtailHrs:250, firmPremPct:10, flexDiscPct:10, drSharePct:50,
-            desc:'Current market conditions. Model defaults: 8.2% effective flex from workload mix, $75/MWh DR, 250 annual curtailment hours. Matches Emerald AI demo parameters.' },
-          { id:'bull',        name:'Bull Case',         badge:'🐂', color:'var(--green)',
-            gpuRate:3.5,  flexPct:12,  drRate:120, curtailHrs:320, firmPremPct:12, flexDiscPct:8,  drSharePct:45,
-            desc:'Tight GPU supply, increasing DR market value as ERCOT loads surge. Higher flex enrollment as AI training workloads grow as % of portfolio.' },
-          { id:'pricecomp',   name:'Price Compression', badge:'📉', color:'var(--amber)',
-            gpuRate:2.0,  flexPct:15,  drRate:65,  curtailHrs:280, firmPremPct:8,  flexDiscPct:15, drSharePct:55,
-            desc:'B200/GB200 displacement drives H100 pricing to $2.0M/MW/yr. Operators compensate with higher flex enrollment to recover margin via grid revenue streams.' },
-          { id:'highdr',      name:'High DR Market',    badge:'⚡', color:'var(--teal)',
-            gpuRate:3.0,  flexPct:8.2, drRate:200, curtailHrs:450, firmPremPct:10, flexDiscPct:10, drSharePct:50,
-            desc:'ERCOT scarcity events intensify — extreme heat or supply shortage drives DR prices to $200+/MWh. More frequent curtailment events increase total DR pool.' },
-          { id:'fullflex',    name:'Full Flex Adoption', badge:'🚀', color:'var(--blue)',
-            gpuRate:2.8,  flexPct:20,  drRate:100, curtailHrs:350, firmPremPct:10, flexDiscPct:12, drSharePct:55,
-            desc:'20% portfolio flex enrollment as industry matures. Customers accept deeper discounts in exchange for DR sharing. Slightly lower GPU rate offset by DR uplift.' },
-          { id:'outlook2028', name:'2028 Outlook',       badge:'🔭', color:'var(--purple)',
-            gpuRate:1.8,  flexPct:25,  drRate:150, curtailHrs:500, firmPremPct:8,  flexDiscPct:18, drSharePct:60,
-            desc:'2028 steady-state: commoditized GPU rates offset by deep flex enrollment, higher DR rates, and 500+ annual curtailment hours as grid stress grows with AI load.' },
+          { id:'bear',      name:'Bear Case',         badge:'🐻', color:'var(--red)',
+            h100:1.12, gpuRate:1.50,   flexPct:2,    drRate:35,  curtailHrs:80,
+            desc:'GPU price compression from H200/B200 competition. Minimal flex adoption — customers prioritize cost certainty. Low curtailment frequency means DR credits barely move the needle.' },
+          { id:'base',      name:'Base Case',         badge:'📊', color:'var(--text-2)',
+            h100:2.24, gpuRate:3.00,   flexPct:11.1, drRate:55,  curtailHrs:120,
+            desc:'Current market conditions per Excel model (Apr 2026 audit). 11.1% portfolio flex enrollment, $55/MWh ERCOT DR rate, 120 annual curtailment hours.' },
+          { id:'bull',      name:'Bull Case',         badge:'🐂', color:'var(--green)',
+            h100:3.73, gpuRate:5.00,   flexPct:15,   drRate:75,  curtailHrs:200,
+            desc:'Tight GPU supply premium. Higher flex enrollment as pre-training workloads surge. ERCOT scarcity pushes DR rates above $75/MWh — strong ancillary service economics.' },
+          { id:'pricecomp', name:'Price Compression', badge:'📉', color:'var(--amber)',
+            h100:1.34, gpuRate:1.796,  flexPct:65,   drRate:55,  curtailHrs:120,
+            desc:'B200/GB200 commoditization drives H100 rates to $1.34/hr. CSPs compensate with 65% flex enrollment to monetize idle capacity via grid revenue — margin maintained through volume.' },
+          { id:'highdr',    name:'High DR Market',    badge:'⚡', color:'var(--teal)',
+            h100:2.24, gpuRate:3.00,   flexPct:65,   drRate:100, curtailHrs:120,
+            desc:'High flex enrollment + elevated DR prices ($100/MWh). ERCOT grid stress increases frequency of scarcity events — 65% flex share captures substantial ancillary service revenue.' },
+          { id:'fullflex',  name:'Full Flex Adoption', badge:'🚀', color:'var(--blue)',
+            h100:2.24, gpuRate:3.00,   flexPct:90,   drRate:55,  curtailHrs:200,
+            desc:'Near-full portfolio flex enrollment (90%). 200 curtailment hours/yr. Industry norm shift: most workloads accept preemption in exchange for pricing and DR revenue sharing.' },
+          { id:'out2028',   name:'2028 Outlook',       badge:'🔭', color:'var(--purple)',
+            h100:1.12, gpuRate:1.50,   flexPct:70,   drRate:65,  curtailHrs:130,
+            desc:'2028 steady-state: $1.12/hr GPU rate after commoditization. 70% flex adoption standard practice. DR market matures to $65/MWh. High enrollment offsets price compression.' },
         ];
 
-        const util = 0.85;
         const MW = 600;
+        // Blended flex discount across non-inference workloads (from live workload mix sliders)
+        const nonInfTotal = s.wlPreTrain + s.wlMLOps + s.wlResearch;
+        const blendedDisc = nonInfTotal > 0
+          ? (s.wlPreTrain*8 + s.wlMLOps*4 + s.wlResearch*18) / (nonInfTotal * 100)
+          : 0.0847; // fallback to Excel default 8.47%
 
         const calcSc = (sc) => {
-          const firmMW   = MW * (1 - sc.flexPct/100);
-          const flexMW   = MW * (sc.flexPct/100);
-          const firmRate = sc.gpuRate * (1 + sc.firmPremPct/100);
-          const flexRate = sc.gpuRate * (1 - sc.flexDiscPct/100);
-          const drEligMW = flexMW;
-          const annualSpend    = firmMW * firmRate + flexMW * flexRate * util;
-          const l1             = flexMW * (firmRate - flexRate) * util;
-          const l2             = drEligMW * sc.drRate * sc.curtailHrs * (sc.drSharePct/100) / 1e6;
-          const totalBenefit   = l1 + l2;
-          const benefitPct     = annualSpend > 0 ? (totalBenefit / annualSpend) * 100 : 0;
-          const cspFirmPremium = firmMW * sc.gpuRate * (sc.firmPremPct/100);
-          const cspFlexRev     = flexMW * flexRate * util;
-          const cspDrRetained  = drEligMW * sc.drRate * sc.curtailHrs * (1 - sc.drSharePct/100) / 1e6;
-          const cspTotalRev    = firmMW * firmRate + cspFlexRev + cspDrRetained;
-          const noFlexBaseline = MW * sc.gpuRate * 0.918;
-          const cspUplift      = cspTotalRev - noFlexBaseline;
-          const valueSplitCust = (totalBenefit + cspUplift) > 0
-            ? (totalBenefit / (totalBenefit + cspUplift)) * 100 : 0;
-          return { firmMW, flexMW, firmRate, flexRate, drEligMW,
-            annualSpend, l1, l2, totalBenefit, benefitPct,
-            cspFirmPremium, cspFlexRev, cspDrRetained, cspTotalRev, cspUplift, valueSplitCust };
+          const firmMW      = MW * (1 - sc.flexPct/100);
+          const flexMW      = MW * (sc.flexPct/100);
+          const drEligMW    = flexMW;
+          // Annual Spend = reference list price (no discount, no utilization)
+          const annualSpend = MW * sc.gpuRate;
+          // L1: compute savings vs list price (no utilization factor — Excel methodology)
+          const l1          = flexMW * sc.gpuRate * blendedDisc;
+          // L2: DR credit at 50% customer share
+          const l2          = drEligMW * sc.drRate * sc.curtailHrs * 0.50 / 1e6;
+          const totalBenefit  = l1 + l2;
+          const benefitPct    = annualSpend > 0 ? (totalBenefit / annualSpend) * 100 : 0;
+          // CSP revenue components (incremental from flex product)
+          const cspFirmPremium = firmMW * sc.gpuRate * 0.10;               // +10% SLA premium
+          const cspFlexRev     = flexMW * sc.gpuRate * (1 - blendedDisc);  // flex tier revenue
+          const cspDrRetained  = drEligMW * sc.drRate * sc.curtailHrs * 0.50 / 1e6; // CSP 50% DR
+          const cspTotalRev    = cspFirmPremium + cspFlexRev + cspDrRetained;
+          // Value split = customer benefit as % of CSP flex-enabled revenue
+          const valueSplitCust = cspTotalRev > 0 ? (totalBenefit / cspTotalRev) * 100 : 0;
+          return { firmMW, flexMW, drEligMW, annualSpend, l1, l2, totalBenefit, benefitPct,
+            cspFirmPremium, cspFlexRev, cspDrRetained, cspTotalRev, valueSplitCust };
         };
 
         const computed = NAMED_SCENARIOS.map(sc => ({...sc, ...calcSc(sc)}));
@@ -2668,7 +2681,7 @@ const CSPTab = ({ s, tx, az, va }) => {
                   <tr style={{borderBottom:'1px solid var(--border)',background:'var(--bg-overlay)'}}>
                     <th style={{position:'sticky',left:0,background:'var(--bg-overlay)',padding:'6px 12px',textAlign:'left',fontSize:9,color:'var(--text-3)',fontWeight:600,whiteSpace:'nowrap',zIndex:1}}>&nbsp;</th>
                     {[
-                      {l:'H100 Rate',sub:'$/MW/yr',c:'var(--blue)'},{l:'Flex Share',sub:'% of MW',c:'var(--blue)'},
+                      {l:'H100 Rate',sub:'$/GPU-hr',c:'var(--blue)'},{l:'Flex Share',sub:'% enrolled',c:'var(--blue)'},
                       {l:'DR Rate',sub:'$/MWh',c:'var(--blue)'},{l:'Curtail Hrs',sub:'annual',c:'var(--blue)'},
                       {l:'Annual Spend',sub:'$M/yr',c:'var(--teal)'},{l:'DR-Eligible MW',sub:'enrolled',c:'var(--teal)'},
                       {l:'L1 Compute',sub:'savings $M',c:'var(--teal)'},{l:'L2 DR Credit',sub:'$M/yr',c:'var(--teal)'},
@@ -2703,7 +2716,7 @@ const CSPTab = ({ s, tx, az, va }) => {
                           </div>
                         </td>
                         {/* Inputs */}
-                        <C v={`$${sc.gpuRate.toFixed(1)}M`}   color="var(--blue)"/>
+                        <C v={`$${sc.h100.toFixed(2)}/hr`}    color="var(--blue)"/>
                         <C v={`${sc.flexPct}%`}               color="var(--blue)"/>
                         <C v={`$${sc.drRate}`}                 color="var(--blue)"/>
                         <C v={sc.curtailHrs}                   color="var(--blue)"/>
@@ -2784,9 +2797,156 @@ const CSPTab = ({ s, tx, az, va }) => {
             {/* Footer note */}
             <div style={{padding:'10px 20px',borderTop:'1px solid var(--border)',background:'var(--bg-surface)'}}>
               <p style={{fontSize:9,color:'var(--text-3)',margin:0,lineHeight:1.6}}>
-                <strong style={{color:'var(--text-2)'}}>Methodology:</strong> All scenarios use 600 MW total portfolio (TX+AZ+VA), 85% GPU utilization, and the workload-mix derived effective flex% from the global header.
-                H100 Rate = blended GPU fleet rate in $M/MW/yr. L1 = flex compute savings vs. firm tier. L2 = DR credit passed to flex customers.
-                CSP Uplift = revenue delta vs. no-flex baseline at scenario GPU rate. Scenarios modeled independently — not a time-series forecast.
+                <strong style={{color:'var(--text-2)'}}>Methodology (aligned to GPU_Flex_Model_Final_v5.xlsx · Scenario Analysis sheet):</strong> Scenarios use 600 MW portfolio.
+                Annual Spend = 600 MW × GPU rate (reference list price). L1 = flex-enrolled MW × GPU rate × blended discount (pre-train 8% / MLOps 4% / research 18%, SUMPRODUCT of workload mix — no utilization factor per Excel audit).
+                CSP Firm Premium = firm MW × rate × 10% SLA premium. CSP Flex Rev = flex MW × rate × (1−blended discount). Both sides split DR 50/50.
+                Value Split = customer L1+L2 ÷ CSP total incremental revenue. H100 $/GPU-hr shown as market reference only.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Section B — Customer Profiles ── */}
+      <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',overflow:'hidden'}}>
+        <div style={{background:'var(--bg-raised)',borderBottom:'1px solid var(--border)',padding:'14px 20px'}}>
+          <p style={{fontSize:12,fontWeight:700,color:'var(--text-1)',margin:'0 0 2px'}}>
+            <span style={{color:'var(--purple)',marginRight:6}}>§B</span>Customer Profiles — Representative Archetypes (Excel: Customer Profiles sheet)
+          </p>
+          <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>Per-profile analysis at individual customer scale · Portfolio aggregate (600 MW) is authoritative for financial outputs</p>
+        </div>
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+            <thead>
+              <tr style={{borderBottom:'2px solid var(--border)',background:'var(--bg-overlay)'}}>
+                {['Attribute','P1: Hyperscaler AI Lab','P2: Enterprise AI Platform','P3: Applied Research Inst.','P4: Climate Tech Startup','Portfolio Blend (600 MW)'].map((h,i)=>(
+                  <th key={h} style={{padding:'8px 12px',textAlign:i===0?'left':'center',fontSize:9,color:['var(--text-3)','var(--blue)','var(--teal)','var(--purple)','var(--amber)','var(--green)'][i],fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',whiteSpace:'nowrap'}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                {attr:'Annual Compute Spend',    p1:'$870M',  p2:'$345M',  p3:'$102M',  p4:'$15M',  port:'$1,800M', bold:true},
+                {attr:'DC Power Demand (MW)',     p1:'290 MW', p2:'115 MW', p3:'34 MW',  p4:'5 MW',  port:'444 MW (IT load)'},
+                {attr:'Inference Share (Firm)',   p1:'40%',    p2:'70%',    p3:'5%',     p4:'30%',   port:'44.98%'},
+                {attr:'Pre-Training (Flex)',      p1:'45%',    p2:'10%',    p3:'60%',    p4:'20%',   port:'36.8%'},
+                {attr:'MLOps / Retraining',       p1:'10%',    p2:'15%',    p3:'5%',     p4:'40%',   port:'11.25%'},
+                {attr:'Research / Batch',         p1:'5%',     p2:'5%',     p3:'30%',    p4:'10%',   port:'6.97%'},
+                {attr:'DR-Eligible MW',           p1:'174 MW', p2:'34.5 MW',p3:'32.3 MW',p4:'3.5 MW',port:'49.1 MW'},
+                {attr:'L1 Compute Savings',       p1:'$42.6M', p2:'$7.9M',  p3:'$10.6M', p4:'$0.75M',port:'$83.7M', accent:'var(--teal)'},
+                {attr:'L2 DR Credit',             p1:'$0.57M', p2:'$0.11M', p3:'$0.11M', p4:'$0.01M',port:'$0.16M', accent:'var(--teal)'},
+                {attr:'TOTAL Annual Benefit',     p1:'$43.2M', p2:'$8.0M',  p3:'$10.7M', p4:'$0.76M',port:'$83.8M', bold:true, accent:'var(--green)'},
+                {attr:'Benefit % of Spend',       p1:'4.97%',  p2:'2.33%',  p3:'10.5%',  p4:'5.08%', port:'4.66%', accent:'var(--green)'},
+                {attr:'Flex Tolerance',           p1:'Medium', p2:'Low-Med',p3:'Very High',p4:'High', port:'Mixed'},
+                {attr:'Primary Value Driver',     p1:'Pricing lock + DR credits at scale',p2:'Firm SLA guarantee',p3:'Spot-like economics without cloud unreliability',p4:'MLOps savings + strategic alignment',port:'Compute savings dominate'},
+                {attr:'Switching Cost (post-integration)',p1:'High — months of re-integration',p2:'Medium — inference dependencies',p3:'Low — scheduler portable',p4:'Medium — grid signal sticky',port:'Varies by workload type'},
+              ].map((row,i)=>(
+                <tr key={row.attr} style={{borderBottom:'1px solid var(--border)',background:row.bold?'var(--bg-overlay)':i%2===0?'transparent':'var(--bg-raised)'}}>
+                  <td style={{padding:'7px 12px',fontSize:10,fontWeight:row.bold?700:500,color:'var(--text-2)',whiteSpace:'nowrap'}}>{row.attr}</td>
+                  {[row.p1,row.p2,row.p3,row.p4,row.port].map((v,j)=>(
+                    <td key={j} style={{padding:'7px 12px',textAlign:'center',fontSize:j===4?11:10,
+                      fontWeight:row.bold||(j===4)?700:400,
+                      color:row.accent&&(row.bold||j===4)?row.accent:(row.bold?'var(--text-1)':'var(--text-2)'),
+                      fontFamily:(row.attr.includes('$')||row.attr.includes('MW')||row.attr.includes('%')||v?.includes('$'))?'var(--mono)':'inherit',
+                      whiteSpace:j===4?'nowrap':'normal'}}>{v}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={{padding:'10px 20px',borderTop:'1px solid var(--border)',background:'var(--bg-surface)'}}>
+          <p style={{fontSize:9,color:'var(--text-3)',margin:0,lineHeight:1.6}}>
+            <strong style={{color:'var(--text-2)'}}>Source: Excel Customer Profiles sheet (GPU_Flex_Model_Final_v5.xlsx).</strong> L1 formula: MW × workload% × $3M/MW-yr × discount%. L2 = DR-eligible MW × $55/MWh × 120 hrs × 50% customer share.
+            Inference customers pay +10% SLA premium (partially offsetting flex discounts). For high-flex profiles (P3: Research), effective savings reach ~10.5% vs. list rate. P1 Hyperscaler at 45% pre-training drives the largest absolute benefit: $43.2M/yr.
+          </p>
+        </div>
+      </div>
+
+      {/* ── Section D — 5-Year Cumulative Flex Benefit Projection ── */}
+      {(() => {
+        // Excel Section D: 5-Year Cumulative Flex Benefit Projection
+        // H100 price escalator: −12%/yr | Flex adoption ramp: +3%/yr | DR market: +5%/yr
+        const baseH100 = 2.2383;    // Base Case H100 rate ($/hr/GPU)
+        const baseFlexShare = 0.111; // Base flex enrollment %
+        const baseDRRate = 55;       // Base DR rate ($/MWh)
+        const PRICE_ESC = -0.12;     // −12%/yr GPU price escalator (Excel model)
+        const FLEX_RAMP = 0.03;      // +3%/yr flex adoption growth
+        const DR_MATUR  = 0.05;      // +5%/yr DR market maturation
+        const baseL1 = flex_grossRev > 0 ? flex_grossRev : 16.88; // live from CSP model or fallback
+
+        const years5 = [1,2,3,4,5].map(yr => {
+          const h100 = baseH100 * Math.pow(1 + PRICE_ESC, yr-1);
+          const flexSh = baseFlexShare * Math.pow(1 + FLEX_RAMP, yr-1);
+          const drRate = baseDRRate * Math.pow(1 + DR_MATUR, yr-1);
+          const gpuRate = 3.0 * Math.pow(1 + PRICE_ESC, yr-1); // $3M/MW base scales same as H100
+          const nonInfTot = s.wlPreTrain + s.wlMLOps + s.wlResearch;
+          const bDisc = nonInfTot > 0 ? (s.wlPreTrain*8+s.wlMLOps*4+s.wlResearch*18)/(nonInfTot*100) : 0.0847;
+          const flexMW = 600 * flexSh;
+          const l1 = flexMW * gpuRate * bDisc;
+          const l2 = flexMW * drRate * 120 * 0.50 / 1e6;
+          const totalBen = l1 + l2;
+          const annSpend = 600 * gpuRate;
+          return { yr, h100:+h100.toFixed(4), flexSh:+(flexSh*100).toFixed(2), drRate:+drRate.toFixed(2), l1:+l1.toFixed(2), l2:+l2.toFixed(3), totalBen:+totalBen.toFixed(2), annSpend:+annSpend.toFixed(0), benefitPct:+(totalBen/annSpend*100).toFixed(3) };
+        });
+        const total5yr = years5.reduce((a,b)=>a+b.totalBen,0);
+        const cagr = years5.length>=2 ? Math.pow(years5[4].totalBen/years5[0].totalBen, 0.25)-1 : 0;
+
+        return (
+          <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',overflow:'hidden'}}>
+            <div style={{background:'var(--bg-raised)',borderBottom:'1px solid var(--border)',padding:'14px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+              <div>
+                <p style={{fontSize:12,fontWeight:700,color:'var(--text-1)',margin:'0 0 2px'}}>
+                  <span style={{color:'var(--amber)',marginRight:6}}>§D</span>5-Year Cumulative Flex Benefit Projection
+                </p>
+                <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>H100 price −12%/yr · Flex adoption +3%/yr · DR market +5%/yr · Base Case starting point</p>
+              </div>
+              <div style={{display:'flex',gap:10}}>
+                {[{l:'5-Yr Total Benefit',v:`$${total5yr.toFixed(1)}M`,c:'var(--teal)'},{l:'3-Yr CAGR',v:`+${(cagr*100).toFixed(1)}%/yr`,c:'var(--green)'}].map(k=>(
+                  <div key={k.l} style={{background:'var(--bg-overlay)',border:`1px solid ${k.c}33`,borderRadius:8,padding:'6px 14px',textAlign:'center'}}>
+                    <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase'}}>{k.l}</p>
+                    <p style={{fontSize:15,fontWeight:700,color:k.c,fontFamily:'var(--mono)',margin:0}}>{k.v}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{overflowX:'auto'}}>
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+                <thead>
+                  <tr style={{borderBottom:'1px solid var(--border)',background:'var(--bg-overlay)'}}>
+                    {['Metric','Year 1','Year 2','Year 3','Year 4','Year 5','5-Yr Total','CAGR'].map((h,i)=>(
+                      <th key={h} style={{padding:'7px 12px',textAlign:i===0?'left':'right',fontSize:9,color:i===6||i===7?'var(--green)':'var(--text-3)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',whiteSpace:'nowrap'}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    {label:'H100 Price ($/GPU-hr)',  vals:years5.map(y=>`$${y.h100.toFixed(2)}`), tot:'—', cagr:'—', c:'var(--text-2)'},
+                    {label:'Flex-Eligible Share (%)', vals:years5.map(y=>`${y.flexSh.toFixed(1)}%`), tot:'—', cagr:'—', c:'var(--text-2)'},
+                    {label:'DR Market Rate ($/MWh)',  vals:years5.map(y=>`$${y.drRate.toFixed(2)}`), tot:'—', cagr:'—', c:'var(--text-2)'},
+                    {label:'L1 Compute Savings ($M)', vals:years5.map(y=>`$${y.l1.toFixed(1)}M`), tot:`$${years5.reduce((a,b)=>a+b.l1,0).toFixed(1)}M`, cagr:'—', c:'var(--teal)', bold:true},
+                    {label:'L2 DR Revenue Credit ($M)',vals:years5.map(y=>`$${y.l2.toFixed(2)}M`), tot:`$${years5.reduce((a,b)=>a+b.l2,0).toFixed(2)}M`, cagr:'—', c:'var(--teal)'},
+                    {label:'Total Annual Benefit ($M)', vals:years5.map(y=>`$${y.totalBen.toFixed(1)}M`), tot:`$${total5yr.toFixed(1)}M`, cagr:`+${(cagr*100).toFixed(1)}%/yr`, c:'var(--green)', bold:true},
+                    {label:'Cumulative Benefit ($M)',  vals:years5.map((_,i)=>`$${years5.slice(0,i+1).reduce((a,b)=>a+b.totalBen,0).toFixed(1)}M`), tot:`$${total5yr.toFixed(1)}M`, cagr:'—', c:'var(--green)'},
+                    {label:'Benefit % of Spend',       vals:years5.map(y=>`${y.benefitPct.toFixed(3)}%`), tot:'—', cagr:'—', c:'var(--text-2)'},
+                  ].map((row,i)=>(
+                    <tr key={row.label} style={{borderBottom:'1px solid var(--border)',background:row.bold?'var(--bg-overlay)':i%2===0?'transparent':'var(--bg-raised)'}}>
+                      <td style={{padding:'7px 12px',fontSize:10,fontWeight:row.bold?700:400,color:'var(--text-2)'}}>{row.label}</td>
+                      {row.vals.map((v,j)=>(
+                        <td key={j} style={{padding:'7px 12px',textAlign:'right',fontFamily:'var(--mono)',fontSize:10,fontWeight:row.bold?700:400,color:row.c}}>{v}</td>
+                      ))}
+                      <td style={{padding:'7px 12px',textAlign:'right',fontFamily:'var(--mono)',fontSize:10,fontWeight:700,color:'var(--green)'}}>{row.tot}</td>
+                      <td style={{padding:'7px 12px',textAlign:'right',fontFamily:'var(--mono)',fontSize:10,color:'var(--text-3)'}}>{row.cagr}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{padding:'10px 20px',borderTop:'1px solid var(--border)',background:'var(--bg-surface)'}}>
+              <p style={{fontSize:9,color:'var(--text-3)',margin:0,lineHeight:1.6}}>
+                <strong style={{color:'var(--text-2)'}}>Source: Excel Section D — 5-Year Cumulative Flex Benefit Projection.</strong> Projections use Base Case starting values: H100 $2.24/hr, flex 11.1%, DR $55/MWh.
+                GPU price escalator −12%/yr · Flex adoption ramp +3%/yr · DR market maturation +5%/yr. Live model: all year-1 values update when workload mix or assumptions change.
               </p>
             </div>
           </div>
