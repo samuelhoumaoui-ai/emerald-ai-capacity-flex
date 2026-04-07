@@ -1396,6 +1396,194 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
           </div>
         </div>
 
+        {/* Section 4 — Battery Growth Trajectories */}
+        <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'20px 24px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+            <span style={{fontSize:14}}>📈</span>
+            <span style={{fontSize:12,fontWeight:700,color:'var(--teal)',textTransform:'uppercase',letterSpacing:'0.07em'}}>Battery Storage Growth Trajectories</span>
+          </div>
+          <p style={{fontSize:11,color:'var(--text-3)',marginBottom:18}}>U.S. and ERCOT battery storage are on exponential growth curves driven by renewable integration, AI data center co-location, and falling lithium-ion costs. Understanding these trajectories is critical for projecting ERCOT arbitrage economics and data center DR revenue.</p>
+
+          {/* Stat pills */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:20}}>
+            {[
+              {label:'ERCOT Operational BESS',  val:'14.2 GW',  sub:'as of Q1 2025',      col:'var(--teal)'},
+              {label:'ERCOT BESS Queue',         val:'110+ GW',  sub:'pending interconnect',col:'var(--amber)'},
+              {label:'US Utility-Scale BESS',    val:'52 GW',    sub:'2025 installed',      col:'var(--blue)'},
+              {label:'4-hr BESS Installed Cost', val:'$175/kWh', sub:'down 54% from 2020',  col:'var(--green)'},
+            ].map(s=>(
+              <div key={s.label} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 14px',border:`1px solid ${s.col}33`}}>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.07em'}}>{s.label}</p>
+                <p style={{fontSize:18,fontWeight:700,color:s.col,fontFamily:'var(--mono)',margin:'0 0 1px'}}>{s.val}</p>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:0}}>{s.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Charts row */}
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:18}}>
+            {/* Capacity growth chart */}
+            <div>
+              <p style={{fontSize:10,fontWeight:700,color:'var(--text-2)',margin:'0 0 10px',textTransform:'uppercase',letterSpacing:'0.07em'}}>⚡ Installed Capacity — GW (Operational)</p>
+              <ResponsiveContainer width="100%" height={210}>
+                <AreaChart data={[
+                  {yr:'2020', us:1.5,  ercot:0.2},
+                  {yr:'2021', us:4.0,  ercot:0.6},
+                  {yr:'2022', us:9.0,  ercot:1.8},
+                  {yr:'2023', us:17.5, ercot:3.8},
+                  {yr:'2024', us:30.0, ercot:7.5},
+                  {yr:'2025', us:52.0, ercot:14.2},
+                  {yr:'2026E',us:85.0, ercot:24.0},
+                  {yr:'2027E',us:120.0,ercot:36.0},
+                  {yr:'2028E',us:165.0,ercot:50.0},
+                  {yr:'2030E',us:260.0,ercot:82.0},
+                ]} margin={{top:5,right:10,left:0,bottom:5}}>
+                  <defs>
+                    <linearGradient id="gradUS" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--blue)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--blue)" stopOpacity={0.02}/>
+                    </linearGradient>
+                    <linearGradient id="gradERCOT" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--teal)" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="var(--teal)" stopOpacity={0.02}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false}/>
+                  <XAxis dataKey="yr" tick={{fill:'var(--text-3)',fontSize:9}} axisLine={false} tickLine={false}/>
+                  <YAxis tick={{fill:'var(--text-3)',fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>`${v}GW`}/>
+                  <Tooltip contentStyle={{background:'var(--bg-overlay)',border:'1px solid var(--border)',borderRadius:8,fontSize:11}} labelStyle={{color:'var(--text-2)'}}
+                    formatter={(v,name)=>[`${v} GW`, name==='us'?'United States':'ERCOT']}/>
+                  <Area type="monotone" dataKey="us"    stroke="var(--blue)" strokeWidth={2} fill="url(#gradUS)"    name="us"/>
+                  <Area type="monotone" dataKey="ercot" stroke="var(--teal)" strokeWidth={2} fill="url(#gradERCOT)" name="ercot"/>
+                </AreaChart>
+              </ResponsiveContainer>
+              <div style={{display:'flex',gap:14,marginTop:4}}>
+                {[{c:'var(--blue)',l:'US Total'},{c:'var(--teal)',l:'ERCOT'}].map(d=>(
+                  <div key={d.l} style={{display:'flex',alignItems:'center',gap:5}}>
+                    <div style={{width:10,height:2,background:d.c,borderRadius:1}}/>
+                    <span style={{fontSize:9,color:'var(--text-3)'}}>{d.l}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Cost + arbitrage chart */}
+            <div>
+              <p style={{fontSize:10,fontWeight:700,color:'var(--text-2)',margin:'0 0 10px',textTransform:'uppercase',letterSpacing:'0.07em'}}>💰 Cost Decline & Arbitrage Compression</p>
+              <ResponsiveContainer width="100%" height={210}>
+                <LineChart data={[
+                  {yr:'2020',cost:380,arb:120},
+                  {yr:'2021',cost:340,arb:110},
+                  {yr:'2022',cost:290,arb:130},
+                  {yr:'2023',cost:250,arb:115},
+                  {yr:'2024',cost:210,arb:95},
+                  {yr:'2025',cost:175,arb:80},
+                  {yr:'2026E',cost:150,arb:65},
+                  {yr:'2027E',cost:130,arb:52},
+                  {yr:'2028E',cost:115,arb:42},
+                  {yr:'2030E',cost:98, arb:30},
+                ]} margin={{top:5,right:10,left:0,bottom:5}}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false}/>
+                  <XAxis dataKey="yr" tick={{fill:'var(--text-3)',fontSize:9}} axisLine={false} tickLine={false}/>
+                  <YAxis yAxisId="cost" tick={{fill:'var(--text-3)',fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>`$${v}`}/>
+                  <YAxis yAxisId="arb"  orientation="right" tick={{fill:'var(--text-3)',fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>`$${v}`}/>
+                  <Tooltip contentStyle={{background:'var(--bg-overlay)',border:'1px solid var(--border)',borderRadius:8,fontSize:11}} labelStyle={{color:'var(--text-2)'}}
+                    formatter={(v,name)=>name==='cost'?[`$${v}/kWh`,'Installed Cost (4-hr)']:[`$${v}/MWh-cycle`,'ERCOT Arbitrage Spread']}/>
+                  <Line yAxisId="cost" type="monotone" dataKey="cost" stroke="var(--green)"  strokeWidth={2} dot={false} name="cost"/>
+                  <Line yAxisId="arb"  type="monotone" dataKey="arb"  stroke="var(--amber)"  strokeWidth={2} dot={false} strokeDasharray="5 3" name="arb"/>
+                </LineChart>
+              </ResponsiveContainer>
+              <div style={{display:'flex',gap:14,marginTop:4}}>
+                {[{c:'var(--green)',l:'Installed Cost ($/kWh)'},{c:'var(--amber)',l:'Arbitrage Spread ($/MWh-cycle)',dash:true}].map(d=>(
+                  <div key={d.l} style={{display:'flex',alignItems:'center',gap:5}}>
+                    <div style={{width:10,height:2,background:d.c,borderRadius:1,opacity:d.dash?0.6:1}}/>
+                    <span style={{fontSize:9,color:'var(--text-3)'}}>{d.l}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Key trajectory insights */}
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:16}}>
+            {[
+              {icon:'📉',col:'var(--green)',title:'Cost Decline Curve',
+               pts:['BESS capex fell from $380/kWh (2020) → $175/kWh (2025) — a 54% reduction in 5 years','Driven by lithium-iron phosphate (LFP) cell commoditization and scale of Chinese manufacturing','Wood Mackenzie projects $98/kWh by 2030 at current trajectory','At sub-$100/kWh: 4-hr BESS achieves sub-5-year payback on merchant ERCOT economics alone']},
+              {icon:'⚡',col:'var(--teal)',title:'ERCOT Deployment Wave',
+               pts:['110 GW in ERCOT interconnection queue — 3× current installed generation capacity','~70% of queue is battery + solar hybrid projects (DC-coupled ITC optimization)','ERCOT approved 8-GW BESS additions in 2024; 15-20 GW expected 2025 (TAC forecast)','Grid congestion in West Texas creating BTM + co-location premium for data center-adjacent BESS']},
+              {icon:'⚠️',col:'var(--amber)',title:'Revenue Stack Compression',
+               pts:['Arbitrage spreads compressing: $120/MWh-cycle (2020) → $80 (2025) → est. $30 (2030) as fleet doubles','Energy-only market forces BESS into ancillary services (RRS, ECRS) for margin protection','ECRS and RegUp/Down hold value better than pure arbitrage as fleet grows','Data center co-location de-risks BESS economics — removes merchant basis risk via DC load offtake agreement']},
+            ].map(card=>(
+              <div key={card.title} style={{background:'var(--bg-raised)',borderRadius:10,border:`1px solid ${card.col}33`,padding:'12px 14px'}}>
+                <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:8}}>
+                  <span style={{fontSize:14}}>{card.icon}</span>
+                  <p style={{fontSize:11,fontWeight:700,color:card.col,margin:0}}>{card.title}</p>
+                </div>
+                <ul style={{margin:0,padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:5}}>
+                  {card.pts.map((pt,i)=>(
+                    <li key={i} style={{display:'flex',gap:6,fontSize:10,color:'var(--text-2)',lineHeight:1.5}}>
+                      <span style={{color:card.col,flexShrink:0,marginTop:1}}>›</span><span>{pt}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* ERCOT pipeline table */}
+          <div style={{marginBottom:16}}>
+            <p style={{fontSize:10,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:10}}>🗂 ERCOT BESS Pipeline by Status (2025)</p>
+            <div style={{overflowX:'auto'}}>
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+                <thead>
+                  <tr style={{borderBottom:'1px solid var(--border)'}}>
+                    {['Status','Capacity (GW)','% of Queue','Avg Project Size','Dominant Region','Notes'].map(h=>(
+                      <th key={h} style={{textAlign:'left',padding:'6px 10px',fontSize:9,color:'var(--text-3)',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.06em',whiteSpace:'nowrap'}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    {status:'Operational',         gw:'14.2',  pct:'11%', size:'85 MW',  region:'West TX / DFW',    note:'Active in ERCOT real-time markets; earning AS + arbitrage',      col:'var(--green)'},
+                    {status:'Under Construction',  gw:'8.5',   pct:'6%',  size:'120 MW', region:'West TX / Coastal', note:'COD expected 2025–2026; majority solar+storage hybrid',          col:'var(--teal)'},
+                    {status:'Permitted / Approved',gw:'18.0',  pct:'14%', size:'200 MW', region:'Statewide',         note:'IA signed; financing close; 2026–2027 COD target',               col:'var(--blue)'},
+                    {status:'In Sync Studies',     gw:'32.0',  pct:'25%', size:'250 MW', region:'West TX (congested)','note':'Awaiting ERCOT Sync Study Phase 2 — 18–30 month timeline',    col:'var(--amber)'},
+                    {status:'Application Filed',   gw:'47.0',  pct:'37%', size:'310 MW', region:'All Zones',         note:'Earliest stage — high attrition expected (~60% withdrawn historically)', col:'var(--text-3)'},
+                    {status:'TOTAL QUEUE',          gw:'~110',  pct:'100%',size:'—',      region:'ERCOT-wide',        note:'3× current installed generation (~37 GW ERCOT peak)',            col:'var(--text-1)'},
+                  ].map((row,i)=>(
+                    <tr key={row.status} style={{borderBottom:'1px solid var(--border)',background:row.status==='TOTAL QUEUE'?'var(--bg-overlay)':i%2===0?'transparent':'var(--bg-raised)'}}>
+                      <td style={{padding:'7px 10px',fontWeight:row.status==='TOTAL QUEUE'?700:500,color:row.col}}>{row.status}</td>
+                      <td style={{padding:'7px 10px',fontFamily:'var(--mono)',fontWeight:700,color:row.col}}>{row.gw}</td>
+                      <td style={{padding:'7px 10px',color:'var(--text-2)'}}>{row.pct}</td>
+                      <td style={{padding:'7px 10px',color:'var(--text-2)'}}>{row.size}</td>
+                      <td style={{padding:'7px 10px',color:'var(--text-2)'}}>{row.region}</td>
+                      <td style={{padding:'7px 10px',color:'var(--text-3)',fontSize:10}}>{row.note}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* DC Strategy implications */}
+          <div style={{background:'rgba(20,184,166,0.07)',borderRadius:9,border:'1px solid rgba(20,184,166,0.2)',padding:'14px 18px'}}>
+            <p style={{fontSize:11,fontWeight:700,color:'var(--teal)',margin:'0 0 8px'}}>🏗 Data Center Strategy Implications — BESS Growth</p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10}}>
+              {[
+                {title:'Near-Term (2025–2027): Premium Window',body:'ERCOT BESS revenue stacks are still highly lucrative — $100–150k/MW/yr blended. Co-located BESS with data centers locks in this revenue before fleet saturation compresses spreads. Window closes as 30+ GW comes online 2026–2027.'},
+                {title:'Mid-Term (2027–2029): Ancillary Shift',body:'Energy arbitrage margins compress below $50/MWh-cycle. BESS revenue shifts toward ECRS, RRS, and RegUp/Down. Projects without ancillary service qualification face margin pressure. Data center "virtual curtailment" (BESS discharges instead of reducing compute) retains full AS value.'},
+                {title:'Long-Term (2029–2032): Cost Parity',body:'At $98/kWh installed cost and 8,760 charge-discharge cycles, BESS achieves effective $11/MWh LCOS. Even compressed arbitrage spreads of $20–30/MWh sustain positive NPV. BTM battery becomes standard DC infrastructure — equivalent to diesel gensets but revenue-generating.'},
+                {title:'Emerald AI Positioning',body:'A 50 MW BTM BESS at each Texas site (150 MW total) captures $15–22M/yr in current ERCOT revenue — declining to ~$8M/yr by 2030 as spreads compress. Net NPV over 10 years: ~$130–180M at $800k–$1.0M/MW capex. Finances through tax equity + DC load offtake agreement.'},
+              ].map(c=>(
+                <div key={c.title}>
+                  <p style={{fontSize:11,fontWeight:700,color:'var(--teal)',margin:'0 0 4px'}}>{c.title}</p>
+                  <p style={{fontSize:10,color:'var(--text-2)',lineHeight:1.6,margin:0}}>{c.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Footer note */}
         <div style={{background:'var(--bg-raised)',borderRadius:8,padding:'12px 16px',border:'1px solid var(--border)',display:'flex',gap:10,alignItems:'flex-start'}}>
           <span style={{fontSize:13,flexShrink:0}}>📌</span>
@@ -2375,6 +2563,229 @@ const CSPTab = ({ s, tx, az, va }) => {
         </div>
       </div>
 
+      {/* ── Section A — Named Scenarios ── */}
+      {(() => {
+        const NAMED_SCENARIOS = [
+          { id:'bear',        name:'Bear Case',         badge:'🐻', color:'var(--red)',
+            gpuRate:2.5,  flexPct:5,   drRate:40,  curtailHrs:150, firmPremPct:8,  flexDiscPct:6,  drSharePct:50,
+            desc:'Aggressive H100 price compression from commodity GPU supply. Minimal flex adoption as customers prioritize cost certainty over grid participation.' },
+          { id:'base',        name:'Base Case',         badge:'📊', color:'var(--text-2)',
+            gpuRate:3.0,  flexPct:8.2, drRate:75,  curtailHrs:250, firmPremPct:10, flexDiscPct:10, drSharePct:50,
+            desc:'Current market conditions. Model defaults: 8.2% effective flex from workload mix, $75/MWh DR, 250 annual curtailment hours. Matches Emerald AI demo parameters.' },
+          { id:'bull',        name:'Bull Case',         badge:'🐂', color:'var(--green)',
+            gpuRate:3.5,  flexPct:12,  drRate:120, curtailHrs:320, firmPremPct:12, flexDiscPct:8,  drSharePct:45,
+            desc:'Tight GPU supply, increasing DR market value as ERCOT loads surge. Higher flex enrollment as AI training workloads grow as % of portfolio.' },
+          { id:'pricecomp',   name:'Price Compression', badge:'📉', color:'var(--amber)',
+            gpuRate:2.0,  flexPct:15,  drRate:65,  curtailHrs:280, firmPremPct:8,  flexDiscPct:15, drSharePct:55,
+            desc:'B200/GB200 displacement drives H100 pricing to $2.0M/MW/yr. Operators compensate with higher flex enrollment to recover margin via grid revenue streams.' },
+          { id:'highdr',      name:'High DR Market',    badge:'⚡', color:'var(--teal)',
+            gpuRate:3.0,  flexPct:8.2, drRate:200, curtailHrs:450, firmPremPct:10, flexDiscPct:10, drSharePct:50,
+            desc:'ERCOT scarcity events intensify — extreme heat or supply shortage drives DR prices to $200+/MWh. More frequent curtailment events increase total DR pool.' },
+          { id:'fullflex',    name:'Full Flex Adoption', badge:'🚀', color:'var(--blue)',
+            gpuRate:2.8,  flexPct:20,  drRate:100, curtailHrs:350, firmPremPct:10, flexDiscPct:12, drSharePct:55,
+            desc:'20% portfolio flex enrollment as industry matures. Customers accept deeper discounts in exchange for DR sharing. Slightly lower GPU rate offset by DR uplift.' },
+          { id:'outlook2028', name:'2028 Outlook',       badge:'🔭', color:'var(--purple)',
+            gpuRate:1.8,  flexPct:25,  drRate:150, curtailHrs:500, firmPremPct:8,  flexDiscPct:18, drSharePct:60,
+            desc:'2028 steady-state: commoditized GPU rates offset by deep flex enrollment, higher DR rates, and 500+ annual curtailment hours as grid stress grows with AI load.' },
+        ];
+
+        const util = 0.85;
+        const MW = 600;
+
+        const calcSc = (sc) => {
+          const firmMW   = MW * (1 - sc.flexPct/100);
+          const flexMW   = MW * (sc.flexPct/100);
+          const firmRate = sc.gpuRate * (1 + sc.firmPremPct/100);
+          const flexRate = sc.gpuRate * (1 - sc.flexDiscPct/100);
+          const drEligMW = flexMW;
+          const annualSpend    = firmMW * firmRate + flexMW * flexRate * util;
+          const l1             = flexMW * (firmRate - flexRate) * util;
+          const l2             = drEligMW * sc.drRate * sc.curtailHrs * (sc.drSharePct/100) / 1e6;
+          const totalBenefit   = l1 + l2;
+          const benefitPct     = annualSpend > 0 ? (totalBenefit / annualSpend) * 100 : 0;
+          const cspFirmPremium = firmMW * sc.gpuRate * (sc.firmPremPct/100);
+          const cspFlexRev     = flexMW * flexRate * util;
+          const cspDrRetained  = drEligMW * sc.drRate * sc.curtailHrs * (1 - sc.drSharePct/100) / 1e6;
+          const cspTotalRev    = firmMW * firmRate + cspFlexRev + cspDrRetained;
+          const noFlexBaseline = MW * sc.gpuRate * 0.918;
+          const cspUplift      = cspTotalRev - noFlexBaseline;
+          const valueSplitCust = (totalBenefit + cspUplift) > 0
+            ? (totalBenefit / (totalBenefit + cspUplift)) * 100 : 0;
+          return { firmMW, flexMW, firmRate, flexRate, drEligMW,
+            annualSpend, l1, l2, totalBenefit, benefitPct,
+            cspFirmPremium, cspFlexRev, cspDrRetained, cspTotalRev, cspUplift, valueSplitCust };
+        };
+
+        const computed = NAMED_SCENARIOS.map(sc => ({...sc, ...calcSc(sc)}));
+        const [selId, setSelId] = React.useState('base');
+        const sel = computed.find(s=>s.id===selId) || computed[1];
+
+        const C = ({v,bold,color,right}) => (
+          <td style={{padding:'7px 10px',fontFamily:'var(--mono)',fontSize:11,
+            fontWeight:bold?700:500,color:color||'var(--text-2)',
+            textAlign:right?'right':'left',whiteSpace:'nowrap'}}>{v}</td>
+        );
+
+        return (
+          <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',overflow:'hidden'}}>
+            {/* Header */}
+            <div style={{background:'var(--bg-raised)',borderBottom:'1px solid var(--border)',padding:'14px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+              <div>
+                <p style={{fontSize:12,fontWeight:700,color:'var(--text-1)',margin:'0 0 2px'}}>
+                  <span style={{color:'var(--green)',marginRight:6}}>§A</span>Named Scenario Analysis — 600 MW Portfolio
+                </p>
+                <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>7 market scenarios × 15 KPIs · Click any scenario to see full breakdown</p>
+              </div>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                {computed.map(sc=>(
+                  <button key={sc.id} onClick={()=>setSelId(sc.id)}
+                    style={{fontSize:9,fontWeight:600,padding:'4px 10px',borderRadius:5,border:`1px solid ${sc.id===selId?sc.color:'var(--border)'}`,
+                      background:sc.id===selId?`${sc.color}22`:'transparent',
+                      color:sc.id===selId?sc.color:'var(--text-3)',cursor:'pointer',transition:'all 0.15s',whiteSpace:'nowrap'}}>
+                    {sc.badge} {sc.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Scrollable table */}
+            <div style={{overflowX:'auto'}}>
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+                <thead>
+                  <tr style={{borderBottom:'2px solid var(--border)'}}>
+                    <th style={{position:'sticky',left:0,background:'var(--bg-raised)',padding:'8px 12px',textAlign:'left',fontSize:9,color:'var(--text-3)',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.07em',whiteSpace:'nowrap',zIndex:1}}>Scenario</th>
+                    <th colSpan={4} style={{padding:'5px 10px',textAlign:'center',fontSize:9,color:'var(--blue)',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',borderLeft:'1px solid var(--border)'}}>Inputs</th>
+                    <th colSpan={6} style={{padding:'5px 10px',textAlign:'center',fontSize:9,color:'var(--teal)',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',borderLeft:'1px solid var(--border)'}}>Customer View</th>
+                    <th colSpan={5} style={{padding:'5px 10px',textAlign:'center',fontSize:9,color:'var(--green)',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.06em',borderLeft:'1px solid var(--border)'}}>CSP Revenue View</th>
+                  </tr>
+                  <tr style={{borderBottom:'1px solid var(--border)',background:'var(--bg-overlay)'}}>
+                    <th style={{position:'sticky',left:0,background:'var(--bg-overlay)',padding:'6px 12px',textAlign:'left',fontSize:9,color:'var(--text-3)',fontWeight:600,whiteSpace:'nowrap',zIndex:1}}>&nbsp;</th>
+                    {[
+                      {l:'H100 Rate',sub:'$/MW/yr',c:'var(--blue)'},{l:'Flex Share',sub:'% of MW',c:'var(--blue)'},
+                      {l:'DR Rate',sub:'$/MWh',c:'var(--blue)'},{l:'Curtail Hrs',sub:'annual',c:'var(--blue)'},
+                      {l:'Annual Spend',sub:'$M/yr',c:'var(--teal)'},{l:'DR-Eligible MW',sub:'enrolled',c:'var(--teal)'},
+                      {l:'L1 Compute',sub:'savings $M',c:'var(--teal)'},{l:'L2 DR Credit',sub:'$M/yr',c:'var(--teal)'},
+                      {l:'TOTAL Benefit',sub:'$M/yr',c:'var(--teal)'},{l:'Benefit %',sub:'of spend',c:'var(--teal)'},
+                      {l:'Firm Premium',sub:'$M/yr',c:'var(--green)'},{l:'Flex Rev',sub:'$M/yr',c:'var(--green)'},
+                      {l:'DR Retained',sub:'$M/yr',c:'var(--green)'},{l:'CSP TOTAL',sub:'$M/yr',c:'var(--green)'},
+                      {l:'Value Split',sub:'cust %',c:'var(--green)'},
+                    ].map((h,i)=>(
+                      <th key={i} style={{padding:'5px 10px',textAlign:'right',fontSize:9,color:h.c,fontWeight:600,whiteSpace:'nowrap',
+                        borderLeft:i===0||i===4||i===10?'1px solid var(--border)':'none'}}>
+                        <div>{h.l}</div><div style={{color:'var(--text-3)',fontWeight:400}}>{h.sub}</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {computed.map((sc,ri)=>{
+                    const isSel = sc.id === selId;
+                    return (
+                      <tr key={sc.id} onClick={()=>setSelId(sc.id)}
+                        style={{borderBottom:'1px solid var(--border)',cursor:'pointer',
+                          background:isSel?`${sc.color}12`:ri%2===0?'transparent':'var(--bg-raised)',
+                          transition:'background 0.1s'}}>
+                        <td style={{position:'sticky',left:0,background:isSel?`${sc.color}18`:(ri%2===0?'var(--bg-surface)':'var(--bg-raised)'),
+                          padding:'8px 12px',zIndex:1,borderRight:'1px solid var(--border)'}}>
+                          <div style={{display:'flex',alignItems:'center',gap:7}}>
+                            <span style={{fontSize:14}}>{sc.badge}</span>
+                            <div>
+                              <p style={{fontSize:11,fontWeight:700,color:isSel?sc.color:'var(--text-1)',margin:0,whiteSpace:'nowrap'}}>{sc.name}</p>
+                              {isSel && <p style={{fontSize:9,color:'var(--text-3)',margin:0}}>selected</p>}
+                            </div>
+                          </div>
+                        </td>
+                        {/* Inputs */}
+                        <C v={`$${sc.gpuRate.toFixed(1)}M`}   color="var(--blue)"/>
+                        <C v={`${sc.flexPct}%`}               color="var(--blue)"/>
+                        <C v={`$${sc.drRate}`}                 color="var(--blue)"/>
+                        <C v={sc.curtailHrs}                   color="var(--blue)"/>
+                        {/* Customer view */}
+                        <C v={`$${sc.annualSpend.toFixed(0)}M`} bold={isSel} color={isSel?sc.color:'var(--text-2)'}/>
+                        <C v={`${sc.drEligMW.toFixed(0)} MW`}   color="var(--text-2)"/>
+                        <C v={`$${sc.l1.toFixed(1)}M`}          color="var(--teal)"/>
+                        <C v={`$${sc.l2.toFixed(1)}M`}          color="var(--teal)"/>
+                        <C v={`$${sc.totalBenefit.toFixed(1)}M`} bold color="var(--teal)"/>
+                        <C v={`${sc.benefitPct.toFixed(1)}%`}    color={sc.benefitPct>2?'var(--green)':'var(--text-2)'}/>
+                        {/* CSP view */}
+                        <C v={`$${sc.cspFirmPremium.toFixed(0)}M`} color="var(--green)"/>
+                        <C v={`$${sc.cspFlexRev.toFixed(0)}M`}     color="var(--green)"/>
+                        <C v={`$${sc.cspDrRetained.toFixed(1)}M`}   color="var(--green)"/>
+                        <C v={`$${sc.cspTotalRev.toFixed(0)}M`}    bold color={isSel?sc.color:'var(--green)'}/>
+                        <C v={`${sc.valueSplitCust.toFixed(1)}%`}   color={sc.valueSplitCust>10?'var(--teal)':'var(--text-3)'}/>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Selected scenario breakdown */}
+            <div style={{borderTop:'1px solid var(--border)',padding:'18px 20px',background:'var(--bg-raised)'}}>
+              <div style={{display:'flex',alignItems:'flex-start',gap:16,flexWrap:'wrap'}}>
+                <div style={{flex:'0 0 auto'}}>
+                  <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 4px',textTransform:'uppercase',letterSpacing:'0.07em'}}>Selected Scenario</p>
+                  <p style={{fontSize:18,fontWeight:700,color:sel.color,margin:'0 0 2px'}}>{sel.badge} {sel.name}</p>
+                  <p style={{fontSize:10,color:'var(--text-3)',maxWidth:260,lineHeight:1.5,margin:0}}>{sel.desc}</p>
+                </div>
+                {/* Mini KPI strip */}
+                <div style={{display:'flex',gap:10,flexWrap:'wrap',flex:1}}>
+                  {[
+                    {l:'Customer Total Spend',    v:`$${sel.annualSpend.toFixed(0)}M/yr`,    c:'var(--text-2)'},
+                    {l:'Total Customer Benefit',  v:`$${sel.totalBenefit.toFixed(1)}M/yr`,   c:'var(--teal)'},
+                    {l:'Benefit as % of Spend',   v:`${sel.benefitPct.toFixed(1)}%`,         c:sel.benefitPct>2?'var(--green)':'var(--text-2)'},
+                    {l:'CSP Total Revenue',       v:`$${sel.cspTotalRev.toFixed(0)}M/yr`,    c:'var(--green)'},
+                    {l:'CSP Rev Uplift vs Base',  v:`+$${Math.max(0,sel.cspUplift).toFixed(0)}M/yr`, c:'var(--green)'},
+                    {l:'Value Split (Cust / CSP)',v:`${sel.valueSplitCust.toFixed(1)}% / ${(100-sel.valueSplitCust).toFixed(1)}%`, c:sel.color},
+                  ].map(k=>(
+                    <div key={k.l} style={{background:'var(--bg-overlay)',borderRadius:8,padding:'8px 14px',minWidth:130,border:`1px solid ${sel.color}33`}}>
+                      <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.05em'}}>{k.l}</p>
+                      <p style={{fontSize:14,fontWeight:700,color:k.c,fontFamily:'var(--mono)',margin:0}}>{k.v}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Revenue breakdown bar chart */}
+              <div style={{marginTop:16}}>
+                <p style={{fontSize:10,fontWeight:700,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:8}}>
+                  Revenue Stack — {sel.name}
+                </p>
+                <ResponsiveContainer width="100%" height={160}>
+                  <BarChart layout="vertical" data={[
+                    {name:'CSP Firm Premium',  v:+sel.cspFirmPremium.toFixed(1), c:'#60a5fa'},
+                    {name:'CSP Flex Compute',  v:+sel.cspFlexRev.toFixed(1),     c:'#00c96e'},
+                    {name:'CSP DR Retained',   v:+sel.cspDrRetained.toFixed(1),  c:'#f59e0b'},
+                    {name:'Customer L1 Saved', v:+sel.l1.toFixed(1),             c:'#14b8a6'},
+                    {name:'Customer L2 DR',    v:+sel.l2.toFixed(1),             c:'#a78bfa'},
+                  ]} margin={{top:0,right:60,left:120,bottom:0}}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false}/>
+                    <XAxis type="number" tick={{fill:'var(--text-3)',fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>`$${v}M`}/>
+                    <YAxis type="category" dataKey="name" tick={{fill:'var(--text-2)',fontSize:9}} axisLine={false} tickLine={false} width={115}/>
+                    <Tooltip contentStyle={{background:'var(--bg-overlay)',border:'1px solid var(--border)',borderRadius:8,fontSize:11}}
+                      formatter={(v)=>[`$${v}M/yr`]}/>
+                    <Bar dataKey="v" radius={[0,4,4,0]}>
+                      {[{c:'#60a5fa'},{c:'#00c96e'},{c:'#f59e0b'},{c:'#14b8a6'},{c:'#a78bfa'}].map((d,i)=>(
+                        <Cell key={i} fill={d.c} fillOpacity={0.85}/>
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Footer note */}
+            <div style={{padding:'10px 20px',borderTop:'1px solid var(--border)',background:'var(--bg-surface)'}}>
+              <p style={{fontSize:9,color:'var(--text-3)',margin:0,lineHeight:1.6}}>
+                <strong style={{color:'var(--text-2)'}}>Methodology:</strong> All scenarios use 600 MW total portfolio (TX+AZ+VA), 85% GPU utilization, and the workload-mix derived effective flex% from the global header.
+                H100 Rate = blended GPU fleet rate in $M/MW/yr. L1 = flex compute savings vs. firm tier. L2 = DR credit passed to flex customers.
+                CSP Uplift = revenue delta vs. no-flex baseline at scenario GPU rate. Scenarios modeled independently — not a time-series forecast.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── Core argument ── */}
       <div style={{background:'linear-gradient(135deg,#011a0e 0%,#011820 100%)',border:'1px solid #014a25',borderRadius:12,padding:'18px 24px',textAlign:'center'}}>
         <p style={{fontSize:11,fontWeight:700,color:'var(--green)',marginBottom:6,textTransform:'uppercase',letterSpacing:'0.08em'}}>🔑 The Core Argument</p>
@@ -2911,6 +3322,15 @@ const App = () => {
   const [pitchMode, setPitchMode] = useState(false);
   const [liveDataStatus, setLiveDataStatus] = useState('loading');
 
+  // ── Claude Chat State ──
+  const [chatOpen, setChatOpen]   = useState(false);
+  const [chatMsgs, setChatMsgs]   = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [apiKey, setApiKey]       = useState(() => localStorage.getItem('emerald_claude_key') || '');
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const chatEndRef = React.useRef(null);
+
   const set = useCallback((key, val) => setS(prev => ({...prev, [key]: val})), []);
   const reset = useCallback(() => setS({...DEFAULTS}), []);
 
@@ -2933,6 +3353,75 @@ const App = () => {
   }), [s, effectiveFlexPct]);
 
   const totalNPV = tx.npv + az.npv + va.npv;
+
+  // ── Chat scroll + send ──
+  useEffect(() => { chatEndRef.current?.scrollIntoView({behavior:'smooth'}); }, [chatMsgs]);
+
+  const sendChat = useCallback(async () => {
+    const text = chatInput.trim();
+    if (!text || chatLoading) return;
+    if (!apiKey) { setShowKeyInput(true); return; }
+
+    const userMsg = {role:'user', content:text};
+    setChatMsgs(prev => [...prev, userMsg]);
+    setChatInput('');
+    setChatLoading(true);
+
+    const systemPrompt = `You are the Emerald AI Compute Flexibility Value Calculator assistant. You help users understand the model's calculations, assumptions, and energy market context.
+
+KEY MODEL FACTS:
+- Portfolio: 600 MW total (Texas/ERCOT: ${s.txDcMW}MW, Arizona/APS+SRP: ${s.azDcMW}MW, Virginia/PJM: ${s.vaCurrentMW}MW)
+- Workload mix: Pre-Training ${s.wlPreTrain}%, MLOps ${s.wlMLOps}%, Inference ${s.wlInference}%, Research ${s.wlResearch}%
+- Effective flex %: ${(computeEffectiveFlexPct(s)).toFixed(1)}% (SUMPRODUCT of workload × curtail floor)
+- GPU base rate: $${s.txGpuRate}M/MW/yr (Texas blended)
+- Portfolio 10-yr NPV: $${(totalNPV/1000).toFixed(2)}B
+- Texas NPV: $${(tx.npv/1e3).toFixed(0)}M | Arizona NPV: $${(az.npv/1e3).toFixed(0)}M | Virginia NPV: $${(va.npv/1e3).toFixed(0)}M
+- ERCOT spike price: $${s.txSpikePrice}/MWh | Texas DR program rate: $${s.txDrRate}/MWh
+- Interconnection acceleration: Texas ${s.txAccelMo}mo faster | Arizona ${s.azAccelMo}mo faster
+
+CALCULATION LOGIC:
+- Texas NPV = Time-to-Power value + Spike Avoidance (10yr) + DR Revenue (10yr) + Interconnect savings
+- PJM Virginia: capacity market revenue via BRA auction clearing prices (~$50-100/MW-day)
+- Effective flex % uses SUMPRODUCT: (wlPreTrain×0.16 + wlMLOps×0.08 + wlInference×0 + wlResearch×0.20) / 100
+
+MARKET CONTEXT:
+- ERCOT: energy-only, no capacity market, ~9,000 settlement points, islanded TX grid
+- Arizona: APS/SRP vertically integrated, summer peak $280/MWh, APS E-32 flex tariff
+- Virginia: PJM capacity market, BRA clearing ~$50-100/MW-day, Dominion territory, permitting congestion
+- ERCOT battery storage queue: 110+ GW pending; 14.2 GW operational in 2025
+- H100 blended fleet rate: $2-4M/MW/yr depending on supply/demand
+
+Answer concisely and numerically where possible. Reference specific model figures.`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-5',
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [...chatMsgs, userMsg].map(m => ({role:m.role,content:m.content})),
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(()=>({}));
+        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      const reply = data.content?.[0]?.text || '(no response)';
+      setChatMsgs(prev => [...prev, {role:'assistant', content:reply}]);
+    } catch(e) {
+      setChatMsgs(prev => [...prev, {role:'assistant', content:`⚠️ Error: ${e.message}. Check your API key or try again.`, isError:true}]);
+    } finally {
+      setChatLoading(false);
+    }
+  }, [chatInput, chatLoading, apiKey, chatMsgs, s, tx, az, va, totalNPV]);
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -2990,6 +3479,147 @@ const App = () => {
           </div>
         </div>
       </footer>
+
+      {/* ── Claude Chat Panel ── */}
+      {/* FAB button */}
+      <button onClick={()=>setChatOpen(o=>!o)}
+        style={{position:'fixed',bottom:24,right:24,width:52,height:52,borderRadius:'50%',
+          background:'var(--green)',border:'none',cursor:'pointer',
+          display:'flex',alignItems:'center',justifyContent:'center',
+          boxShadow:'0 4px 20px rgba(0,201,110,0.4)',fontSize:22,zIndex:1000,
+          transition:'transform 0.15s,box-shadow 0.15s'}}
+        onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.08)';e.currentTarget.style.boxShadow='0 6px 28px rgba(0,201,110,0.55)';}}
+        onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow='0 4px 20px rgba(0,201,110,0.4)';}}>
+        {chatOpen ? '✕' : '💬'}
+      </button>
+
+      {/* Chat window */}
+      {chatOpen && (
+        <div style={{position:'fixed',bottom:88,right:24,width:400,height:560,
+          background:'var(--bg-surface)',borderRadius:14,border:'1px solid var(--border)',
+          boxShadow:'0 20px 60px rgba(0,0,0,0.6)',display:'flex',flexDirection:'column',
+          zIndex:999,overflow:'hidden',fontFamily:"'Space Grotesk',sans-serif"}}>
+
+          {/* Chat header */}
+          <div style={{background:'var(--bg-raised)',borderBottom:'1px solid var(--border)',padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{display:'flex',alignItems:'center',gap:9}}>
+              <div style={{width:30,height:30,background:'linear-gradient(135deg,var(--green),var(--teal))',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>⟡</div>
+              <div>
+                <p style={{fontSize:12,fontWeight:700,color:'var(--text-1)',margin:0}}>Emerald AI Assistant</p>
+                <p style={{fontSize:9,color:'var(--text-3)',margin:0}}>Powered by Claude · Ask about the model</p>
+              </div>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <button onClick={()=>setShowKeyInput(k=>!k)}
+                style={{fontSize:9,color:'var(--text-3)',background:'var(--bg-overlay)',border:'1px solid var(--border)',borderRadius:5,padding:'3px 8px',cursor:'pointer'}}>
+                🔑 API Key
+              </button>
+              <button onClick={()=>setChatMsgs([])}
+                style={{fontSize:9,color:'var(--text-3)',background:'transparent',border:'none',cursor:'pointer',padding:'2px 4px'}}>
+                Clear
+              </button>
+            </div>
+          </div>
+
+          {/* API key input (collapsible) */}
+          {showKeyInput && (
+            <div style={{padding:'10px 14px',background:'rgba(0,201,110,0.07)',borderBottom:'1px solid var(--border)',display:'flex',gap:8,alignItems:'center'}}>
+              <input type="password" placeholder="sk-ant-api..." value={apiKey}
+                onChange={e=>{ setApiKey(e.target.value); localStorage.setItem('emerald_claude_key',e.target.value); }}
+                style={{flex:1,background:'var(--bg-raised)',border:'1px solid var(--border)',borderRadius:6,padding:'6px 10px',
+                  fontSize:11,color:'var(--text-1)',outline:'none',fontFamily:'monospace'}}/>
+              <button onClick={()=>setShowKeyInput(false)}
+                style={{fontSize:11,color:'var(--green)',background:'transparent',border:'none',cursor:'pointer',fontWeight:700}}>✓</button>
+            </div>
+          )}
+
+          {/* Messages area */}
+          <div style={{flex:1,overflowY:'auto',padding:'12px 14px',display:'flex',flexDirection:'column',gap:10}}>
+            {chatMsgs.length === 0 && (
+              <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:8}}>
+                <p style={{fontSize:11,color:'var(--text-3)',textAlign:'center',margin:'0 0 8px'}}>Ask anything about the model</p>
+                {[
+                  'What drives the Texas NPV calculation?',
+                  'How does the effective flex % work?',
+                  'Compare the 7 CSP scenarios for me',
+                  'What is ERCOT\'s capacity market structure?',
+                  'How does PJM BRA capacity revenue work?',
+                ].map(q=>(
+                  <button key={q} onClick={()=>{setChatInput(q);}}
+                    style={{textAlign:'left',background:'var(--bg-raised)',border:'1px solid var(--border)',borderRadius:8,
+                      padding:'8px 12px',fontSize:10,color:'var(--text-2)',cursor:'pointer',
+                      transition:'border-color 0.1s',lineHeight:1.4}}
+                    onMouseEnter={e=>e.currentTarget.style.borderColor='var(--green)'}
+                    onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border)'}>
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+            {chatMsgs.map((msg,i)=>(
+              <div key={i} style={{display:'flex',flexDirection:'column',
+                alignItems:msg.role==='user'?'flex-end':'flex-start'}}>
+                <div style={{maxWidth:'88%',background:msg.role==='user'
+                    ? 'linear-gradient(135deg,var(--green),#00a85a)'
+                    : msg.isError ? 'rgba(248,113,113,0.12)' : 'var(--bg-raised)',
+                  border: msg.role==='user' ? 'none'
+                    : `1px solid ${msg.isError?'rgba(248,113,113,0.3)':'var(--border)'}`,
+                  borderRadius: msg.role==='user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                  padding:'9px 13px',fontSize:11,lineHeight:1.65,
+                  color:msg.role==='user'?'#0a1f10':'var(--text-2)',
+                  fontWeight:msg.role==='user'?500:400,
+                  whiteSpace:'pre-wrap',wordBreak:'break-word'}}>
+                  {msg.content}
+                </div>
+                <span style={{fontSize:9,color:'var(--text-3)',marginTop:3,marginLeft:4,marginRight:4}}>
+                  {msg.role==='user'?'You':'Claude'}
+                </span>
+              </div>
+            ))}
+            {chatLoading && (
+              <div style={{display:'flex',alignItems:'flex-start',gap:8}}>
+                <div style={{background:'var(--bg-raised)',border:'1px solid var(--border)',borderRadius:'12px 12px 12px 2px',padding:'10px 14px'}}>
+                  <div style={{display:'flex',gap:5,alignItems:'center'}}>
+                    {[0,1,2].map(i=>(
+                      <div key={i} style={{width:6,height:6,borderRadius:'50%',background:'var(--green)',opacity:0.7,
+                        animation:`pulse 1.2s ease-in-out ${i*0.2}s infinite`}}/>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={chatEndRef}/>
+          </div>
+
+          {/* Input bar */}
+          <div style={{borderTop:'1px solid var(--border)',padding:'10px 12px',background:'var(--bg-raised)',display:'flex',gap:8,alignItems:'flex-end'}}>
+            <textarea value={chatInput} onChange={e=>setChatInput(e.target.value)}
+              onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}}
+              placeholder={apiKey?'Ask about calculations, markets, scenarios…':'Add your Claude API key to start (🔑 above)'}
+              rows={2} style={{flex:1,background:'var(--bg-overlay)',border:'1px solid var(--border)',borderRadius:8,
+                padding:'8px 10px',fontSize:11,color:'var(--text-1)',resize:'none',outline:'none',
+                lineHeight:1.5,fontFamily:"'Space Grotesk',sans-serif",
+                transition:'border-color 0.1s'}}
+              onFocus={e=>e.target.style.borderColor='var(--green)'}
+              onBlur={e=>e.target.style.borderColor='var(--border)'}/>
+            <button onClick={sendChat} disabled={!chatInput.trim()||chatLoading}
+              style={{width:36,height:36,borderRadius:8,background:chatInput.trim()&&!chatLoading?'var(--green)':'var(--border)',
+                border:'none',cursor:chatInput.trim()&&!chatLoading?'pointer':'default',
+                display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,flexShrink:0,
+                transition:'background 0.15s'}}>
+              {chatLoading ? '⏳' : '↑'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50% { transform: scale(1.3); opacity: 1; }
+        }
+      `}</style>
+
     </div>
   );
 };
