@@ -1,0 +1,443 @@
+================================================================================
+EMERALD AI — COMPUTE FLEXIBILITY PITCH DECK PROMPT
+Build a 4–5 slide presentation covering two audiences:
+  (A) Slides 1–3: Data center operator / infrastructure investor — flexibility explainer
+  (B) Slides 4–5: CSP executive — B2B cloud commercialization pitch
+================================================================================
+
+DESIGN SYSTEM
+─────────────
+Background:       Deep navy / near-black — #0D1B2A or #080D18
+Primary accent:   Emerald green — #00D17A
+Secondary accent: Teal — #00C8B0
+Tertiary:         Electric blue — #4DA8FF, Purple — #B87FFF, Amber — #FFB020
+Danger / cost:    Red — #FF5C6A
+Text primary:     #DCE8F5 (off-white)
+Text secondary:   #7A90B0 (muted)
+Font:             Space Grotesk (headings), Inter or DM Sans (body)
+Grid lines:       Faint green grid overlay at 2–3% opacity for tech texture
+Charts:           Dark background, colored bars/lines, white axis labels
+Style cues:       Infrastructure-tech meets institutional finance.
+                  Clean, dense-but-readable. No clip art. No gradients on text.
+                  Every number must be visible and cited.
+
+================================================================================
+SLIDE 1 OF 5 — THE GRID FLEXIBILITY IMPERATIVE
+(Audience: Data center operator / infrastructure investor)
+Layout: Left column narrative + Right column visual infographic
+================================================================================
+
+SLIDE TITLE (large, white, top-left):
+"The Grid Is Changing — Data Centers Must Adapt"
+
+SUBTITLE (smaller, green):
+"Why compute flexibility is no longer optional for new-build GPU data centers"
+
+─── LEFT COLUMN — Three stacked "tension blocks" ───────────────────────────
+
+Block 1 — The Power Crunch  [icon: lightning bolt]
+  Headline: "Interconnection queues now run 24–48 months"
+  Body: New 200 MW AI data center sites face 2–4 year waits for grid connection
+  across ERCOT (Texas), APS/SRP (Arizona), and PJM (Virginia). Utilities are
+  overwhelmed by data center demand — standard queue priority goes to the
+  lowest-disruption applicants.
+
+Block 2 — The Reliability Paradox  [icon: lock / shield]
+  Headline: "Five-nines uptime and grid stability are not opposites"
+  Body: GPU workloads are not monolithic. Real-time inference requires
+  sub-100ms SLA — but AI pre-training, HPC batch jobs, and research compute
+  can tolerate curtailment windows of hours without customer impact.
+  Flexibility ≠ unreliability. Flexibility = SLA differentiation.
+
+Block 3 — The Financial Opportunity  [icon: upward arrow chart]
+  Headline: "Grid programs pay operators to be flexible"
+  Body: ERCOT demand response, PJM capacity markets, and APS/SRP load
+  management programs provide direct revenue for load reduction commitments —
+  on top of queue acceleration and interconnect cost savings.
+
+─── RIGHT COLUMN — Tension Diagram ─────────────────────────────────────────
+
+Visual: A vertical "tension axis" diagram with three paired opposites:
+
+  GRID PRESSURE                    DC OPERATOR NEED
+  ─────────────────────────────────────────────────
+  Interconnect queue: 24–48 months ←→ Must power-on in 12–18 months
+  Spike prices $2,500/MWh          ←→ Power cost exposure at scale
+  Capacity market obligations      ←→ Revenue diversification beyond GPU rental
+
+Center of diagram: A green band labeled "EMERALD CONDUCTOR" with tagline:
+"Turns grid constraints into a competitive moat"
+
+─── BOTTOM STRIP — Three market stats (pill badges, dark cards) ──────────────
+
+  ERCOT                 PJM                    APS/SRP
+  200 MW queue:         $329/MW-day            $50/kW-yr
+  24 mo → 12 mo        PJM BRA Capacity Price  DR Capacity Rate
+  with flex commitment  2026/27–2027/28 auction avail. to flex loads
+
+SPEAKER NOTE:
+"The core insight is simple: not all GPU workloads need 100% uptime 100% of
+the time. The data center operator who figures this out first gets cheaper
+interconnect, earlier revenue, and a new income stream from the grid."
+
+================================================================================
+SLIDE 2 OF 5 — HOW THE FLEXIBILITY MODEL WORKS
+(Audience: Data center operator / infrastructure investor)
+Layout: Center-stage framework diagram + supporting mechanics panels
+================================================================================
+
+SLIDE TITLE:
+"Emerald Conductor: From Workload Intelligence to Grid Value"
+
+SUBTITLE (green):
+"A five-step flywheel that transforms compute flexibility into financial returns"
+
+─── CENTER — Circular flywheel diagram (5 steps, clockwise) ─────────────────
+
+Step 1 (top)  — PROFILE  [icon: grid/chip]
+  "Map workload mix across flexibility tolerance tiers"
+  Default portfolio: 35% Pre-Training · 25% MLOps · 20% Inference ·
+                     10% Research · 10% HPC Batch
+  Output: Effective DC Flex Capacity = 11.1% of total MW
+
+Step 2 (right) — COMMIT  [icon: handshake]
+  "Enroll curtailable MW into DR and capacity programs"
+  At 11.1% flex: 22.2 MW per 200 MW site is curtailable
+  Minimum commitment threshold: ≥10% for interconnect priority
+                                 ≥15% for full queue acceleration
+  Output: Utility enrolls site as priority interconnect applicant
+
+Step 3 (bottom-right) — CURTAIL  [icon: power meter]
+  "Shift flexible workloads during peak / spike events"
+  Texas: 150 spike hours/yr at $2,500/MWh — curtail to avoid exposure
+  Virginia: PJM BRA commitment dispatched during peak hours
+  Output: Conductor orchestrates job scheduling — zero customer SLA breach
+
+Step 4 (bottom-left) — COLLECT  [icon: dollar sign]
+  "Receive DR capacity payments, energy payments, and queue position upgrade"
+  Texas: $35/kW-yr capacity + $50/MWh energy during curtailment
+  Virginia: $329.17/MW-day × UCAP accreditation × 365 days
+  Arizona: $50/kW-yr capacity + $40/MWh energy
+  Output: New revenue stream layered on top of GPU rental income
+
+Step 5 (left) — ACCELERATE  [icon: rocket]
+  "Flex commitment unlocks earlier interconnection and upsized capacity"
+  Texas: 24-month queue → 12-month queue (saving ~$200M time-to-power)
+  Virginia: Enables 275 MW connection vs. 200 MW base (75 MW upsize)
+  Output: Earlier first-revenue date, larger revenue base
+
+Arrow from Step 5 back to Step 1 with label: "Reinvest in next site"
+
+─── BELOW FLYWHEEL — Key Assumptions Table ──────────────────────────────────
+
+Title: "Model Assumptions — Base Case"
+
+  PARAMETER                   VALUE           NOTE
+  ─────────────────────────────────────────────────────────────────────────
+  Portfolio Sites             3               TX/ERCOT, AZ/APS+SRP, VA/PJM
+  Total IT Load               600 MW          200 MW per site
+  PUE                         1.35            Power Usage Effectiveness
+  GPU Revenue Rate            $3.0M/MW/yr     Blended market rate
+  Effective Flex %            11.1%           SUMPRODUCT(workload mix × curtailment floor)
+  Curtailable MW (per site)   22.2 MW         200 MW × 11.1%
+  Queue Acceleration Scale    MIN(1, Flex%/15) Full benefit at ≥15% commitment
+  Interconnect Scale          MIN(1, Flex%/10) Full savings at ≥10% commitment
+  PJM UCAP Accreditation      90% × flex scale Scales with program commitment depth
+  Discount Rate (WACC)        10%
+  Analysis Horizon            10 years
+  Conductor Platform Cost     $2.0M/yr/site   = $6.0M/yr portfolio total
+
+─── BOTTOM — Formula callout (monospace font, dark code block) ──────────────
+
+  Effective Flex % = SUMPRODUCT(workload_mix%, curtailment_floor%)
+                   = (35%×16%) + (25%×8%) + (20%×0%) + (10%×20%) + (10%×15%)
+                   = 5.6% + 2.0% + 0.0% + 2.0% + 1.5% = 11.1%
+
+SPEAKER NOTE:
+"The 11.1% flex figure is not arbitrary — it's derived bottom-up from the
+actual SLA tolerances of each workload type. Inference customers need firm
+power. Pre-training customers are actively happy to take a pricing discount
+in exchange for occasional curtailment windows. Conductor figures out which
+jobs to pause so the operator never breaches a single customer SLA."
+
+================================================================================
+SLIDE 3 OF 5 — VALUE QUANTIFICATION: $2.8B PORTFOLIO NPV
+(Audience: Data center operator / infrastructure investor)
+Layout: KPI hero row + site breakdown chart + sensitivity callout
+================================================================================
+
+SLIDE TITLE:
+"The Numbers: A 600 MW Portfolio Generates $2.8B in Flexibility Value"
+
+SUBTITLE (green):
+"10-year NPV at 10% WACC — three sites, three market structures, one platform"
+
+─── TOP ROW — Four hero KPIs (large, bold, colored) ─────────────────────────
+
+  PORTFOLIO NPV          PAYBACK PERIOD        ANNUAL NET BENEFIT     REVENUE UPLIFT
+  $2.8B                  < 1 Year              $232M / yr             +16.7%
+  10-yr, 10% WACC        on one-time gains     post-Conductor cost    vs. baseline ops
+  [green]                [teal]                [blue]                 [amber]
+
+─── MIDDLE — Three-site breakdown (horizontal stacked bar or grouped bar) ────
+
+Title: "Value Decomposition by Site and Driver"
+
+CHART: Grouped horizontal bar chart — one bar per value driver per site
+
+  TEXAS / ERCOT  ($508M NPV)
+  ████████████████░░░░░░░░░░░░    Time-to-Power: $200M (one-time)
+  ████░░░░░░░░░░░░░░░░░░░░░░░░    Spike Avoidance: $50M (10yr)
+  ██░░░░░░░░░░░░░░░░░░░░░░░░░░    DR Revenue: $6M (10yr)
+  ███░░░░░░░░░░░░░░░░░░░░░░░░░    Interconnect: $13M (one-time)
+
+  ARIZONA / APS+SRP  ($575M NPV)
+  ████████████████░░░░░░░░░░░░    Time-to-Power: $250M (one-time)
+  ██░░░░░░░░░░░░░░░░░░░░░░░░░░    DR Revenue: $8M (10yr)
+  ███░░░░░░░░░░░░░░░░░░░░░░░░░    Avoided Upgrade: $25M (one-time)
+
+  VIRGINIA / PJM  ($1.7B NPV)
+  ██████████████████████████░░    Upsize Revenue: $225M/yr recurring
+  ████████████████░░░░░░░░░░░░    PJM Capacity Market: annual
+  ██████░░░░░░░░░░░░░░░░░░░░░░    DR Energy Revenue
+  ██░░░░░░░░░░░░░░░░░░░░░░░░░░    Interconnect Savings: $20M
+
+Color coding: Green = time-to-power / acceleration, Blue = grid revenue,
+              Teal = DR payments, Purple = capacity market, Amber = one-time savings
+
+─── BOTTOM — Two-panel callout row ──────────────────────────────────────────
+
+LEFT PANEL (dark card, green border) — Key Insight:
+  Title: "Why Virginia Dominates"
+  "The Virginia site benefits from both a PJM capacity market commitment
+  (paying $329.17/MW-day for accredited UCAP) AND a 75 MW interconnection
+  upsize — unlocking $225M/yr of incremental GPU revenue that simply isn't
+  available without flex. That upsize revenue alone drives ~60% of Virginia NPV."
+
+RIGHT PANEL (dark card, amber border) — Sensitivity:
+  Title: "NPV Sensitivity to Flex Commitment %"
+  Mini-table:
+
+    Flex %    TX NPV     AZ NPV     VA NPV     Portfolio
+    ──────────────────────────────────────────────────────
+    2%        $85M       $96M       $285M      $466M
+    5%        $213M      $240M      $713M      $1.2B
+    11.1%     $509M      $575M      $1.7B      $2.8B  ← base case
+    15%       $689M      $718M      $2.1B      $3.5B
+    20%       $689M      $718M      $2.1B      $3.5B  (capped)
+
+  Note: Benefits cap at 15–20% due to utility queue/accreditation limits
+
+SPEAKER NOTE:
+"The most important number isn't $2.8B — it's the payback period. One-time
+gains (time-to-power, interconnect savings) are received in Year 0 before a
+single dollar of Conductor cost is paid. The platform essentially pays for
+itself on day one through queue acceleration, then generates $232M/yr in
+net recurring benefit on top."
+
+================================================================================
+SLIDE 4 OF 5 — THE CSP OPPORTUNITY: TIERED COMPUTE PRICING
+(Audience: CSP executive — B2B cloud commercialization)
+Layout: Side-by-side comparison (Baseline vs. Flex-Enabled) + customer segmentation
+================================================================================
+
+SLIDE TITLE:
+"From Grid Constraint to Product Strategy: The Flex-Native Cloud"
+
+SUBTITLE (green):
+"How compute flexibility becomes a pricing architecture that grows total revenue"
+
+─── TOP — The Core Insight (full-width callout bar) ─────────────────────────
+
+Dark green banner:
+"Inference customers will pay a premium for guaranteed uptime — precisely
+because pre-training customers agree to absorb grid variability.
+Emerald Conductor creates the SLA differentiation that makes this trade possible."
+
+─── MIDDLE — Side-by-Side Revenue Comparison ────────────────────────────────
+
+TWO COLUMN TABLE (Baseline | Flex-Enabled Emerald Conductor):
+
+  LINE ITEM                   BASELINE (No Flex)      FLEX-ENABLED (Conductor)
+  ──────────────────────────────────────────────────────────────────────────────
+  CAPACITY ARCHITECTURE
+  Firm / Inference (20%)      600 MW (undiff.)        120 MW @ $3.30M/MW
+  Flex Primary (45%)          —                       270 MW @ $3.04M/MW (−8%)
+  Flex Secondary (25%)        —                       150 MW @ $3.17M/MW (−4%)
+  Deep Discount (10%)         —                       60 MW  @ $2.71M/MW (−18%)
+  ──────────────────────────────────────────────────────────────────────────────
+  ANNUAL REVENUE BUILDUP
+  Blended Compute Revenue     $1,530M/yr              $1,575M/yr gross compute
+    Firm Tier Revenue         —                       $396M/yr
+    Flex Primary Revenue      —                       $697M/yr
+    Flex Secondary Revenue    —                       $404M/yr
+    Deep Discount Revenue     —                       $138M/yr (Research/Academia)
+  ──────────────────────────────────────────────────────────────────────────────
+  GRID & STRUCTURAL UPLIFT
+  DR Revenue (CSP share 50%)  $0                      + $12M/yr
+  Accelerated Revenue (amort) $0                      + $166M/yr (3-yr amortisation)
+  Interconnect Savings (amort)$0                      + $16M/yr
+  ──────────────────────────────────────────────────────────────────────────────
+  TOTAL ALL-IN ANNUAL REVENUE $1,530M/yr              ~$1,786M/yr
+  ──────────────────────────────────────────────────────────────────────────────
+  REVENUE UPLIFT              —                       +$256M/yr  /  +16.7%
+
+Highlight the delta column in emerald green. Show a small upward arrow next
+to the flex-enabled total.
+
+─── BOTTOM — Customer Segmentation Table ────────────────────────────────────
+
+Title: "B2B Customer Tiers — Who Buys What"
+
+  TIER            PROFILE                WORKLOAD       RATE        VALUE PROP
+  ───────────────────────────────────────────────────────────────────────────────
+  Firm Only       Inference API cos.     Real-time       $3.30M/MW  Guaranteed SLA,
+                  Financial services     inference       (+10% prem) zero curtailment,
+                  Healthcare/regulated                               five-nines uptime
+
+  Flex Primary    Hyperscalers           AI pre-training $3.04M/MW  8% discount, low-
+                  AI labs                HPC simulation  (−8%)      priority interrupt
+                  Rendering studios      Batch/overnight            window scheduling
+
+  Flex Secondary  Enterprise IT          MLOps pipelines $3.17M/MW  4% discount,
+                  SaaS / ISVs            Periodic retrain(−4%)      maintenance windows
+                  Mid-market AI teams                               tolerated
+
+  Deep Discount   Universities           Research /      $2.71M/MW  18% discount,
+                  Gov't R&D labs         Academia        (−18%)     preemptible,
+                  AI startups (early)    Experimental               spot-like behavior
+
+Note cell below table:
+  "Discount is NOT a revenue loss — it is the mechanism that enables the
+   firm tier premium. Without flex customers absorbing variability, inference
+   customers cannot be offered a differentiated SLA, and the $3.30M/MW
+   premium rate cannot be justified. The tiers are mutually enabling."
+
+SPEAKER NOTE:
+"This is a portfolio pricing strategy, not a discounting strategy. Think of
+it like airline yield management — coach passengers fill the plane that
+makes first class economics possible. The CSP with Conductor can sell four
+products from one piece of infrastructure. The CSP without it sells one."
+
+================================================================================
+SLIDE 5 OF 5 — THE CSP COMMERCIAL ROADMAP
+(Audience: CSP executive — B2B cloud commercialization)
+Layout: Timeline / phased rollout + 10-year NPV comparison + call to action
+================================================================================
+
+SLIDE TITLE:
+"The Path to $2.8B: A Three-Phase Commercial Activation"
+
+SUBTITLE (green):
+"How a GPU data center operator systematically converts flexibility into enterprise value"
+
+─── TOP — Three-Phase Timeline (horizontal, left-to-right) ──────────────────
+
+PHASE 1 — FOUNDATION  (Months 0–6)  [icon: wrench/settings]  [color: amber]
+  Milestones:
+  • Deploy Emerald Conductor at all 3 sites
+  • Complete workload profiling and SLA mapping per customer segment
+  • Enroll curtailable capacity in ERCOT DR, PJM BRA, APS/SRP programs
+  • Negotiate flex-based interconnect priority with utilities
+  Value unlocked: Interconnect savings ($49M one-time) + queue acceleration begins
+  Cost: $6M Conductor deployment (3 × $2M)
+
+PHASE 2 — PRODUCT LAUNCH  (Months 6–18)  [icon: layers/tiers]  [color: teal]
+  Milestones:
+  • Launch tiered compute pricing (Firm / Flex Primary / Secondary / Deep Discount)
+  • Onboard first inference-tier enterprise customers at $3.30M/MW premium
+  • Execute first DR curtailment events — demonstrate zero SLA breach
+  • Virginia PJM capacity auction accreditation secured
+  Value unlocked: Tier pricing premium activates (+$45M/yr gross compute uplift)
+                  First DR capacity payments received
+                  Time-to-power acceleration: ~$540M across 3 sites (Year 0)
+  Cost: Product/sales team build-out, customer SLA documentation
+
+PHASE 3 — SCALE  (Year 2–10)  [icon: rocket/growth]  [color: green]
+  Milestones:
+  • Full utilization across all four pricing tiers
+  • Expand to additional sites with flex-native interconnect strategy
+  • Secondary market: sell flex capacity to neighboring DCs or utilities
+  • Virginia upsize to 275 MW completed — full $225M/yr incremental revenue
+  Value unlocked: $232M/yr net recurring benefit at portfolio level
+  Output: $2.8B 10-year NPV at 10% WACC
+
+─── MIDDLE — 10-Year NPV Waterfall Chart (visual) ───────────────────────────
+
+Title: "10-Year Value Creation Waterfall — Baseline vs. Flex-Enabled"
+
+Waterfall bars from left to right:
+  [1] Baseline NPV (no flex)    $8.8B       [gray bar, full]
+  [2] + Time-to-Power Accel.   +$0.54B      [green bar up]
+  [3] + TX Spike Avoidance     +$0.32B      [green bar up]
+  [4] + AZ/VA DR Revenue       +$0.11B      [teal bar up]
+  [5] + VA PJM Cap Market      +$0.74B      [blue bar up]
+  [6] + VA Upsize Revenue      +$1.02B      [blue bar up]
+  [7] − Conductor Platform     −$0.04B      [red bar down]
+  [8] Flex-Enabled NPV         $11.6B       [green bar, full total]
+
+Incremental Flex Value = $2.8B (labeled with large green number)
+
+─── BOTTOM — Call to Action Panel ───────────────────────────────────────────
+
+Three action cards side by side:
+
+  CARD 1 — QUICK WIN  [amber border]
+  "Start with Texas / ERCOT"
+  Fastest queue acceleration benefit.
+  Interconnect savings realised in <6 months.
+  ERCOT DR program enrollment: 30-day onboarding.
+  NPV: $509M on $2M/yr investment.
+
+  CARD 2 — BIGGEST UPSIDE  [blue border]
+  "Prioritise Virginia / PJM"
+  $1.7B NPV driven by capacity market + upsize.
+  PJM BRA auction occurs annually — next enrollment window matters.
+  75 MW upsize = $225M/yr revenue permanently added to the business.
+  Act before next BRA auction deadline.
+
+  CARD 3 — STRATEGIC MOAT  [green border]
+  "Own the Flex-Native Narrative"
+  First CSP to publish a tiered flex compute product becomes the
+  reference architecture for GPU cloud pricing.
+  Inference customers pay more because they trust the SLA.
+  That trust is only credible if flex workloads are provably managed.
+  Emerald Conductor is that proof.
+
+─── FINAL ROW — Summary metrics strip ──────────────────────────────────────
+
+  $2.8B Portfolio NPV  |  +$256M/yr Revenue Uplift  |  +16.7% vs. Baseline
+  11.1% Effective Flex |  22.2 MW Curtailable / Site |  <1 yr Payback (Year 0)
+  $6M/yr Platform Cost |  3 Sites / 3 Markets        |  10% WACC / 10 yr Horizon
+
+SPEAKER NOTE:
+"The ask is simple: deploy Conductor across all three sites before the next
+PJM BRA auction and before the Texas interconnect queue resets for 2026.
+The window to capture queue priority is now. Every month of delay is a month
+of time-to-power lost — and that's a number we can calculate exactly."
+
+================================================================================
+FORMATTING INSTRUCTIONS FOR PRESENTATION TOOL
+================================================================================
+
+1. Slide dimensions: 16:9 widescreen (1920×1080 or standard 13.33" × 7.5")
+2. Background: Dark navy #0D1B2A with subtle green grid overlay (2–3% opacity)
+3. Slide numbers: Bottom right, small, muted
+4. Logo: "⟡ Emerald AI" top-left corner, every slide — white text, green icon
+5. Date / Version: Bottom left — "April 2026 | Conductor Value Model v1.0"
+6. Typography hierarchy:
+   - Slide title: 32–36pt, Space Grotesk Bold, white
+   - Section headers: 14–16pt, Space Grotesk SemiBold, #00D17A green
+   - Body text: 11–12pt, Inter/DM Sans Regular, #DCE8F5
+   - Numbers/data: Space Mono or monospace, colored by valence (green=positive, red=cost)
+7. Charts: All charts use the dark theme palette — no white chart backgrounds
+8. Tables: Alternating row shading at 5% opacity, header row with green text
+9. Callout boxes: 1px border matching accent color, 8–12% opacity background fill
+10. Icons: Line-style icons preferred (no filled emoji-style in body — only in headers)
+11. Transitions: None or subtle fade — this is a data-heavy deck, not an animation deck
+12. Every number on every slide must match the base case model output exactly —
+    do not round or approximate without a note
+
+================================================================================
+END OF PROMPT
+================================================================================

@@ -1,0 +1,349 @@
+================================================================================
+CLAUDE IN EXCEL PROMPT — EMERALD AI COMPUTE FLEXIBILITY DCF MODEL
+Copy this entire prompt into Claude in Excel to generate the financial model.
+================================================================================
+
+Build me a professional financial model in Excel that quantifies the value of
+compute flexibility for a GPU data center CSP operator using the Emerald AI
+"Conductor" flexibility platform. The model should have the following structure:
+
+================================================================================
+TAB 1: ASSUMPTIONS & INPUTS
+================================================================================
+
+Section A — Portfolio Overview
+- Three data center sites: Texas/ERCOT (200 MW), Arizona/APS+SRP (200 MW),
+  Virginia/PJM (200 MW)
+- Total portfolio: 600 MW
+- PUE (Power Usage Effectiveness): 1.35 [input cell, yellow]
+- IT Load = Total MW / PUE → 444 MW IT
+- Rack density: 40 kW/rack → 11,111 racks
+- GPUs per rack: 8 → 88,889 total GPUs
+- GPU utilization rate: 85%
+
+Section B — Workload Mix (must sum to 100%)
+- AI Pre-Training:       35%   | Flex tolerance: High     | Curtailment floor: 16%
+- Enterprise MLOps:      25%   | Flex tolerance: Medium   | Curtailment floor: 8%
+- Real-time Inference:   20%   | Flex tolerance: None     | Curtailment floor: 0%
+- Research / Academia:   10%   | Flex tolerance: Very High| Curtailment floor: 20%
+- HPC / Batch Compute:   10%   | Flex tolerance: High     | Curtailment floor: 15%
+- Effective Flex % = SUMPRODUCT(mix%, curtailment%) = weighted average
+  Formula: =SUMPRODUCT(B_mix_range, B_curtailment_range) → ~11.1% default
+
+Section C — Revenue Rate Assumptions
+- GPU Revenue Rate (blended): $3.0M/MW/yr [global input]
+- Firm Tier Rate: GPU Rate × 1.10 = $3.30M/MW/yr (10% premium for SLA guarantee)
+- Flex Primary discount (Pre-Train/HPC): 8% → rate = Firm × (1-8%) = $3.04M/MW/yr
+- Flex Secondary discount (MLOps): 4% → rate = Firm × (1-4%) = $3.17M/MW/yr
+- Deep Discount (Research): 18% → rate = Firm × (1-18%) = $2.71M/MW/yr
+
+Section D — Flexibility & Queue Parameters (per site)
+                          Texas       Arizona     Virginia
+Queue Without Flex (mo):  24          30          48
+Queue With Flex (mo):     12          15          24
+Queue Savings (mo):       12          15          24
+Flex Queue Scale*:        =MIN(1,FlexPct/15)  [same formula all sites]
+Effective Accel (mo):     = Queue Savings × Flex Queue Scale
+
+*Queue Scale explanation: Below 15% flex commitment, ERCOT/utilities grant
+partial queue priority only. Full benefit requires ≥15%. This reflects
+real five-nines reliability constraints on data center SLAs.
+
+Section E — Market-Specific Revenue Parameters
+Texas/ERCOT:
+- Base power price: $40/MWh
+- Spike price: $2,500/MWh
+- Spike hours/year: 150 hrs
+- DR Capacity Rate: $35/kW-yr
+- DR Energy Rate: $50/MWh during curtailment
+- Interconnect cost (no flex): $50M | (with flex): $30M
+
+Arizona/APS+SRP:
+- DR Capacity Rate: $50/kW-yr
+- DR Energy Rate: $40/MWh
+- Peak hours/year: 120 hrs
+- Avoided upgrade savings: $25M (one-time)
+
+Virginia/PJM:
+- Target upsize: 275 MW (from 200 MW base)
+- PJM BRA Capacity Price: $329.17/MW-day
+- UCAP Accreditation factor: 90%
+- Flex Accreditation Scale: MIN(1, 0.5 + FlexPct/20)
+- DR Energy Rate: $75/MWh
+- Peak hours/year: 100 hrs
+- Interconnect cost (no flex): $40M | (with flex): $20M
+
+Section F — DCF Parameters
+- Discount Rate (WACC): 10%
+- Analysis Horizon: 10 years
+- Conductor Platform Cost: $2.0M/yr per site (OpEx)
+- DR Revenue share to customers: 50%
+- Accel Revenue amortisation period: 3 years
+
+================================================================================
+TAB 2: SITE-LEVEL FLEXIBILITY VALUE — TEXAS
+================================================================================
+
+Label each row clearly. All values in $M unless noted.
+
+Row 1:  Effective Flex % [linked from Assumptions]
+Row 2:  Curtailable MW = 200 × Flex% = e.g. 22.2 MW
+Row 3:  Flex Queue Scale = MIN(1, Flex%/15)
+Row 4:  Effective Queue Acceleration (months) = 12 × QueueScale [rounded to 1dp]
+
+-- ONE-TIME BENEFITS (Year 0) --
+Row 5:  Annual GPU Revenue = 200 MW × $3.0M/MW = $600M/yr
+Row 6:  Time-to-Power Value = AnnualGPU × (AccelMo/12)
+        = $600M × (4.0/12) = $200M [one-time, year 0]
+Row 7:  Interconnect Savings = (50−30) × MIN(1,Flex%/10) = $13.3M [one-time]
+
+-- ANNUAL RECURRING BENEFITS --
+Row 8:  Spike Avoidance = CurtailMW × 150hrs × ($2,500−$40)/MWh / 1,000,000
+        = 22.2 × 150 × 2,460 / 1e6 = $8.2M/yr
+Row 9:  DR Capacity Revenue = CurtailMW × $35/kW-yr × 1,000 / 1e6 = $0.78M/yr
+Row 10: DR Energy Revenue = CurtailMW × 150hrs × $50/MWh / 1e6 = $0.17M/yr
+Row 11: Total Annual DR = Row 9 + Row 10 = $0.95M/yr
+Row 12: Total Annual Operating Benefit = Row 8 + Row 11 = $9.1M/yr
+Row 13: Conductor Cost = $2.0M/yr
+Row 14: Net Annual Benefit = Row 12 − Row 13 = $7.1M/yr
+
+-- NPV CALCULATION --
+Build a year-by-year cash flow table (Years 0–10):
+  Year 0: Time-to-Power + Interconnect Savings (undiscounted)
+  Year 1–10: Net Annual Benefit discounted at WACC
+  NPV = Year0 CF + SUM(YearN CF / (1+WACC)^N)
+
+Row 15: Texas NPV (10-yr, 10% WACC)
+Row 16: Payback Period (years) = first year cumulative CF turns positive
+
+================================================================================
+TAB 3: SITE-LEVEL FLEXIBILITY VALUE — ARIZONA
+================================================================================
+
+Same structure as Texas with these differences:
+- No spike avoidance (WECC market — different structure)
+- Interconnect = Avoided Upgrade × MIN(1,Flex%/10)
+- Annual Benefit = annualDR only
+- DR Capacity = CurtailMW × $50/kW-yr × 1,000 / 1e6
+- DR Energy = CurtailMW × 120hrs × $40/MWh / 1e6
+
+================================================================================
+TAB 4: SITE-LEVEL FLEXIBILITY VALUE — VIRGINIA
+================================================================================
+
+Additional complexity:
+- Upsize increment = 275 − 200 = 75 MW
+- UCAP = CurtailMW × 90% × MIN(1, 0.5 + Flex%/20)
+- Annual Cap Revenue = UCAP × $329.17/MW-day × 365 / 1e6
+- Annual Upsize Revenue = 75 MW × $3.0M/MW = $225M/yr [recurring — only achievable with flex]
+- Upsize Time-to-Power = AnnualUpsizeRev × (AccelMo/12) [one-time, year 0]
+- Annual DR Energy = CurtailMW × 100hrs × $75/MWh / 1e6
+- Annual Operating Benefit = CapRev + DREnergy + UpsizeRev
+  NOTE: UpsizeRev is incremental — without flex the site stays at 200 MW
+
+================================================================================
+TAB 5: PORTFOLIO NPV SUMMARY
+================================================================================
+
+Table 1 — Site NPV Comparison
+               Texas       Arizona     Virginia    Portfolio
+One-Time:      $XXM        $XXM        $XXM        SUM
+Annual Benefit:$XXM/yr     $XXM/yr     $XXM/yr     SUM
+10-Yr NPV:     $XXM        $XXM        $XXM        SUM
+Payback:       X.X yrs     X.X yrs     X.X yrs     —
+
+Table 2 — Sensitivity: Flex Commitment %
+Rows: 0.5%, 2%, 5%, 10%, 15%, 20%
+Columns: Texas NPV, Arizona NPV, Virginia NPV, Portfolio NPV
+[Use DATA TABLE or formula array referencing the Assumptions flex input]
+
+Table 3 — Scenario Analysis (3 scenarios)
+               Bear        Base        Bull
+GPU Rate:      $1.5M/MW    $3.0M/MW    $5.0M/MW
+Flex %:        2%          11.1%       15%
+Cap Price:     $200/MW-day $329/MW-day $450/MW-day
+Spike Price:   $1,000/MWh  $2,500/MWh  $5,000/MWh
+Portfolio NPV: $XXM        $XXM        $XXM
+
+================================================================================
+TAB 6: CSP REVENUE MODEL — BASELINE vs. FLEX-ENABLED
+================================================================================
+
+COLUMN A: Line Item Description
+COLUMN B: Baseline (No Flex)
+COLUMN C: Flex-Enabled (Emerald Conductor)
+COLUMN D: Delta (C − B)
+COLUMN E: Delta %
+
+== SECTION 1: COMPUTE REVENUE BUILDUP ==
+Revenue by Tier:
+  Firm/Inference Capacity (MW)     | 600 MW (all)  | 120 MW (20%)
+  Flex Primary Capacity (MW)       | —             | 270 MW (45%)
+  Flex Secondary Capacity (MW)     | —             | 150 MW (25%)
+  Deep Discount Capacity (MW)      | —             | 60 MW (10%)
+
+Revenue by Tier ($/yr):
+  Firm Rate (per MW):              | $3.30M/MW     | $3.30M/MW
+  Flex Primary Rate:               | —             | $3.04M/MW (−8%)
+  Flex Secondary Rate:             | —             | $3.17M/MW (−4%)
+  Deep Discount Rate:              | —             | $2.71M/MW (−18%)
+
+Annual Revenue:
+  Firm Tier Revenue                | $1,683M/yr    | $336M/yr
+  Flex Primary Revenue             | —             | $697M/yr
+  Flex Secondary Revenue           | —             | $404M/yr
+  Deep Discount Revenue            | —             | $138M/yr
+  ─────────────────────────────────────────────────────────────
+  Gross Compute Revenue            | $1,683M/yr    | $1,575M/yr
+
+NOTE: Baseline uses blended GPU rate (no tier premium). Include a note cell
+explaining that the firm tier premium in flex scenario is earned because
+Emerald creates SLA differentiation — inference customers pay more precisely
+because training customers absorb grid variability.
+
+== SECTION 2: GRID REVENUE STREAMS ==
+  Total DR Revenue Pool            | $0            | [from site models]
+  DR Revenue — Emerald Share (50%) | $0            | $XXM/yr
+  DR Revenue — Customer Share (50%)| $0            | −$XXM/yr [cost of discount]
+
+== SECTION 3: STRUCTURAL VALUE (AMORTISED) ==
+  Accelerated Time-to-Power        | $0            | $XXM/yr [÷3 yr amortisation]
+  Interconnect Savings             | $0            | $XXM/yr [÷3 yr amortisation]
+
+== SECTION 4: ALL-IN REVENUE ==
+  TOTAL NET ANNUAL REVENUE         | $1,428M/yr    | $1,786M/yr (illustrative)
+  Revenue Uplift vs. Baseline      | —             | +$XXM/yr  / +XX%
+
+== SECTION 5: 10-YEAR NPV OF REVENUE STREAMS ==
+  Apply 10% WACC discount rate to annual revenue streams
+  Year 0: Accel Rev + Interconnect (one-time)
+  Years 1–10: Net annual revenue − Conductor costs ($6M/yr total for 3 sites)
+  NPV of Baseline Revenue          | $XXB
+  NPV of Flex Revenue              | $XXB
+  Incremental NPV of Flexibility   | $XXB          [= Portfolio NPV from Tab 5]
+
+IMPORTANT CHECK: The "Incremental NPV of Flexibility" in Tab 6 should equal
+the "Portfolio NPV" in Tab 5. These two tabs measure the same value from
+different angles — Tab 5 measures incremental flexibility value, Tab 6
+measures total revenue under each scenario. The difference between
+NPV(Flex Revenue) and NPV(Baseline Revenue) should match Tab 5's Portfolio NPV.
+
+================================================================================
+TAB 7: DCF WATERFALL — YEAR BY YEAR
+================================================================================
+
+Build a detailed annual cash flow model for all 3 sites combined.
+
+Columns: Year 0, Year 1, Year 2, ... Year 10
+Rows:
+  Time-to-Power Value (Year 0 only)
+  Interconnect Savings (Year 0 only)
+  Texas Spike Avoidance (recurring)
+  Texas DR Revenue (recurring)
+  Arizona DR Revenue (recurring)
+  Virginia PJM Capacity Revenue (recurring)
+  Virginia Upsize Revenue (recurring)
+  Virginia DR Energy (recurring)
+  Less: Conductor Platform Cost (3 × $2M = $6M/yr)
+  ─────────────────────────────────
+  NET ANNUAL CASH FLOW
+  Discount Factor = 1/(1+10%)^Year
+  DISCOUNTED CASH FLOW
+  Cumulative DCF [for payback identification]
+  ─────────────────────────────────
+  NPV = SUM of all discounted cash flows
+  IRR = use Excel IRR() function on the undiscounted cash flow row
+
+Include a chart: Line chart of Cumulative DCF over Years 0–10.
+Mark the payback year with a vertical reference line.
+
+================================================================================
+TAB 8: MONTE CARLO ASSUMPTIONS (optional — for advanced model)
+================================================================================
+
+If implementing Monte Carlo:
+- Run 1,000 scenarios using Excel's RAND() function
+- Key uncertain variables:
+  GPU Rate: NORM(3.0, 1.0) — triangular between $1M and $6M
+  Flex %: UNIFORM(0.5%, 15%) — based on five-nines constraints
+  Cap Price: NORM(329, 80) — PJM capacity price volatility
+  Spike Hours: UNIFORM(50, 400)
+  Spike Price: LOG-NORM(2500, 1000) — fat-tailed price spike distribution
+- Output: Portfolio NPV distribution
+- Report P10 / P50 / P90 NPV values
+- Show histogram of outcomes
+
+================================================================================
+FORMATTING INSTRUCTIONS
+================================================================================
+
+1. Use a dark navy color scheme: Background #0D1B2A, text white,
+   accent green #00D17A for positive values, red #FF5C6A for costs/negatives
+2. Input cells: Yellow fill (#FFE066), bold border
+3. Calculated cells: No fill, formula-driven
+4. Key outputs: Large bold font, green text, thick bottom border
+5. All monetary values: $M format with 1 decimal place
+6. Freeze rows 1–3 and column A on all tabs
+7. Add a cover sheet (Tab 0) with: Title, date, version, key assumptions summary,
+   and a table of contents linking to each tab
+8. Each tab should have a 2-row header: Tab name (large) + one-line description
+9. Add data validation dropdowns for scenario selection in Tab 5
+10. Add conditional formatting: Green if NPV > 0, red if NPV < 0
+
+================================================================================
+KEY FORMULAS TO VERIFY (Excel syntax)
+================================================================================
+
+Effective Flex %:
+=SUMPRODUCT(WorkloadMix_Range, CurtailmentFloor_Range)
+
+Curtailable MW:
+=SiteMW * EffectiveFlexPct
+
+Queue Acceleration (Texas):
+=ROUND(MAX(0,(TXQueueNoFlex−TXQueueFlex)*MIN(1,EffectiveFlexPct/15%)),1)
+
+Time-to-Power (Texas):
+=TXAnnualGPURevenue * (TXAccelMo/12)
+
+Annual Spike Savings (Texas):
+=TXCurtailMW * TXSpikeHours * (TXSpikePrice−TXBasePower) / 1000000
+
+Annual DR Cap Revenue (Texas):
+=TXCurtailMW * TXDRCapRate * 1000 / 1000000
+
+PJM UCAP (Virginia):
+=VACurtailMW * VAAccreditation * MIN(1, 0.5 + EffectiveFlexPct/20%)
+
+Annual PJM Cap Revenue (Virginia):
+=VADUCAP * VACap_Price_per_MW_day * 365 / 1000000
+
+NPV calculation:
+=InitialBenefit + NPV(WACC, AnnualNetBenefits_Year1_to_10)
+[Note: Excel NPV() function assumes end-of-period cash flows starting Year 1]
+
+Portfolio NPV:
+=TexasNPV + ArizonaNPV + VirginiaNPV
+
+Revenue Delta %:
+=(FlexRevenue − BaselineRevenue) / BaselineRevenue
+
+================================================================================
+DEFAULTS AT LAUNCH (base case numbers to hardcode as starting values)
+================================================================================
+
+Effective Flex %:         11.1%
+Portfolio NPV (flex):     $2.8B
+Texas NPV:                $508.8M
+Arizona NPV:              $575.2M
+Virginia NPV:             $1.7B
+Baseline Annual Revenue:  $1,530M/yr  (600MW × $3.0M × 85%)
+Flex Annual Revenue:      ~$1,786M/yr
+Revenue Uplift:           ~+$256M/yr  (+16.7%)
+Monte Carlo P50 NPV:      ~$2.8B
+Monte Carlo P10 NPV:      ~$1.2B
+Monte Carlo P90 NPV:      ~$5.1B
+
+================================================================================
+END OF PROMPT
+================================================================================

@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Emerald AI — Compute Flexibility Value Calculator</title>
+<title>Emerald AI — GPU Flexibility Value Model</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
@@ -14,35 +15,37 @@
 <script>if(window._Recharts && !window.Recharts) window.Recharts = window._Recharts;</script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-/* ═══════════════════════════════════════════
-   EMERALD AI — CRISP MODERN DARK SYSTEM
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   EMERALD AI — EXECUTIVE DASHBOARD THEME
+   Deep navy palette · Inter typeface · High-signal readability
+   ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* Accent colors — clear and intentional */
-  --green:        #00c96e;
-  --green-bright: #00f080;
-  --green-dim:    #008a4a;
-  --green-glow:   rgba(0,201,110,0.12);
-  --teal:         #14b8a6;
+  /* ── Primary accent — refined emerald (no neon) */
+  --green:        #10b981;
+  --green-bright: #34d399;
+  --green-dim:    #065f46;
+  --green-glow:   rgba(16,185,129,0.10);
+  --teal:         #2dd4bf;
   --blue:         #60a5fa;
   --purple:       #a78bfa;
   --amber:        #f59e0b;
   --red:          #f87171;
 
-  /* Neutral dark backgrounds — no blue tint */
-  --bg-base:      #0c0c0f;
-  --bg-surface:   #131316;
-  --bg-raised:    #18181c;
-  --bg-overlay:   #1e1e24;
-  --border:       #26262e;
-  --border-hi:    #32323c;
+  /* ── Deep navy backgrounds — authoritative, not harsh */
+  --bg-base:      #080f1a;
+  --bg-surface:   #0d1829;
+  --bg-raised:    #111f33;
+  --bg-overlay:   #172540;
+  --bg-header:    #071120;
+  --border:       #1e2f45;
+  --border-hi:    #263d58;
 
-  /* Text — clean contrast */
-  --text-1:       #f0f0f4;
-  --text-2:       #8a8a9a;
-  --text-3:       #4e4e5e;
-  --mono:         'Space Mono', 'JetBrains Mono', monospace;
+  /* ── Text — precise contrast hierarchy */
+  --text-1:       #f1f5f9;
+  --text-2:       #94a3b8;
+  --text-3:       #4b6280;
+  --mono:         'JetBrains Mono', 'Fira Code', monospace;
 }
 
 /* Base */
@@ -53,13 +56,14 @@
 }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   background-color: var(--bg-base) !important;
   background-image: none !important;
   color: var(--text-1) !important;
   min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
 /* ── Backgrounds ─────────────────────────── */
@@ -68,6 +72,13 @@ body {
 .bg-slate-100       { background-color: var(--bg-base)    !important; }
 .bg-slate-200       { background-color: var(--bg-raised)  !important; }
 .min-h-screen       { background-color: var(--bg-base)    !important; }
+
+/* ── Typography hierarchy ─────────────────── */
+.text-3xl, .text-2xl { letter-spacing: -0.03em; }
+.text-xl             { letter-spacing: -0.02em; }
+.text-lg             { letter-spacing: -0.015em; }
+.text-sm             { letter-spacing: -0.005em; }
+.text-xs             { letter-spacing:  0.025em; }
 
 /* ── Borders ─────────────────────────────── */
 .border-slate-100   { border-color: var(--border)    !important; }
@@ -91,25 +102,25 @@ body {
 .text-emerald-600   { color: var(--green) !important; }
 .text-emerald-800   { color: var(--green-bright) !important; }
 .text-emerald-200   { color: #6ee7b7 !important; }
-.bg-emerald-600     { background-color: var(--green) !important; color: #020e06 !important; font-weight: 600; }
-.hover\:bg-emerald-700:hover { background-color: var(--green-dim) !important; }
-.bg-emerald-700     { background-color: #0f2e1c !important; }
-.bg-emerald-50      { background-color: rgba(0,201,110,0.06) !important; }
-.bg-emerald-100     { background-color: rgba(0,201,110,0.09) !important; }
-.border-emerald-100 { border-color: rgba(0,201,110,0.15) !important; }
-.border-emerald-200 { border-color: rgba(0,201,110,0.22) !important; }
-.border-emerald-300 { border-color: rgba(0,201,110,0.32) !important; }
+.bg-emerald-600     { background-color: var(--green) !important; color: #022c1c !important; font-weight: 600; }
+.hover\:bg-emerald-700:hover { background-color: #059669 !important; }
+.bg-emerald-700     { background-color: #064e35 !important; }
+.bg-emerald-50      { background-color: rgba(16,185,129,0.07) !important; }
+.bg-emerald-100     { background-color: rgba(16,185,129,0.10) !important; }
+.border-emerald-100 { border-color: rgba(16,185,129,0.18) !important; }
+.border-emerald-200 { border-color: rgba(16,185,129,0.25) !important; }
+.border-emerald-300 { border-color: rgba(16,185,129,0.35) !important; }
 .border-emerald-500 { border-color: var(--green) !important; }
 .border-l-4.border-emerald-500,
 .border-t-4.border-emerald-500 { border-color: var(--green) !important; }
 
 /* ── Teal ────────────────────────────────── */
 .text-teal-600,.text-teal-700 { color: var(--teal) !important; }
-.text-teal-800      { color: #2dd4bf !important; }
-.bg-teal-50         { background-color: rgba(20,184,166,0.06) !important; }
-.bg-teal-100        { background-color: rgba(20,184,166,0.09) !important; }
-.border-teal-100    { border-color: rgba(20,184,166,0.15) !important; }
-.border-teal-200    { border-color: rgba(20,184,166,0.22) !important; }
+.text-teal-800      { color: #5eead4 !important; }
+.bg-teal-50         { background-color: rgba(45,212,191,0.08) !important; }
+.bg-teal-100        { background-color: rgba(45,212,191,0.11) !important; }
+.border-teal-100    { border-color: rgba(45,212,191,0.18) !important; }
+.border-teal-200    { border-color: rgba(45,212,191,0.28) !important; }
 .border-teal-500    { border-color: var(--teal) !important; }
 .border-l-4.border-teal-500,
 .border-t-4.border-teal-500 { border-color: var(--teal) !important; }
@@ -117,10 +128,10 @@ body {
 /* ── Blue ────────────────────────────────── */
 .text-blue-600,.text-blue-700 { color: var(--blue) !important; }
 .text-blue-800,.text-blue-900 { color: #93c5fd !important; }
-.bg-blue-50         { background-color: rgba(96,165,250,0.06) !important; }
-.bg-blue-100        { background-color: rgba(96,165,250,0.09) !important; }
-.border-blue-100    { border-color: rgba(96,165,250,0.15) !important; }
-.border-blue-200    { border-color: rgba(96,165,250,0.22) !important; }
+.bg-blue-50         { background-color: rgba(96,165,250,0.08) !important; }
+.bg-blue-100        { background-color: rgba(96,165,250,0.11) !important; }
+.border-blue-100    { border-color: rgba(96,165,250,0.18) !important; }
+.border-blue-200    { border-color: rgba(96,165,250,0.28) !important; }
 .border-blue-500    { border-color: var(--blue) !important; }
 .border-l-4.border-blue-500,
 .border-t-4.border-blue-500 { border-color: var(--blue) !important; }
@@ -128,36 +139,36 @@ body {
 /* ── Purple ──────────────────────────────── */
 .text-purple-600,.text-purple-700 { color: var(--purple) !important; }
 .text-purple-800    { color: #c4b5fd !important; }
-.bg-purple-50       { background-color: rgba(167,139,250,0.06) !important; }
-.bg-purple-100      { background-color: rgba(167,139,250,0.09) !important; }
-.border-purple-100  { border-color: rgba(167,139,250,0.15) !important; }
-.border-purple-200  { border-color: rgba(167,139,250,0.22) !important; }
+.bg-purple-50       { background-color: rgba(167,139,250,0.08) !important; }
+.bg-purple-100      { background-color: rgba(167,139,250,0.11) !important; }
+.border-purple-100  { border-color: rgba(167,139,250,0.18) !important; }
+.border-purple-200  { border-color: rgba(167,139,250,0.28) !important; }
 .border-purple-500  { border-color: var(--purple) !important; }
 .border-l-4.border-purple-500,
 .border-t-4.border-purple-500 { border-color: var(--purple) !important; }
 
 /* ── Amber ───────────────────────────────── */
 .text-amber-600,.text-amber-700 { color: var(--amber) !important; }
-.bg-amber-50        { background-color: rgba(245,158,11,0.06) !important; }
-.bg-amber-100       { background-color: rgba(245,158,11,0.09) !important; }
-.border-amber-100   { border-color: rgba(245,158,11,0.15) !important; }
-.border-amber-200   { border-color: rgba(245,158,11,0.22) !important; }
+.bg-amber-50        { background-color: rgba(245,158,11,0.08) !important; }
+.bg-amber-100       { background-color: rgba(245,158,11,0.11) !important; }
+.border-amber-100   { border-color: rgba(245,158,11,0.18) !important; }
+.border-amber-200   { border-color: rgba(245,158,11,0.28) !important; }
 .border-amber-400   { border-color: var(--amber) !important; }
 .border-l-4.border-amber-400 { border-color: var(--amber) !important; }
 
 /* ── Red ─────────────────────────────────── */
 .text-red-500,.text-red-600 { color: var(--red) !important; }
 .text-red-700       { color: #fca5a5 !important; }
-.bg-red-50          { background-color: rgba(248,113,113,0.06) !important; }
-.bg-red-100         { background-color: rgba(248,113,113,0.09) !important; }
+.bg-red-50          { background-color: rgba(248,113,113,0.08) !important; }
+.bg-red-100         { background-color: rgba(248,113,113,0.11) !important; }
 .border-l-4.border-red-400 { border-color: var(--red) !important; }
 
 /* ── Badges / pills ──────────────────────── */
 .bg-slate-100.text-slate-700 { background-color: var(--bg-raised) !important; color: var(--text-2) !important; }
-.border-2.border-slate-200   { border-color: var(--border) !important; }
-.border-2.border-emerald-500 { border-color: var(--green) !important; background-color: #011e10 !important; }
-.border-2.border-red-500     { border-color: var(--red) !important; background-color: #1f000d !important; }
-.border-2.border-blue-500    { border-color: var(--blue) !important; background-color: #011428 !important; }
+.border-2.border-slate-200   { border-color: var(--border)  !important; }
+.border-2.border-emerald-500 { border-color: var(--green)   !important; background-color: rgba(16,185,129,0.08) !important; }
+.border-2.border-red-500     { border-color: var(--red)     !important; background-color: rgba(248,113,113,0.08) !important; }
+.border-2.border-blue-500    { border-color: var(--blue)    !important; background-color: rgba(96,165,250,0.08)  !important; }
 
 /* ── Select elements ─────────────────────── */
 select {
@@ -191,9 +202,9 @@ input[type=range]::-moz-range-thumb {
 
 /* ── Sticky headers ──────────────────────── */
 .sticky {
-  background-color: rgba(12,12,15,0.95) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(7,17,32,0.97) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom-color: var(--border) !important;
 }
 
@@ -212,101 +223,102 @@ input[type=range]::-moz-range-thumb {
 /* ── Font utilities ──────────────────────── */
 .font-mono, pre { font-family: var(--mono) !important; }
 
-/* ── KPI numbers glow ────────────────────── */
-.text-3xl.font-bold.text-emerald-600,
-.text-3xl.font-bold.text-emerald-700 { text-shadow: 0 0 20px rgba(0,209,122,0.35); }
-
 /* ── Emerald green quote bar ─────────────── */
-.bg-emerald-700.text-white { background: linear-gradient(135deg, #011e12 0%, #013d22 100%) !important; border: 1px solid var(--green-dim) !important; }
+.bg-emerald-700.text-white { background: linear-gradient(135deg, #042818 0%, #064e35 100%) !important; border: 1px solid var(--green-dim) !important; }
 
 /* ── Pitch mode ──────────────────────────── */
 .pitch-hide { display: none !important; }
 
 /* ── Footer ──────────────────────────────── */
-footer { background-color: #050a12 !important; border-top-color: var(--border) !important; }
+footer { background-color: #04091a !important; border-top-color: var(--border) !important; }
 
 /* ── Code blocks ─────────────────────────── */
-pre.font-mono { background-color: #030810 !important; border-color: var(--border) !important; color: var(--green) !important; }
+pre.font-mono { background-color: #04091a !important; border-color: var(--border) !important; color: var(--green) !important; }
 
 /* ── Table row highlight ─────────────────── */
-.bg-emerald-50 { background-color: #010e07 !important; }
+.bg-emerald-50 { background-color: rgba(16,185,129,0.07) !important; }
 
 /* ── Scrollbar ───────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
 
 /* ══════════════════════════════════════════
-   CRISP MODERN PASS
+   EXECUTIVE REFINEMENT PASS
    ══════════════════════════════════════════ */
-
-/* Typography — tight, precise */
-.text-3xl, .text-2xl        { letter-spacing: -0.03em; }
-.text-xl                     { letter-spacing: -0.02em; }
-.text-lg                     { letter-spacing: -0.015em; }
-.text-xs                     { letter-spacing:  0.03em; }
-.font-mono, [style*="var(--mono)"] {
-  font-feature-settings: "tnum" 1, "zero" 1;
-}
 
 /* No glows, no text shadows */
 * { text-shadow: none !important; }
 
-/* Consistent card style — clean, flat */
+/* Monospace — tabular figures */
+.font-mono, [style*="var(--mono)"] {
+  font-family: var(--mono) !important;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Consistent card background */
 .bg-white.rounded-xl, .bg-white.rounded-lg {
   background-color: var(--bg-surface) !important;
 }
 
-/* Clean card shadow — depth without color */
+/* Structural card shadow */
 .shadow-sm {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 0 0 1px var(--border) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6), 0 0 0 1px var(--border) !important;
 }
 
-/* Precise radii */
+/* Refined border radii */
 .rounded-xl { border-radius: 10px !important; }
 .rounded-lg { border-radius:  8px !important; }
 .rounded-md { border-radius:  6px !important; }
 
-/* Clean border-l-4 — accent only, no shadow */
+/* Border-left accent cards */
 .border-l-4 {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.4) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
 }
 
-/* Slider — minimal, precise */
+/* Slider — executive precision */
 input[type=range] { height: 3px; border-radius: 2px; }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
-  width: 13px; height: 13px; border-radius: 50%;
+  width: 14px; height: 14px; border-radius: 50%;
   background: var(--green); cursor: pointer;
   border: 2px solid var(--bg-base);
-  box-shadow: none;
-  transition: transform 0.1s;
+  box-shadow: 0 1px 4px rgba(16,185,129,0.3);
+  transition: transform 0.12s, box-shadow 0.12s;
 }
-input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+  box-shadow: 0 2px 8px rgba(16,185,129,0.5);
+}
 input[type=range]::-moz-range-thumb {
-  width: 13px; height: 13px; border-radius: 50%;
+  width: 14px; height: 14px; border-radius: 50%;
   background: var(--green); cursor: pointer;
   border: 2px solid var(--bg-base);
-  box-shadow: none;
 }
 
-/* Active tab — clean underline only */
+/* Active tab indicator */
 .border-b-\[3px\].border-emerald-500 {
-  background: rgba(0,201,110,0.05) !important;
-  border-radius: 5px 5px 0 0 !important;
+  background: rgba(16,185,129,0.06) !important;
+  border-radius: 4px 4px 0 0 !important;
+}
+
+/* Sticky tab bar */
+.sticky.top-\[72px\] {
+  background-color: rgba(7,17,32,0.98) !important;
+  box-shadow: 0 1px 0 var(--border) !important;
 }
 
 /* Sticky headers */
 .sticky {
-  background-color: rgba(12,12,15,0.95) !important;
+  background-color: rgba(7,17,32,0.95) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 /* Tab bar separator */
 .sticky.top-\[72px\] {
-  background-color: rgba(12,12,15,0.97) !important;
+  background-color: rgba(7,17,32,0.97) !important;
   box-shadow: 0 1px 0 var(--border) !important;
 }
 
@@ -346,7 +358,7 @@ const fmtYrs = v => v === null ? '> horizon' : `${Number(v).toFixed(1)} yrs`;
 // 4 segments per Excel model Global Assumptions Section B
 // Effective Flex % = SUMPRODUCT(mix%, curtailFloor%) → 8.2% at defaults
 const WORKLOAD_SEGMENTS = [
-  { key:'wlPreTrain',   label:'AI Pre-Training',                    short:'Pre-Train',    dot:'#00d17a', flexPct:16, tolerance:'High',      target:'Flex Primary',       desc:'Long-horizon batch jobs; curtailment windows of hours are acceptable' },
+  { key:'wlPreTrain',   label:'AI Pre-Training',                    short:'Pre-Train',    dot:'#10b981', flexPct:16, tolerance:'High',      target:'Flex Primary',       desc:'Long-horizon batch jobs; curtailment windows of hours are acceptable' },
   { key:'wlMLOps',      label:'Enterprise MLOps',                   short:'MLOps',        dot:'#ffb020', flexPct:8,  tolerance:'Medium',    target:'Flex Secondary',     desc:'Periodic retraining pipelines; tolerates short curtailment with scheduling' },
   { key:'wlInference',  label:'Real-time Inference',                short:'Inference',    dot:'#ff5c6a', flexPct:0,  tolerance:'None',      target:'Firm Only',          desc:'Sub-100ms SLA; zero curtailment tolerance — must be firm capacity' },
   { key:'wlResearch',   label:'Research / Academia / HPC / Batch',  short:'Research/HPC', dot:'#b87fff', flexPct:20, tolerance:'Very High', target:'Deep Discount Flex', desc:'Opportunistic compute; fully preemptible; HPC/batch jobs tolerate unlimited curtailment' },
@@ -534,7 +546,7 @@ const Slider = ({ label, value, min, max, step=1, unit='', onChange, fmt }) => {
         <input type="range" min={min} max={max} step={step} value={value}
           onChange={e => onChange(Number(e.target.value))}
           className="w-full cursor-pointer"
-          style={{ background: `linear-gradient(to right, #00d17a 0%, #00d17a ${pct}%, #1c2e48 ${pct}%, #1c2e48 100%)` }}
+          style={{ background: `linear-gradient(to right, #10b981 0%, #10b981 ${pct}%, #1e2f45 ${pct}%, #1e2f45 100%)` }}
         />
       </div>
       <div className="flex justify-between text-xs text-slate-400 mt-0.5">
@@ -548,28 +560,37 @@ const Slider = ({ label, value, min, max, step=1, unit='', onChange, fmt }) => {
 const KPICard = ({ title, value, sub, color='emerald', icon }) => {
   const borderColor = {emerald:'border-emerald-500', blue:'border-blue-500', purple:'border-purple-500', teal:'border-teal-500', amber:'border-amber-400', red:'border-red-400'}[color];
   const valColor = {emerald:'text-emerald-600', blue:'text-blue-600', purple:'text-purple-600', teal:'text-teal-600', amber:'text-amber-600', red:'text-red-600'}[color];
-  const accentRgb = {emerald:'0,209,122', blue:'77,168,255', purple:'184,127,255', teal:'0,200,176', amber:'255,176,32', red:'255,92,106'}[color];
+  const accentRgb = {emerald:'16,185,129', blue:'96,165,250', purple:'167,139,250', teal:'45,212,191', amber:'245,158,11', red:'248,113,113'}[color];
+  const accentColor = {emerald:'#10b981',blue:'#60a5fa',purple:'#a78bfa',teal:'#2dd4bf',amber:'#f59e0b',red:'#f87171'}[color];
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 ${borderColor} p-5`}
-      style={{borderTop:`1px solid rgba(${accentRgb},0.15)`}}>
-      <div className="flex items-start justify-between">
+    <div style={{
+      background:'var(--bg-surface)',
+      borderRadius:10,
+      border:'1px solid var(--border)',
+      borderLeft:`3px solid ${accentColor}`,
+      padding:'18px 20px',
+      boxShadow:'0 1px 3px rgba(0,0,0,0.5)',
+    }}>
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between'}}>
         <div style={{flex:1}}>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5" style={{letterSpacing:'0.07em'}}>{title}</p>
-          <p className={`text-3xl font-bold ${valColor}`} style={{lineHeight:1.1}}>{value}</p>
-          {sub && <p className="text-xs text-slate-500 mt-1.5" style={{lineHeight:1.5}}>{sub}</p>}
+          <p style={{fontSize:10,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.07em',margin:'0 0 8px'}}>{title}</p>
+          <p style={{fontSize:28,fontWeight:700,color:accentColor,lineHeight:1.1,margin:0,fontFamily:"'JetBrains Mono',monospace",letterSpacing:'-0.02em'}}>{value}</p>
+          {sub && <p style={{fontSize:11,color:'var(--text-3)',marginTop:6,lineHeight:1.5}}>{sub}</p>}
         </div>
-        {icon && <span style={{fontSize:22,opacity:0.7,marginLeft:8,flexShrink:0}}>{icon}</span>}
+        {icon && <span style={{fontSize:18,opacity:0.5,marginLeft:8,flexShrink:0,marginTop:2}}>{icon}</span>}
       </div>
     </div>
   );
 };
 
 const InfoCard = ({ title, children, color='blue' }) => {
-  const bg = {blue:'bg-blue-50 border-blue-200', teal:'bg-teal-50 border-teal-200', purple:'bg-purple-50 border-purple-200', emerald:'bg-emerald-50 border-emerald-200', amber:'bg-amber-50 border-amber-200'}[color];
+  const accent = {blue:'rgba(96,165,250,0.15)',teal:'rgba(45,212,191,0.15)',purple:'rgba(167,139,250,0.15)',emerald:'rgba(16,185,129,0.12)',amber:'rgba(245,158,11,0.12)'}[color] || 'rgba(96,165,250,0.12)';
+  const accentBorder = {blue:'rgba(96,165,250,0.25)',teal:'rgba(45,212,191,0.25)',purple:'rgba(167,139,250,0.25)',emerald:'rgba(16,185,129,0.22)',amber:'rgba(245,158,11,0.22)'}[color] || 'rgba(96,165,250,0.22)';
+  const titleColor = {blue:'#93c5fd',teal:'#5eead4',purple:'#c4b5fd',emerald:'#34d399',amber:'#fcd34d'}[color] || '#93c5fd';
   return (
-    <div className={`rounded-lg border p-4 ${bg} mb-3`}>
-      {title && <p className="text-sm font-bold text-slate-700 mb-2">{title}</p>}
-      <div className="text-sm text-slate-600">{children}</div>
+    <div style={{borderRadius:8,border:`1px solid ${accentBorder}`,background:accent,padding:'12px 14px',marginBottom:10}}>
+      {title && <p style={{fontSize:12,fontWeight:600,color:titleColor,marginBottom:6,letterSpacing:'-0.01em'}}>{title}</p>}
+      <div style={{fontSize:12.5,color:'var(--text-2)',lineHeight:1.6}}>{children}</div>
     </div>
   );
 };
@@ -579,41 +600,54 @@ const Collapsible = ({ title, children, defaultOpen=true, accent='slate' }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-4">
       <button onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center p-4 text-left hover:bg-slate-50 rounded-xl transition-colors">
-        <span className="text-sm font-semibold text-slate-700">{title}</span>
-        <span className="text-slate-400 text-lg">{open ? '▲' : '▼'}</span>
+        style={{width:'100%',display:'flex',justifyContent:'space-between',alignItems:'center',
+          padding:'12px 16px',textAlign:'left',background:'transparent',border:'none',
+          cursor:'pointer',borderRadius:open?'10px 10px 0 0':'10px',
+          transition:'background 0.12s'}}
+        onMouseEnter={e=>e.currentTarget.style.background='var(--bg-raised)'}
+        onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+        <span style={{fontSize:12.5,fontWeight:600,color:'var(--text-2)',letterSpacing:'-0.01em',textTransform:'uppercase',letterSpacing:'0.04em'}}>{title}</span>
+        <span style={{fontSize:10,color:'var(--text-3)'}}>{open ? '▴' : '▾'}</span>
       </button>
-      {open && <div className="px-4 pb-4">{children}</div>}
+      {open && <div style={{padding:'4px 16px 16px'}}>{children}</div>}
     </div>
   );
 };
 
 const FormulaBox = ({ children }) => (
-  <pre style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:'#00d17a',background:'#030810',padding:'10px 12px',borderRadius:8,border:'1px solid #1c2e48',overflowX:'auto',whiteSpace:'pre-wrap',marginTop:8}}>{children}</pre>
+  <pre style={{fontFamily:"'JetBrains Mono','Fira Code',monospace",fontSize:11,color:'#34d399',background:'#04091a',padding:'10px 14px',borderRadius:8,border:'1px solid #1e2f45',overflowX:'auto',whiteSpace:'pre-wrap',marginTop:8,lineHeight:1.6}}>{children}</pre>
 );
 
 const SectionTitle = ({ children, sub }) => (
   <div className="mb-4">
-    <h3 className="text-lg font-semibold text-slate-800" style={{letterSpacing:'-0.02em',lineHeight:1.25}}>{children}</h3>
-    {sub && <p className="text-sm text-slate-500 mt-1" style={{lineHeight:1.55}}>{sub}</p>}
+    <h3 style={{fontSize:14,fontWeight:600,color:'var(--text-1)',letterSpacing:'-0.02em',lineHeight:1.3,margin:'0 0 4px',fontFamily:"'Inter',sans-serif"}}>{children}</h3>
+    {sub && <p style={{fontSize:11.5,color:'var(--text-3)',lineHeight:1.5,margin:0}}>{sub}</p>}
   </div>
 );
 
 const Badge = ({ children, color='emerald' }) => {
-  const cls = {emerald:'bg-emerald-100 text-emerald-800', blue:'bg-blue-100 text-blue-800', purple:'bg-purple-100 text-purple-800', teal:'bg-teal-100 text-teal-800', amber:'bg-amber-100 text-amber-700', red:'bg-red-100 text-red-700', slate:'bg-slate-100 text-slate-700'}[color];
-  return <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${cls}`}>{children}</span>;
+  const styles = {
+    emerald: {background:'rgba(16,185,129,0.12)',color:'#34d399',border:'1px solid rgba(16,185,129,0.25)'},
+    blue:    {background:'rgba(96,165,250,0.12)',color:'#93c5fd',border:'1px solid rgba(96,165,250,0.25)'},
+    purple:  {background:'rgba(167,139,250,0.12)',color:'#c4b5fd',border:'1px solid rgba(167,139,250,0.25)'},
+    teal:    {background:'rgba(45,212,191,0.12)',color:'#5eead4',border:'1px solid rgba(45,212,191,0.25)'},
+    amber:   {background:'rgba(245,158,11,0.12)',color:'#fcd34d',border:'1px solid rgba(245,158,11,0.25)'},
+    red:     {background:'rgba(248,113,113,0.12)',color:'#fca5a5',border:'1px solid rgba(248,113,113,0.25)'},
+    slate:   {background:'var(--bg-raised)',color:'var(--text-2)',border:'1px solid var(--border)'},
+  };
+  return <span style={{display:'inline-block',fontSize:9.5,fontWeight:600,padding:'2px 8px',borderRadius:4,letterSpacing:'0.04em',textTransform:'uppercase',...(styles[color]||styles.slate)}}>{children}</span>;
 };
 
 // ── Custom Tooltip ─────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, prefix='$', suffix='M' }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:'#0d1525',border:'1px solid #1c2e48',borderRadius:8,padding:'10px 14px',boxShadow:'0 4px 24px rgba(0,0,0,0.7),0 0 0 1px rgba(0,209,122,0.08)',minWidth:160}}>
-      <p style={{color:'#00d17a',fontWeight:700,fontSize:11,marginBottom:6,letterSpacing:'0.05em'}}>{label}</p>
+    <div style={{background:'#0d1829',border:'1px solid #1e2f45',borderRadius:8,padding:'10px 14px',boxShadow:'0 8px 32px rgba(0,0,0,0.7)',minWidth:165,fontFamily:"'Inter',sans-serif"}}>
+      <p style={{color:'#10b981',fontWeight:600,fontSize:10,marginBottom:6,letterSpacing:'0.06em',textTransform:'uppercase'}}>{label}</p>
       {payload.map((p,i) => (
-        <p key={i} style={{color:p.color,display:'flex',justifyContent:'space-between',gap:16,fontSize:11,margin:'2px 0'}}>
-          <span style={{color:'#7a90b0'}}>{p.name}</span>
-          <span style={{fontWeight:700}}>{prefix}{typeof p.value==='number'?Math.abs(p.value).toFixed(1):p.value}{suffix}</span>
+        <p key={i} style={{color:p.color,display:'flex',justifyContent:'space-between',gap:16,fontSize:11,margin:'3px 0'}}>
+          <span style={{color:'#64748b',fontWeight:400}}>{p.name}</span>
+          <span style={{fontWeight:600,fontFamily:"'JetBrains Mono',monospace"}}>{prefix}{typeof p.value==='number'?Math.abs(p.value).toFixed(1):p.value}{suffix}</span>
         </p>
       ))}
     </div>
@@ -636,14 +670,14 @@ const WorkloadMixPanel = ({ s, set, effectiveFlexPct }) => {
     set(key, Math.max(0, actualClamped));
   };
 
-  const dotColor = tol => tol==='Very High'?'#00d17a':tol==='High'?'#00d17a':tol==='Medium'?'#ffb020':'#ff5c6a';
+  const dotColor = tol => tol==='Very High'?'#10b981':tol==='High'?'#10b981':tol==='Medium'?'#ffb020':'#ff5c6a';
 
   return (
     <div style={{background:'var(--bg-surface)',borderRadius:12,border:'1px solid var(--border)',padding:'14px 18px',marginBottom:16}}>
       {/* Header row */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12,flexWrap:'wrap',gap:8}}>
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <div style={{width:28,height:28,background:'linear-gradient(135deg,#00d17a,#00c8b0)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13}}>⚙</div>
+          <div style={{width:28,height:28,background:'linear-gradient(135deg,#10b981,#2dd4bf)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13}}>⚙</div>
           <div>
             <p style={{fontSize:12,fontWeight:700,color:'var(--text-1)',margin:0}}>Workload Mix — Compute Profile</p>
             <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>Determines effective DC flexibility from customer SLA constraints</p>
@@ -664,7 +698,7 @@ const WorkloadMixPanel = ({ s, set, effectiveFlexPct }) => {
             <p style={{fontSize:16,fontWeight:700,color:'var(--text-2)',fontFamily:'var(--mono)',margin:0}}>{firmMW.toFixed(0)} MW</p>
           </div>
           <div style={{
-            background: Math.abs(remaining) < 1 ? 'rgba(0,209,122,0.12)' : 'rgba(255,92,106,0.12)',
+            background: Math.abs(remaining) < 1 ? 'rgba(16,185,129,0.12)' : 'rgba(255,92,106,0.12)',
             border: `1px solid ${Math.abs(remaining)<1?'var(--green)':'var(--red)'}`,
             borderRadius:8,padding:'5px 12px',textAlign:'center'
           }}>
@@ -691,13 +725,13 @@ const WorkloadMixPanel = ({ s, set, effectiveFlexPct }) => {
             <div key={seg.key} style={{display:'flex',alignItems:'center',gap:10,padding:'5px 0'}}>
               {/* Dot + label */}
               <div style={{display:'flex',alignItems:'center',gap:6,minWidth:164,flexShrink:0}}>
-                <div style={{width:8,height:8,borderRadius:'50%',background:seg.flexPct===0?'#ff5c6a':seg.flexPct>=15?'#00d17a':'#ffb020',flexShrink:0,boxShadow:`0 0 5px ${seg.flexPct===0?'#ff5c6a':seg.flexPct>=15?'#00d17a':'#ffb020'}88`}}/>
+                <div style={{width:7,height:7,borderRadius:'50%',background:seg.flexPct===0?'#f87171':seg.flexPct>=15?'#10b981':'#f59e0b',flexShrink:0}}/>
                 <span style={{fontSize:11,color:'var(--text-1)',fontWeight:500}}>{seg.label}</span>
               </div>
               {/* Mini slider */}
               <div style={{flex:1,position:'relative',height:14,display:'flex',alignItems:'center'}}>
                 <div style={{position:'absolute',left:0,right:0,height:3,background:'var(--border)',borderRadius:2}}>
-                  <div style={{position:'absolute',left:0,width:`${val}%`,height:'100%',background:seg.flexPct===0?'#ff5c6a44':seg.flexPct>=15?'#00d17a':'#ffb020',borderRadius:2}}/>
+                  <div style={{position:'absolute',left:0,width:`${val}%`,height:'100%',background:seg.flexPct===0?'#ff5c6a44':seg.flexPct>=15?'#10b981':'#ffb020',borderRadius:2}}/>
                 </div>
                 <input type="range" min={0} max={100} step={1} value={val}
                   onChange={e => adjustSeg(seg.key, Number(e.target.value))}
@@ -707,8 +741,8 @@ const WorkloadMixPanel = ({ s, set, effectiveFlexPct }) => {
               <div style={{display:'flex',alignItems:'center',gap:6,minWidth:110,flexShrink:0}}>
                 <span style={{fontSize:11,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)',minWidth:32,textAlign:'right'}}>{val}%</span>
                 <span style={{fontSize:9,padding:'1px 6px',borderRadius:10,fontWeight:600,whiteSpace:'nowrap',
-                  background:seg.flexPct===0?'rgba(255,92,106,0.15)':seg.flexPct>=15?'rgba(0,209,122,0.12)':'rgba(255,176,32,0.15)',
-                  color:seg.flexPct===0?'#ff5c6a':seg.flexPct>=15?'#00d17a':'#ffb020'}}>
+                  background:seg.flexPct===0?'rgba(255,92,106,0.15)':seg.flexPct>=15?'rgba(16,185,129,0.12)':'rgba(255,176,32,0.15)',
+                  color:seg.flexPct===0?'#ff5c6a':seg.flexPct>=15?'#10b981':'#ffb020'}}>
                   {seg.tolerance}
                 </span>
                 <span style={{fontSize:9,color:'var(--text-3)',whiteSpace:'nowrap'}}>{curtailMW}MW flex</span>
@@ -737,10 +771,10 @@ const GlobalControls = ({ s, set, pitchMode, setPitchMode, reset, totalNPV, effe
       <div className="max-w-screen-2xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div style={{width:32,height:32,background:'var(--green)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:15,color:'#020e06',fontFamily:'Space Grotesk,sans-serif',letterSpacing:'-0.5px'}}>⟡</div>
+            <div style={{width:34,height:34,background:'linear-gradient(135deg,#10b981,#0d9488)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:16,color:'#022c1c',letterSpacing:'-0.5px',flexShrink:0}}>⟡</div>
             <div>
-              <h1 className="text-lg font-bold text-emerald-700 leading-tight">Emerald AI</h1>
-              <p className="text-xs text-slate-500">Compute Flexibility Value Calculator</p>
+              <h1 style={{fontSize:15,fontWeight:700,color:'#f1f5f9',lineHeight:1.2,letterSpacing:'-0.02em',fontFamily:'Inter,sans-serif',margin:0}}>Emerald AI</h1>
+              <p style={{fontSize:10,color:'var(--text-3)',letterSpacing:'0.04em',textTransform:'uppercase',fontWeight:500,margin:0}}>GPU Flexibility Value Model · Confidential</p>
             </div>
           </div>
           <div className="flex-1 flex items-center gap-6 overflow-x-auto">
@@ -762,20 +796,28 @@ const GlobalControls = ({ s, set, pitchMode, setPitchMode, reset, totalNPV, effe
             {/* Effective flex pill in header */}
             {!collapsed && (
               <button onClick={()=>setShowWorkload(w=>!w)}
-                style={{display:'flex',alignItems:'center',gap:6,background:'rgba(0,209,122,0.1)',border:'1px solid rgba(0,209,122,0.3)',borderRadius:8,padding:'4px 10px',cursor:'pointer'}}>
-                <div style={{width:7,height:7,borderRadius:'50%',background:'var(--green)'}}/>
-                <span style={{fontSize:11,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{effectiveFlexPct.toFixed(1)}% flex</span>
-                <span style={{fontSize:9,color:'var(--text-3)'}}>{showWorkload?'▲':'▼'} workload</span>
+                style={{display:'flex',alignItems:'center',gap:7,background:'var(--bg-raised)',border:'1px solid var(--border-hi)',borderRadius:7,padding:'5px 11px',cursor:'pointer',transition:'border-color 0.12s'}}
+                onMouseEnter={e=>e.currentTarget.style.borderColor='var(--green)'}
+                onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border-hi)'}>
+                <div style={{width:6,height:6,borderRadius:'50%',background:'var(--green)'}}/>
+                <span style={{fontSize:11,fontWeight:600,color:'var(--text-1)',fontFamily:"'JetBrains Mono',monospace"}}>{effectiveFlexPct.toFixed(1)}%</span>
+                <span style={{fontSize:10,color:'var(--text-3)',fontWeight:500}}>Flex {showWorkload?'▴':'▾'}</span>
               </button>
             )}
-            <div className="text-right">
-              <p className="text-xs text-slate-500">Portfolio NPV</p>
-              <p className="text-xl font-bold text-emerald-600">{fmtM(totalNPV)}</p>
+            <div style={{textAlign:'right',padding:'4px 12px',borderRadius:8,background:'rgba(16,185,129,0.07)',border:'1px solid rgba(16,185,129,0.2)'}}>
+              <p style={{fontSize:9,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:500,margin:'0 0 1px'}}>Portfolio NPV</p>
+              <p style={{fontSize:18,fontWeight:700,color:'var(--green)',fontFamily:"'JetBrains Mono',monospace",margin:0,letterSpacing:'-0.02em'}}>{fmtM(totalNPV)}</p>
             </div>
-            <button onClick={reset} className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors">↺ Reset</button>
+            <button onClick={reset} style={{fontSize:11,fontWeight:500,padding:'5px 12px',borderRadius:6,border:'1px solid var(--border)',background:'transparent',color:'var(--text-3)',cursor:'pointer',transition:'all 0.12s',letterSpacing:'0.01em'}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--border-hi)';e.currentTarget.style.color='var(--text-2)';}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--border)';e.currentTarget.style.color='var(--text-3)';}}>Reset</button>
             <button onClick={() => setPitchMode(p=>!p)}
-              className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${pitchMode ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-              {pitchMode ? '📊 Pitch Mode ON' : '📊 Pitch Mode'}
+              style={{fontSize:11,fontWeight:600,padding:'5px 14px',borderRadius:6,cursor:'pointer',transition:'all 0.12s',letterSpacing:'0.02em',
+                background: pitchMode ? 'var(--green)' : 'transparent',
+                color: pitchMode ? '#022c1c' : 'var(--text-2)',
+                border: pitchMode ? '1px solid var(--green)' : '1px solid var(--border-hi)',
+              }}>
+              {pitchMode ? 'Presentation ON' : 'Presentation Mode'}
             </button>
             <button onClick={() => setCollapsed(c=>!c)} className="text-slate-400 hover:text-slate-600">{collapsed ? '▼' : '▲'}</button>
           </div>
@@ -865,7 +907,7 @@ const PortfolioTab = ({ s, tx, az, va, pitchMode }) => {
           <SectionTitle sub="NPV of value streams by site (discounted, illustrative)">Value Streams by Site</SectionTitle>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={stackedData} margin={{top:5,right:10,left:10,bottom:5}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="name" tick={{fontSize:12}} />
               <YAxis tickFormatter={v=>`$${v}M`} tick={{fontSize:11}} />
               <Tooltip content={<CustomTooltip />} />
@@ -884,7 +926,7 @@ const PortfolioTab = ({ s, tx, az, va, pitchMode }) => {
           <SectionTitle sub="Each site's NPV contribution builds to portfolio total">Portfolio NPV Bridge by Site</SectionTitle>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={waterfallData} margin={{top:15,right:20,left:20,bottom:10}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="name" tick={{fontSize:11}} />
               <YAxis tickFormatter={v=>`$${(v/1000).toFixed(1)}B`} tick={{fontSize:11}} />
               <Tooltip formatter={(v,n,p) => p.dataKey==='bar' ? [`${fmtM(p.payload.bar)}`, p.payload.name] : null} />
@@ -938,7 +980,7 @@ const FlexDerivedBadge = ({ effectiveFlexPct, dcMW }) => (
       <span style={{fontSize:11,fontWeight:600,color:'var(--text-2)'}}>Flexibility Commitment</span>
       <span style={{fontSize:10,color:'var(--text-3)',fontStyle:'italic'}}>← derived from workload mix</span>
     </div>
-    <div style={{background:'rgba(0,209,122,0.07)',border:'1px solid rgba(0,209,122,0.2)',borderRadius:8,padding:'8px 12px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+    <div style={{background:'rgba(16,185,129,0.07)',border:'1px solid rgba(16,185,129,0.2)',borderRadius:8,padding:'8px 12px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
       <div style={{display:'flex',alignItems:'center',gap:8}}>
         <div style={{width:7,height:7,borderRadius:'50%',background:'var(--green)'}}/>
         <span style={{fontSize:13,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{effectiveFlexPct.toFixed(1)}%</span>
@@ -988,7 +1030,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
   return (
     <div className="space-y-4">
       {!pitchMode && (
-        <Collapsible title="📋 ERCOT Market Context" defaultOpen={false}>
+        <Collapsible title="ERCOT Market Context" defaultOpen={false}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InfoCard title="Market Structure" color="teal">
               <ul className="space-y-1 text-xs">
@@ -1076,7 +1118,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
           <SectionTitle sub="Stylized ERCOT summer day — Conductor triggers curtailment during spike windows">ERCOT Hourly Price Profile</SectionTitle>
           <ResponsiveContainer width="100%" height={240}>
             <ComposedChart data={spikeProfile} margin={{top:5,right:10,left:10,bottom:5}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="hour" tick={{fontSize:9}} interval={3} />
               <YAxis tickFormatter={v=>`$${v}`} tick={{fontSize:11}} />
               <Tooltip formatter={(v,n) => [`$${v}/MWh`, n]} />
@@ -1092,7 +1134,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
           <SectionTitle sub="Cumulative NPV over analysis horizon">10-Year Cash Flow & NPV</SectionTitle>
           <ResponsiveContainer width="100%" height={240}>
             <ComposedChart data={tx.cashFlows} margin={{top:5,right:10,left:10,bottom:5}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="year" label={{value:'Year',position:'insideBottom',offset:-2,fontSize:11}} tick={{fontSize:11}} />
               <YAxis tickFormatter={v=>`$${v.toFixed(0)}M`} tick={{fontSize:11}} />
               <Tooltip content={<CustomTooltip />} />
@@ -1111,7 +1153,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
           <SectionTitle sub="ERCOT 2025 LTDEF — illustrates surging demand driving interconnection urgency">ERCOT Peak Demand Forecast</SectionTitle>
           <ResponsiveContainer width="100%" height={240}>
             <ComposedChart data={ercotForecast} margin={{top:5,right:10,left:10,bottom:5}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="year" tick={{fontSize:12}} />
               <YAxis tickFormatter={v=>`${v} GW`} domain={[70,160]} tick={{fontSize:11}} />
               <Tooltip formatter={v => [`${v} GW`]} />
@@ -1175,7 +1217,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
         {/* Header */}
         <div style={{background:'linear-gradient(135deg,#011a14 0%,#021820 100%)',borderRadius:14,border:'1px solid #0a3d2a',padding:'20px 28px'}}>
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
-            <div style={{width:36,height:36,background:'linear-gradient(135deg,#00d17a,#00b8c8)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>⚡</div>
+            <div style={{width:36,height:36,background:'linear-gradient(135deg,#10b981,#00b8c8)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>⚡</div>
             <div>
               <h3 style={{fontSize:16,fontWeight:700,color:'var(--text-1)',margin:0}}>ERCOT Market & Interconnection Guide</h3>
               <p style={{fontSize:11,color:'var(--text-3)',margin:0}}>Regulatory structure · Load & generation interconnection · Battery deployment landscape</p>
@@ -1224,9 +1266,9 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
 
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
             {/* Load Side */}
-            <div style={{background:'rgba(0,209,122,0.05)',borderRadius:10,border:'1px solid rgba(0,209,122,0.25)',padding:'16px'}}>
+            <div style={{background:'rgba(16,185,129,0.05)',borderRadius:10,border:'1px solid rgba(16,185,129,0.25)',padding:'16px'}}>
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12}}>
-                <div style={{width:28,height:28,background:'rgba(0,209,122,0.15)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>🏢</div>
+                <div style={{width:28,height:28,background:'rgba(16,185,129,0.15)',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>🏢</div>
                 <span style={{fontSize:12,fontWeight:700,color:'var(--green)'}}>LOAD SIDE — Data Center Interconnection</span>
               </div>
               {[
@@ -1237,7 +1279,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
                 {step:'5', label:'Construction & Energization', body:'TSP constructs agreed-upon facilities (paid by customer up-front or amortized via tariff). Customer installs internal switchgear, transformers, and metering. ERCOT approves final registration of the load as a Load Resource (LR) for ancillary service participation. Typical timeline: 18–36 months standard; 10–20 months with flex commitment.'},
               ].map(item => (
                 <div key={item.step} style={{display:'flex',gap:10,marginBottom:10}}>
-                  <div style={{width:22,height:22,borderRadius:'50%',background:'var(--green)',color:'#020e06',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:1}}>{item.step}</div>
+                  <div style={{width:22,height:22,borderRadius:'50%',background:'var(--green)',color:'#022c1c',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:1}}>{item.step}</div>
                   <div>
                     <p style={{fontSize:11,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>{item.label}</p>
                     <p style={{fontSize:10,color:'var(--text-2)',lineHeight:1.6,margin:0}}>{item.body}</p>
@@ -1260,7 +1302,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
                 {step:'5', label:'Registration & Market Participation', body:'Once energized, register with ERCOT as a Resource Entity. Generation assets register as Generation Resources (GRs) or Intermittent Renewable Resources (IRRs for wind/solar). BTM storage registers as an Energy Storage Resource (ESR) — a relatively new designation post-2021 that allows simultaneous charging/discharging optimization. ESRs can participate in energy arbitrage, regulation, RRS, ECRS, and non-spinning reserve simultaneously.'},
               ].map(item => (
                 <div key={item.step} style={{display:'flex',gap:10,marginBottom:10}}>
-                  <div style={{width:22,height:22,borderRadius:'50%',background:'var(--amber)',color:'#020e06',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:1}}>{item.step}</div>
+                  <div style={{width:22,height:22,borderRadius:'50%',background:'var(--amber)',color:'#022c1c',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:1}}>{item.step}</div>
                   <div>
                     <p style={{fontSize:11,fontWeight:700,color:'var(--text-1)',margin:'0 0 3px'}}>{item.label}</p>
                     <p style={{fontSize:10,color:'var(--text-2)',lineHeight:1.6,margin:0}}>{item.body}</p>
@@ -1386,7 +1428,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
                 </div>
               ))}
             </div>
-            <div style={{marginTop:12,padding:'10px 14px',background:'rgba(0,209,122,0.07)',borderRadius:7,border:'1px solid rgba(0,209,122,0.2)'}}>
+            <div style={{marginTop:12,padding:'10px 14px',background:'rgba(16,185,129,0.07)',borderRadius:7,border:'1px solid rgba(16,185,129,0.2)'}}>
               <p style={{fontSize:10,color:'var(--text-2)',margin:0,lineHeight:1.6}}>
                 <strong style={{color:'var(--green)'}}>Data Center Relevance:</strong> A BTM battery co-located with a 200 MW GPU data center captures the same ERCOT revenue stack <em>without curtailing compute</em>.
                 The BESS discharges to the grid during DR/AS events while the GPUs run uninterrupted. At $100k–$150k/MW-yr blended revenue on a 50 MW BESS, that's $5–7.5M/yr of additional revenue —
@@ -1612,7 +1654,7 @@ const ArizonaTab = ({ s, set, az, pitchMode, effectiveFlexPct }) => {
   return (
     <div className="space-y-4">
       {!pitchMode && (
-        <Collapsible title="📋 Arizona Grid Market Context" defaultOpen={false}>
+        <Collapsible title="Arizona Grid Market Context" defaultOpen={false}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InfoCard title="APS/SRP Market Structure" color="purple">
               <ul className="space-y-1 text-xs">
@@ -1690,7 +1732,7 @@ const ArizonaTab = ({ s, set, az, pitchMode, effectiveFlexPct }) => {
           <SectionTitle sub="SRP E-67 Plan: billed at max(actual, 80% of forecast). Flexibility eliminates stranded capacity cost.">SRP E-67 Billing Risk Calculator</SectionTitle>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={srpRiskData} margin={{top:5,right:10,left:10,bottom:5}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="lf" label={{value:'Load Factor',position:'insideBottom',offset:-2,fontSize:11}} tick={{fontSize:12}} />
               <YAxis tickFormatter={v=>`$${v}M`} tick={{fontSize:11}} />
               <Tooltip formatter={v=>[`$${v}M/yr`, 'Stranded Cost Risk']} />
@@ -1744,7 +1786,7 @@ With flexibility: shape load to always hit 80% minimum → $0 stranded`}</Formul
         <SectionTitle sub="Annual cash flows and cumulative NPV">Arizona 10-Year Cash Flow</SectionTitle>
         <ResponsiveContainer width="100%" height={220}>
           <ComposedChart data={az.cashFlows} margin={{top:5,right:10,left:10,bottom:5}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
             <XAxis dataKey="year" tick={{fontSize:11}} />
             <YAxis tickFormatter={v=>`$${v.toFixed(0)}M`} tick={{fontSize:11}} />
             <Tooltip content={<CustomTooltip />} />
@@ -1791,7 +1833,7 @@ const VirginiaTab = ({ s, set, va, pitchMode, effectiveFlexPct }) => {
   return (
     <div className="space-y-4">
       {!pitchMode && (
-        <Collapsible title="📋 PJM / Virginia Market Context" defaultOpen={false}>
+        <Collapsible title="PJM / Virginia Market Context" defaultOpen={false}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InfoCard title="PJM Capacity Market (RPM) — Record Prices" color="blue">
               <ul className="space-y-1 text-xs">
@@ -1866,7 +1908,7 @@ const VirginiaTab = ({ s, set, va, pitchMode, effectiveFlexPct }) => {
           <SectionTitle sub="Historical BRA clearing prices + forward scenarios">PJM Capacity Market Price History</SectionTitle>
           <ResponsiveContainer width="100%" height={250}>
             <ComposedChart data={pjmFull} margin={{top:5,right:10,left:10,bottom:20}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="dy" tick={{fontSize:8}} angle={-35} textAnchor="end" />
               <YAxis tickFormatter={v=>`$${v}`} tick={{fontSize:11}} label={{value:'$/MW-day',angle:-90,position:'insideLeft',fontSize:10}} />
               <Tooltip formatter={(v,n) => v?[`$${Number(v).toFixed(2)}/MW-day`,n]:['—',n]} />
@@ -1884,7 +1926,7 @@ const VirginiaTab = ({ s, set, va, pitchMode, effectiveFlexPct }) => {
           <SectionTitle sub="PJM interconnection wait vs. flexibility-accelerated pathway">PJM Queue Wait: Standard vs. Flexible</SectionTitle>
           <ResponsiveContainer width="100%" height={250}>
             <ComposedChart data={queueChart} margin={{top:5,right:10,left:10,bottom:5}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
               <XAxis dataKey="year" tick={{fontSize:12}} />
               <YAxis tickFormatter={v=>`${v}mo`} tick={{fontSize:11}} />
               <Tooltip formatter={(v,n) => [`${v} months`, n]} />
@@ -1903,7 +1945,7 @@ const VirginiaTab = ({ s, set, va, pitchMode, effectiveFlexPct }) => {
         <SectionTitle sub="Annual cash flows and cumulative NPV over analysis horizon">Virginia 10-Year Cash Flow & NPV</SectionTitle>
         <ResponsiveContainer width="100%" height={220}>
           <ComposedChart data={va.cashFlows} margin={{top:5,right:10,left:10,bottom:5}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
             <XAxis dataKey="year" tick={{fontSize:11}} />
             <YAxis tickFormatter={v=>`$${v.toFixed(0)}M`} tick={{fontSize:11}} />
             <Tooltip content={<CustomTooltip />} />
@@ -2107,7 +2149,7 @@ const SensitivityTab = ({ s, set }) => {
         <SectionTitle sub="P10→P90 swing on Total Portfolio NPV. Sorted by absolute impact.">Tornado Chart — Value Driver Sensitivity</SectionTitle>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={tornadoDrivers} layout="vertical" margin={{top:5,right:60,left:195,bottom:5}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
             <XAxis type="number" tickFormatter={v=>`${v>=0?'+':''}$${Math.abs(v).toFixed(0)}M`} tick={{fontSize:11}} domain={['auto','auto']} />
             <YAxis type="category" dataKey="label" tick={{fontSize:11}} width={188} />
             <Tooltip formatter={(v,n)=>[`${v>=0?'+':''}$${v.toFixed(1)}M vs base`,n]} />
@@ -2124,7 +2166,7 @@ const SensitivityTab = ({ s, set }) => {
         <div className="grid grid-cols-3 gap-4 mb-4">
           {scenarioResults.map(({sc, npv, dr, payback}) => {
             const colors = {bear:'red', base:'emerald', bull:'blue'};
-            const labels = {bear:'🐻 Bear Case', base:'📊 Base Case', bull:'🚀 Bull Case'};
+            const labels = {bear:'Bear Case', base:'Base Case', bull:'Bull Case'};
             const c = colors[sc];
             const isActive = JSON.stringify(SCENARIOS[sc]||{}) === '{}' ? scenario===sc : scenario===sc;
             return (
@@ -2196,7 +2238,7 @@ const SensitivityTab = ({ s, set }) => {
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={mcResults.histogram} margin={{top:5,right:10,left:10,bottom:20}}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" />
                 <XAxis dataKey="range" tick={{fontSize:8}} angle={-35} textAnchor="end" interval={1} />
                 <YAxis tick={{fontSize:11}} />
                 <Tooltip formatter={(v,n)=>[`${v} simulations`,'Frequency']} />
@@ -2339,7 +2381,7 @@ const CSPTab = ({ s, tx, az, va }) => {
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
           <div>
             <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:6}}>
-              <div style={{width:32,height:32,background:'linear-gradient(135deg,#00d17a,#00c8b0)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>💼</div>
+              <div style={{width:32,height:32,background:'linear-gradient(135deg,#10b981,#2dd4bf)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>💼</div>
               <div>
                 <h2 style={{fontSize:18,fontWeight:700,color:'var(--text-1)',margin:0}}>Revenue Model — Bottoms-Up Analysis</h2>
                 <p style={{fontSize:11,color:'var(--text-2)',margin:0}}>Baseline vs. Flex-Enabled · {totalMW} MW portfolio · Workload-mix driven tier splits</p>
@@ -2375,7 +2417,7 @@ const CSPTab = ({ s, tx, az, va }) => {
             {l:'GPUs per Rack',                    v:gpuPerRack, min:4,max:16,step:1,set:setGpuPerRack,
              sub:`${(totalGPUs/1000).toFixed(0)}k GPUs total`},
           ].map(inp=>(
-            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:`1px solid ${inp.readOnly?'rgba(0,209,122,0.25)':'var(--border)'}`}}>
+            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:`1px solid ${inp.readOnly?'rgba(16,185,129,0.25)':'var(--border)'}`}}>
               <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{inp.l}</p>
               <p style={{fontSize:16,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)',margin:'0 0 4px'}}>{inp.fmt?inp.fmt(inp.v):inp.v}{inp.unit?` ${inp.unit}`:''}</p>
               <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>{inp.sub}</p>
@@ -2397,7 +2439,7 @@ const CSPTab = ({ s, tx, az, va }) => {
              fmt:v=>`$${v.toFixed(3)}M/MW/yr`,
              sub:`Base $${gpuRateBase}M + ${firmPremiumPct}% SLA premium → set in pricing panel below`},
           ].map(inp=>(
-            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:`1px solid ${inp.readOnly?'rgba(0,209,122,0.25)':'var(--border)'}`}}>
+            <div key={inp.l} style={{background:'var(--bg-raised)',borderRadius:8,padding:'10px 12px',border:`1px solid ${inp.readOnly?'rgba(16,185,129,0.25)':'var(--border)'}`}}>
               <p style={{fontSize:9,color:'var(--text-3)',margin:'0 0 2px',textTransform:'uppercase',letterSpacing:'0.06em'}}>{inp.l}</p>
               <p style={{fontSize:15,fontWeight:700,color:'var(--blue)',fontFamily:'var(--mono)',margin:'0 0 4px'}}>{inp.fmt?inp.fmt(inp.v):inp.v}{!inp.fmt&&inp.unit?inp.unit:''}</p>
               <p style={{fontSize:9,color:'var(--text-2)',margin:'0 0 6px'}}>{inp.sub}</p>
@@ -2449,7 +2491,7 @@ const CSPTab = ({ s, tx, az, va }) => {
           <Row label="DR Revenue (Emerald 50% share)" val={'+'+fmtM(drCSPShare)+'/yr'} color="var(--amber)" sub={`Total DR pool ${fmtM(totalDR)}/yr · ${100-drSharePct}% retained`}/>
           <Row label="DR Revenue (customer 50% credit)" val={'−'+fmtM(drCustomerShare)+'/yr'} color="var(--text-3)" indent sub={`${drSharePct}% passed to flex customers as invoice credits`}/>
           <div style={{margin:'6px 12px',height:1,background:'var(--border)'}}/>
-          <Row label="TOTAL ALL-IN ANNUAL REVENUE" val={fmtM(flex_netRev)+'/yr'} bold color="var(--green)" bg="rgba(0,209,122,0.08)" border/>
+          <Row label="TOTAL ALL-IN ANNUAL REVENUE" val={fmtM(flex_netRev)+'/yr'} bold color="var(--green)" bg="rgba(16,185,129,0.08)" border/>
           <Row label="10-yr NPV (annuity, 10% WACC)" val={fmtM(flex_netRev*6.145)} bold color="var(--green)" sub="excludes one-time Year 0 items"/>
         </Section>
       </div>
@@ -2473,7 +2515,7 @@ const CSPTab = ({ s, tx, az, va }) => {
             </div>
           ))}
         </div>
-        <div style={{marginTop:12,background:revDelta>=0?'rgba(0,209,122,0.07)':'rgba(255,92,106,0.07)',borderRadius:8,padding:'14px 18px',border:`1px solid ${revDelta>=0?'rgba(0,209,122,0.3)':'rgba(255,92,106,0.3)'}`,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+        <div style={{marginTop:12,background:revDelta>=0?'rgba(16,185,129,0.07)':'rgba(255,92,106,0.07)',borderRadius:8,padding:'14px 18px',border:`1px solid ${revDelta>=0?'rgba(16,185,129,0.3)':'rgba(255,92,106,0.3)'}`,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
           <div>
             <p style={{fontSize:10,color:'var(--text-3)',margin:'0 0 4px',textTransform:'uppercase',letterSpacing:'0.07em'}}>Annual Revenue Uplift vs. Baseline</p>
             <p style={{fontSize:28,fontWeight:700,color:revDelta>=0?'var(--green)':'var(--red)',fontFamily:'var(--mono)',margin:0}}>{revDelta>=0?'+':''}{fmtM(revDelta)}<span style={{fontSize:15,fontWeight:400}}>/yr</span></p>
@@ -2500,14 +2542,14 @@ const CSPTab = ({ s, tx, az, va }) => {
         <p style={{fontSize:11,color:'var(--text-2)',marginBottom:14}}>From baseline (no flex) to all-in flex revenue — each bar shows cumulative total as components are added</p>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={comparisonData} margin={{top:10,right:20,left:20,bottom:40}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" vertical={false}/>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" vertical={false}/>
             <XAxis dataKey="name" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} angle={-25} textAnchor="end" interval={0}/>
             <YAxis tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false}
               tickFormatter={v=>`$${(v/1000).toFixed(1)}B`}/>
             <Tooltip content={({active,payload,label})=>{
               if(!active||!payload?.length) return null;
-              return <div style={{background:'#0d1525',border:'1px solid #1c2e48',borderRadius:8,padding:'8px 12px'}}>
-                <p style={{color:'#00d17a',fontWeight:700,fontSize:11,marginBottom:4}}>{label}</p>
+              return <div style={{background:'#0d1829',border:'1px solid #1e2f45',borderRadius:8,padding:'8px 12px'}}>
+                <p style={{color:'#10b981',fontWeight:700,fontSize:11,marginBottom:4}}>{label}</p>
                 <p style={{color:'#dce8f5',fontSize:11,fontFamily:'var(--mono)'}}>{fmtM(payload[0].value)}/yr</p>
               </div>;
             }}/>
@@ -2515,7 +2557,7 @@ const CSPTab = ({ s, tx, az, va }) => {
               label={{value:'Baseline',fill:'#7a90b0',fontSize:9,position:'right'}}/>
             <Bar dataKey="total" name="Annual Revenue" radius={[4,4,0,0]}>
               {comparisonData.map((d,i)=>(
-                <Cell key={i} fill={d.isFinal?'#00d17a':d.isBase?'#253d60':'#1e3a5f'}
+                <Cell key={i} fill={d.isFinal?'#10b981':d.isBase?'#253d60':'#1e3a5f'}
                   opacity={d.isFinal?1:d.isBase?0.8:0.7}/>
               ))}
             </Bar>
@@ -2537,13 +2579,13 @@ const CSPTab = ({ s, tx, az, va }) => {
             </thead>
             <tbody>
               {[
-                {c:'AI Labs (Pre-Training)',  seg:'wlPreTrain',  tol:'High',      tier:'Flex Primary',       disc:flexDiscPrimary,   col:'#00d17a'},
+                {c:'AI Labs (Pre-Training)',  seg:'wlPreTrain',  tol:'High',      tier:'Flex Primary',       disc:flexDiscPrimary,   col:'#10b981'},
                 {c:'Enterprise MLOps',        seg:'wlMLOps',     tol:'Medium',    tier:'Flex Secondary',     disc:flexDiscSecondary, col:'#ffb020'},
                 {c:'Real-time Inference',     seg:'wlInference', tol:'None',      tier:'Firm Only',          disc:0,                 col:'#4da8ff'},
                 {c:'Research / Academia',     seg:'wlResearch',  tol:'Very High', tier:'Deep Discount Flex', disc:flexDiscDeep,      col:'#b87fff'},
               ].map((row,i)=>{
                 const mixPct = s[row.seg]||0;
-                const dot = row.tol==='None'?'#ff5c6a':row.tol==='Medium'?'#ffb020':'#00d17a';
+                const dot = row.tol==='None'?'#ff5c6a':row.tol==='Medium'?'#ffb020':'#10b981';
                 return (
                   <tr key={row.c} style={{borderBottom:'1px solid var(--border)',background:i%2===0?'transparent':'var(--bg-raised)'}}>
                     <td style={{padding:'7px 8px',color:'var(--text-1)',fontWeight:500}}>{row.c}</td>
@@ -2798,7 +2840,7 @@ const CSPTab = ({ s, tx, az, va }) => {
                 <ResponsiveContainer width="100%" height={160}>
                   <BarChart layout="vertical" data={[
                     {name:'CSP Firm Premium',  v:+sel.cspFirmPremium.toFixed(1), c:'#60a5fa'},
-                    {name:'CSP Flex Compute',  v:+sel.cspFlexRev.toFixed(1),     c:'#00c96e'},
+                    {name:'CSP Flex Compute',  v:+sel.cspFlexRev.toFixed(1),     c:'#10b981'},
                     {name:'CSP DR Retained',   v:+sel.cspDrRetained.toFixed(1),  c:'#f59e0b'},
                     {name:'Customer L1 Saved', v:+sel.l1.toFixed(1),             c:'#14b8a6'},
                     {name:'Customer L2 DR',    v:+sel.l2.toFixed(1),             c:'#a78bfa'},
@@ -2809,7 +2851,7 @@ const CSPTab = ({ s, tx, az, va }) => {
                     <Tooltip contentStyle={{background:'var(--bg-overlay)',border:'1px solid var(--border)',borderRadius:8,fontSize:11}}
                       formatter={(v)=>[`$${v}M/yr`]}/>
                     <Bar dataKey="v" radius={[0,4,4,0]}>
-                      {[{c:'#60a5fa'},{c:'#00c96e'},{c:'#f59e0b'},{c:'#14b8a6'},{c:'#a78bfa'}].map((d,i)=>(
+                      {[{c:'#60a5fa'},{c:'#10b981'},{c:'#f59e0b'},{c:'#14b8a6'},{c:'#a78bfa'}].map((d,i)=>(
                         <Cell key={i} fill={d.c} fillOpacity={0.85}/>
                       ))}
                     </Bar>
@@ -3156,20 +3198,20 @@ const STATE_SHAPES = {
 };
 
 const sentimentColor = score => {
-  if (score >= 4.5) return '#00d17a';
-  if (score >= 3.8) return '#00c8b0';
+  if (score >= 4.5) return '#10b981';
+  if (score >= 3.8) return '#2dd4bf';
   if (score >= 3.0) return '#ffb020';
   if (score >= 2.5) return '#ff8c42';
   return '#ff5c6a';
 };
 const metricValue = (r, mode) => ({price:r.lmpAvg,sentiment:r.sentiment,tariff:r.tariffDemand,queue:r.queueStd,flex:r.queueSavings}[mode]||r.sentiment);
 const metricColor = (r, mode) => {
-  if (mode==='price') { const v=r.lmpAvg; return v<25?'#00d17a':v<45?'#00c8b0':v<55?'#ffb020':'#ff5c6a'; }
+  if (mode==='price') { const v=r.lmpAvg; return v<25?'#10b981':v<45?'#2dd4bf':v<55?'#ffb020':'#ff5c6a'; }
   if (mode==='sentiment') return sentimentColor(r.sentiment);
-  if (mode==='tariff') { const v=r.tariffDemand; return v<8?'#00d17a':v<11?'#00c8b0':v<13?'#ffb020':'#ff5c6a'; }
-  if (mode==='queue') { const v=r.queueStd; return v<25?'#00d17a':v<35?'#ffb020':v<45?'#ff8c42':'#ff5c6a'; }
-  if (mode==='flex') { const v=r.queueSavings; return v>=22?'#00d17a':v>=15?'#00c8b0':v>=12?'#4da8ff':'#ffb020'; }
-  return '#00d17a';
+  if (mode==='tariff') { const v=r.tariffDemand; return v<8?'#10b981':v<11?'#2dd4bf':v<13?'#ffb020':'#ff5c6a'; }
+  if (mode==='queue') { const v=r.queueStd; return v<25?'#10b981':v<35?'#ffb020':v<45?'#ff8c42':'#ff5c6a'; }
+  if (mode==='flex') { const v=r.queueSavings; return v>=22?'#10b981':v>=15?'#2dd4bf':v>=12?'#4da8ff':'#ffb020'; }
+  return '#10b981';
 };
 
 const GeoTab = () => {
@@ -3198,11 +3240,11 @@ const GeoTab = () => {
   }));
 
   const legendItems = {
-    price:     [{l:'<$25/MWh',c:'#00d17a'},{l:'$25–44',c:'#00c8b0'},{l:'$45–54',c:'#ffb020'},{l:'>$55',c:'#ff5c6a'}],
-    sentiment: [{l:'≥4.5 Excellent',c:'#00d17a'},{l:'3.8–4.5 Good',c:'#00c8b0'},{l:'3.0–3.8 Mixed',c:'#ffb020'},{l:'<3.0 At Risk',c:'#ff5c6a'}],
-    tariff:    [{l:'<$8/kW-mo',c:'#00d17a'},{l:'$8–11',c:'#00c8b0'},{l:'$11–13',c:'#ffb020'},{l:'>$13',c:'#ff5c6a'}],
-    queue:     [{l:'<25mo',c:'#00d17a'},{l:'25–34mo',c:'#ffb020'},{l:'35–44mo',c:'#ff8c42'},{l:'>45mo',c:'#ff5c6a'}],
-    flex:      [{l:'≥22mo saved',c:'#00d17a'},{l:'15–22mo',c:'#00c8b0'},{l:'12–15mo',c:'#4da8ff'},{l:'<12mo',c:'#ffb020'}],
+    price:     [{l:'<$25/MWh',c:'#10b981'},{l:'$25–44',c:'#2dd4bf'},{l:'$45–54',c:'#ffb020'},{l:'>$55',c:'#ff5c6a'}],
+    sentiment: [{l:'≥4.5 Excellent',c:'#10b981'},{l:'3.8–4.5 Good',c:'#2dd4bf'},{l:'3.0–3.8 Mixed',c:'#ffb020'},{l:'<3.0 At Risk',c:'#ff5c6a'}],
+    tariff:    [{l:'<$8/kW-mo',c:'#10b981'},{l:'$8–11',c:'#2dd4bf'},{l:'$11–13',c:'#ffb020'},{l:'>$13',c:'#ff5c6a'}],
+    queue:     [{l:'<25mo',c:'#10b981'},{l:'25–34mo',c:'#ffb020'},{l:'35–44mo',c:'#ff8c42'},{l:'>45mo',c:'#ff5c6a'}],
+    flex:      [{l:'≥22mo saved',c:'#10b981'},{l:'15–22mo',c:'#2dd4bf'},{l:'12–15mo',c:'#4da8ff'},{l:'<12mo',c:'#ffb020'}],
   };
 
   const accelRev = (selected.upsizeDelta * selected.queueSavings / 12).toFixed(1);
@@ -3212,7 +3254,7 @@ const GeoTab = () => {
       {/* Header */}
       <div style={{marginBottom:20}}>
         <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:6}}>
-          <div style={{width:34,height:34,background:'linear-gradient(135deg,#00d17a,#00c8b0)',borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>🗺</div>
+          <div style={{width:34,height:34,background:'linear-gradient(135deg,#10b981,#2dd4bf)',borderRadius:9,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>🗺</div>
           <div>
             <h2 style={{fontSize:20,fontWeight:700,color:'var(--text-1)',margin:0}}>Geo Intelligence Module</h2>
             <p style={{fontSize:12,color:'var(--text-2)',margin:0}}>Subregional LMP prices · Jurisdiction sentiment · Predicted large load tariff rates · Interconnection queue dynamics · Time-to-upsize gain analysis</p>
@@ -3388,7 +3430,7 @@ const GeoTab = () => {
           </div>
 
           {/* Queue interplay */}
-          <div style={{background:'rgba(0,209,122,0.06)',borderRadius:8,padding:'11px 13px',border:'1px solid rgba(0,209,122,0.18)'}}>
+          <div style={{background:'rgba(16,185,129,0.06)',borderRadius:8,padding:'11px 13px',border:'1px solid rgba(16,185,129,0.18)'}}>
             <p style={{fontSize:10,color:'var(--green)',fontWeight:700,margin:'0 0 6px',textTransform:'uppercase',letterSpacing:'0.06em'}}>⚡ Queue Jump × Flex Load Interplay</p>
             <p style={{fontSize:11,color:'var(--text-2)',margin:'0 0 9px',lineHeight:1.55}}>
               A 25% flex commitment at <strong style={{color:'var(--text-1)'}}>{selected.name}</strong> cuts queue from{' '}
@@ -3418,13 +3460,13 @@ const GeoTab = () => {
           <p style={{fontSize:11,color:'var(--text-2)',margin:'0 0 14px'}}>Months to interconnect by subregion — red = standard, green = with flex commitment</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={queueChartData} barGap={3} barCategoryGap="30%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" vertical={false}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" vertical={false}/>
               <XAxis dataKey="name" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false}/>
               <YAxis tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} unit="mo" width={36}/>
               <Tooltip content={<CustomTooltip prefix="" suffix="mo"/>}/>
               <Legend wrapperStyle={{fontSize:11,color:'#7a90b0'}}/>
               <Bar dataKey="standard" name="Standard Queue" fill="#ff5c6a" opacity={0.65} radius={[3,3,0,0]}/>
-              <Bar dataKey="flex" name="Flex Queue" fill="#00d17a" radius={[3,3,0,0]}/>
+              <Bar dataKey="flex" name="Flex Queue" fill="#10b981" radius={[3,3,0,0]}/>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -3434,7 +3476,7 @@ const GeoTab = () => {
           <p style={{fontSize:11,color:'var(--text-2)',margin:'0 0 14px'}}>Annual GPU revenue unlocked per 50MW upsize via flex queue acceleration</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={upsizeData} layout="vertical" barCategoryGap="22%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#1c2e48" horizontal={false}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e2f45" horizontal={false}/>
               <XAxis type="number" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} unit="M"/>
               <YAxis type="category" dataKey="name" tick={{fill:'#7a90b0',fontSize:9}} axisLine={false} tickLine={false} width={62}/>
               <Tooltip content={<CustomTooltip prefix="$" suffix="M/yr"/>}/>
@@ -3503,13 +3545,13 @@ const GeoTab = () => {
 
 // ── Main App ───────────────────────────────────────────────
 const TABS = [
-  { key:'portfolio', label:'Portfolio Overview', icon:'🗂' },
-  { key:'texas', label:'Texas / ERCOT', icon:'⚡' },
-  { key:'arizona', label:'Arizona / APS+SRP', icon:'☀️' },
-  { key:'virginia', label:'Virginia / PJM', icon:'🔷' },
-  { key:'sensitivity', label:'Sensitivity Engine', icon:'🎛' },
-  { key:'csp', label:'CSP Monetization', icon:'💼' },
-  { key:'geo', label:'Geo Intelligence', icon:'🗺' },
+  { key:'portfolio', label:'Portfolio Overview', icon:'' },
+  { key:'texas', label:'Texas / ERCOT', icon:'' },
+  { key:'arizona', label:'Arizona / APS+SRP', icon:'' },
+  { key:'virginia', label:'Virginia / PJM', icon:'' },
+  { key:'sensitivity', label:'Sensitivity Analysis', icon:'' },
+  { key:'csp', label:'CSP Revenue Model', icon:'' },
+  { key:'geo', label:'Geo Intelligence', icon:'' },
 ];
 
 const App = () => {
@@ -3624,24 +3666,36 @@ Answer concisely and numerically where possible. Reference specific model figure
       <GlobalControls s={s} set={set} pitchMode={pitchMode} setPitchMode={setPitchMode} reset={reset} totalNPV={totalNPV} effectiveFlexPct={effectiveFlexPct} />
 
       {/* Tab Bar */}
-      <div className="bg-white border-b border-slate-200 sticky top-[72px] z-30 shadow-sm">
+      <div className="bg-white border-b border-slate-200 sticky top-[72px] z-30">
         <div className="max-w-screen-2xl mx-auto px-4">
-          <div className="flex overflow-x-auto gap-1">
+          <div className="flex overflow-x-auto">
             {TABS.map(t => (
               <button key={t.key} onClick={() => setTab(t.key)}
-                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors ${
-                  tab === t.key
-                    ? 'border-b-3 text-emerald-700 border-b-[3px] border-emerald-500'
-                    : 'text-slate-500 hover:text-slate-700 border-b-[3px] border-transparent'
-                }`}>
-                <span>{t.icon}</span>
-                <span>{t.label}</span>
+                style={{
+                  display:'flex', alignItems:'center', gap:6,
+                  padding:'0 18px', height:44,
+                  fontSize:12.5, fontWeight: tab===t.key ? 600 : 500,
+                  letterSpacing:'-0.01em',
+                  whiteSpace:'nowrap', transition:'color 0.15s',
+                  color: tab===t.key ? 'var(--green)' : 'var(--text-3)',
+                  background:'transparent', border:'none', cursor:'pointer',
+                  borderBottom: tab===t.key ? '2px solid var(--green)' : '2px solid transparent',
+                  marginBottom:-1,
+                }}>
+                <span style={{fontFamily:'Inter,sans-serif'}}>{t.label}</span>
                 {t.key !== 'portfolio' && t.key !== 'sensitivity' && t.key !== 'csp' && t.key !== 'geo' && (
-                  <span className={`text-xs font-bold ml-1 px-1.5 py-0.5 rounded-full ${
-                    t.key==='texas'?'bg-teal-100 text-teal-700':t.key==='arizona'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'
-                  }`}>{fmtM(t.key==='texas'?tx.npv:t.key==='arizona'?az.npv:va.npv)}</span>
+                  <span style={{
+                    fontSize:10, fontWeight:600, padding:'1px 6px', borderRadius:4,
+                    background: t.key==='texas'?'rgba(45,212,191,0.12)':t.key==='arizona'?'rgba(167,139,250,0.12)':'rgba(96,165,250,0.12)',
+                    color: t.key==='texas'?'var(--teal)':t.key==='arizona'?'var(--purple)':'var(--blue)',
+                    fontFamily:"'JetBrains Mono',monospace",
+                  }}>{fmtM(t.key==='texas'?tx.npv:t.key==='arizona'?az.npv:va.npv)}</span>
                 )}
-                {t.key === 'portfolio' && <span className="text-xs font-bold ml-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{fmtM(totalNPV)}</span>}
+                {t.key === 'portfolio' && <span style={{
+                  fontSize:10, fontWeight:600, padding:'1px 6px', borderRadius:4,
+                  background:'rgba(16,185,129,0.12)', color:'var(--green)',
+                  fontFamily:"'JetBrains Mono',monospace",
+                }}>{fmtM(totalNPV)}</span>}
               </button>
             ))}
           </div>
@@ -3649,7 +3703,7 @@ Answer concisely and numerically where possible. Reference specific model figure
       </div>
 
       {/* Main Content */}
-      <div className="max-w-screen-2xl mx-auto px-4 py-6">
+      <div className="max-w-screen-2xl mx-auto px-4 py-8">
         {tab === 'portfolio' && <PortfolioTab s={s} tx={tx} az={az} va={va} pitchMode={pitchMode} />}
         {tab === 'texas' && <TexasTab s={s} set={set} tx={tx} pitchMode={pitchMode} effectiveFlexPct={effectiveFlexPct} />}
         {tab === 'arizona' && <ArizonaTab s={s} set={set} az={az} pitchMode={pitchMode} effectiveFlexPct={effectiveFlexPct} />}
@@ -3660,17 +3714,23 @@ Answer concisely and numerically where possible. Reference specific model figure
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 mt-8 py-4 px-4">
-        <div className="max-w-screen-2xl mx-auto flex items-center justify-between flex-wrap gap-2">
+      <footer className="bg-white border-t border-slate-200 mt-12 py-5 px-4">
+        <div className="max-w-screen-2xl mx-auto flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div style={{width:22,height:22,background:'var(--green)',borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:11,color:'#020e06'}}>⟡</div>
-            <p className="text-xs text-slate-500">
-              Built for <strong className="text-emerald-700">Emerald AI</strong> | Data sourced from ERCOT 2025 LTDEF, ERCOT March 2026 TAC Report, PJM BRA Reports 2026/27–2027/28, APS/SRP utility filings
+            <div style={{width:20,height:20,background:'linear-gradient(135deg,#10b981,#0d9488)',borderRadius:5,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:10,color:'#022c1c',flexShrink:0}}>⟡</div>
+            <p style={{fontSize:11,color:'var(--text-3)',lineHeight:1.5}}>
+              <strong style={{color:'var(--green)',fontWeight:600}}>Emerald AI</strong> — GPU Flexibility Value Model · <span style={{fontStyle:'italic'}}>Confidential & Proprietary</span>
+              <span style={{color:'var(--border-hi)',margin:'0 6px'}}>·</span>
+              Data: ERCOT LTDEF 2025, ERCOT TAC March 2026, PJM BRA 2026–2028, APS/SRP filings
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${liveDataStatus==='live'?'bg-emerald-100 text-emerald-700':liveDataStatus==='loading'?'bg-yellow-100 text-yellow-700':'bg-slate-100 text-slate-500'}`}>
-              {liveDataStatus==='live'?'🟢 Live EIA Data':liveDataStatus==='loading'?'⏳ Checking live data…':'📊 Using verified reference data (Aug 2025)'}
+            <span style={{fontSize:10,fontWeight:500,padding:'3px 10px',borderRadius:4,letterSpacing:'0.03em',
+              background: liveDataStatus==='live'?'rgba(16,185,129,0.1)':liveDataStatus==='loading'?'rgba(245,158,11,0.1)':'rgba(75,98,128,0.2)',
+              color: liveDataStatus==='live'?'var(--green)':liveDataStatus==='loading'?'var(--amber)':'var(--text-3)',
+              border:`1px solid ${liveDataStatus==='live'?'rgba(16,185,129,0.25)':liveDataStatus==='loading'?'rgba(245,158,11,0.25)':'var(--border)'}`,
+            }}>
+              {liveDataStatus==='live'?'● Live EIA Data':liveDataStatus==='loading'?'● Checking data…':'● Verified Reference Data · Aug 2025'}
             </span>
           </div>
         </div>
@@ -3679,14 +3739,15 @@ Answer concisely and numerically where possible. Reference specific model figure
       {/* ── Claude Chat Panel ── */}
       {/* FAB button */}
       <button onClick={()=>setChatOpen(o=>!o)}
-        style={{position:'fixed',bottom:24,right:24,width:52,height:52,borderRadius:'50%',
-          background:'var(--green)',border:'none',cursor:'pointer',
+        style={{position:'fixed',bottom:24,right:24,width:46,height:46,borderRadius:12,
+          background:'var(--bg-raised)',border:'1px solid var(--border-hi)',cursor:'pointer',
           display:'flex',alignItems:'center',justifyContent:'center',
-          boxShadow:'0 4px 20px rgba(0,201,110,0.4)',fontSize:22,zIndex:1000,
-          transition:'transform 0.15s,box-shadow 0.15s'}}
-        onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.08)';e.currentTarget.style.boxShadow='0 6px 28px rgba(0,201,110,0.55)';}}
-        onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow='0 4px 20px rgba(0,201,110,0.4)';}}>
-        {chatOpen ? '✕' : '💬'}
+          boxShadow:'0 4px 16px rgba(0,0,0,0.5)',fontSize:16,zIndex:1000,
+          color:'var(--text-2)',fontWeight:600,
+          transition:'all 0.15s'}}
+        onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--green)';e.currentTarget.style.color='var(--green)';e.currentTarget.style.boxShadow='0 4px 20px rgba(16,185,129,0.2)';}}
+        onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--border-hi)';e.currentTarget.style.color='var(--text-2)';e.currentTarget.style.boxShadow='0 4px 16px rgba(0,0,0,0.5)';}}>
+        {chatOpen ? '✕' : '⟡'}
       </button>
 
       {/* Chat window */}
@@ -3694,7 +3755,7 @@ Answer concisely and numerically where possible. Reference specific model figure
         <div style={{position:'fixed',bottom:88,right:24,width:400,height:560,
           background:'var(--bg-surface)',borderRadius:14,border:'1px solid var(--border)',
           boxShadow:'0 20px 60px rgba(0,0,0,0.6)',display:'flex',flexDirection:'column',
-          zIndex:999,overflow:'hidden',fontFamily:"'Space Grotesk',sans-serif"}}>
+          zIndex:999,overflow:'hidden',fontFamily:"'Inter',sans-serif"}}>
 
           {/* Chat header */}
           <div style={{background:'var(--bg-raised)',borderBottom:'1px solid var(--border)',padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -3719,7 +3780,7 @@ Answer concisely and numerically where possible. Reference specific model figure
 
           {/* API key input (collapsible) */}
           {showKeyInput && (
-            <div style={{padding:'10px 14px',background:'rgba(0,201,110,0.07)',borderBottom:'1px solid var(--border)',display:'flex',gap:8,alignItems:'center'}}>
+            <div style={{padding:'10px 14px',background:'rgba(16,185,129,0.07)',borderBottom:'1px solid var(--border)',display:'flex',gap:8,alignItems:'center'}}>
               <input type="password" placeholder="sk-ant-api..." value={apiKey}
                 onChange={e=>{ setApiKey(e.target.value); localStorage.setItem('emerald_claude_key',e.target.value); }}
                 style={{flex:1,background:'var(--bg-raised)',border:'1px solid var(--border)',borderRadius:6,padding:'6px 10px',
@@ -3762,7 +3823,7 @@ Answer concisely and numerically where possible. Reference specific model figure
                     : `1px solid ${msg.isError?'rgba(248,113,113,0.3)':'var(--border)'}`,
                   borderRadius: msg.role==='user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                   padding:'9px 13px',fontSize:11,lineHeight:1.65,
-                  color:msg.role==='user'?'#0a1f10':'var(--text-2)',
+                  color:msg.role==='user'?'#042818':'var(--text-2)',
                   fontWeight:msg.role==='user'?500:400,
                   whiteSpace:'pre-wrap',wordBreak:'break-word'}}>
                   {msg.content}
@@ -3794,7 +3855,7 @@ Answer concisely and numerically where possible. Reference specific model figure
               placeholder={apiKey?'Ask about calculations, markets, scenarios…':'Add your Claude API key to start (🔑 above)'}
               rows={2} style={{flex:1,background:'var(--bg-overlay)',border:'1px solid var(--border)',borderRadius:8,
                 padding:'8px 10px',fontSize:11,color:'var(--text-1)',resize:'none',outline:'none',
-                lineHeight:1.5,fontFamily:"'Space Grotesk',sans-serif",
+                lineHeight:1.5,fontFamily:"'Inter',sans-serif",
                 transition:'border-color 0.1s'}}
               onFocus={e=>e.target.style.borderColor='var(--green)'}
               onBlur={e=>e.target.style.borderColor='var(--border)'}/>
