@@ -371,21 +371,21 @@ const DEFAULTS = {
   txDcMW: 200, txBasePower: 40, txSpikePrice: 2500,
   txSpikeHours: 120,          // Excel: 120 spike hrs/yr (was 150)
   txQueueNoFlex: 24, txQueueFlex: 12,
-  txGpuRate: 3.0, txLoadFactor: 0.85,
+  txGpuRate: 5.0, txLoadFactor: 0.85,  // Excel Base: $5.0M/MW/yr (Scenario Toggle D9)
   txDrCapRate: 35,
-  txDrEnergyRate: 55,          // Excel: $55/MWh mid-point ERCOT DR (was $50)
+  txDrEnergyRate: 55,          // Excel Base: $55/MWh (Scenario Toggle D15)
   txInterconnectNoFlex: 50, txInterconnectFlex: 30, txConductorCost: 2.0,
   // Arizona / APS+SRP — vertically integrated utility
   azDcMW: 200, azQueueNoFlex: 30, azQueueFlex: 15,
-  azDrCapRate: 120,            // Excel: $120/kW-yr APS+SRP capacity rate (was $50)
+  azDrCapRate: 120,            // Excel: $120/kW-yr APS+SRP capacity rate
   azDrEnergyRate: 40, azPeakHours: 120,
-  azGpuRate: 3.0, azAvoidedUpgrade: 25, azConductorCost: 2.0,
+  azGpuRate: 5.0, azAvoidedUpgrade: 25, azConductorCost: 2.0,  // Excel Base: $5.0M/MW/yr
   // Virginia / PJM — capacity market
   vaCurrentMW: 200, vaUpsizeMW: 275,
   vaCapacityPrice: 329.17, vaAccreditation: 0.90,
   vaQueueNoFlex: 48, vaQueueFlex: 24,
   vaPeakHours: 100, vaDrEnergyRate: 75,
-  vaGpuRate: 3.0, vaConductorCost: 2.0,
+  vaGpuRate: 5.0, vaConductorCost: 2.0,  // Excel Base: $5.0M/MW/yr
   vaInterconnectNoFlex: 40, vaInterconnectFlex: 20,
 };
 
@@ -393,17 +393,17 @@ const DEFAULTS = {
 function calcTexas(s, effectiveFlexPct) {
   // ── Excel: Texas sheet ──────────────────────────────────────────────
   // Row 5:  Effective Flex % (from Global Assumptions SUMPRODUCT)
-  // Row 6:  Curtailable MW = 200MW × Flex%
+  // Row 6:  Curtailable MW = 200MW × Flex% / PUE   (Excel: inp_tx_mw*inp_flex_pct/inp_pue)
   // Row 7:  Flex Queue Scale = MIN(1, flexPct / 15%) — full benefit at ≥15%
   // Row 8:  Effective Queue Acceleration = queueSavings × flexQueueScale
-  // Row 11: Annual GPU Revenue = 200MW × $3.0M/MW = $600M/yr
+  // Row 11: Annual GPU Revenue = 200MW × $5.0M/MW = $1,000M/yr
   // Row 12: Time-to-Power = annualGPU × (accelMo / 12)          [Year 0]
   // Row 13: Interconnect Savings = (50−30) × MIN(1, Flex%/10%)  [Year 0]
-  // Row 18: Spike Avoidance = curtailMW × 120hrs × ($2,500−$40) / 1M
+  // Row 18: Spike Avoidance = curtailMW × spike_hrs × ($2,500−$40) / 1M
   // Row 19: DR Capacity = curtailMW × $35/kW-yr × 1,000 / 1M
-  // Row 20: DR Energy = curtailMW × 120hrs × $55/MWh / 1M
+  // Row 20: DR Energy = curtailMW × spike_hrs × $55/MWh / 1M
   const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : 0;
-  const curtailMW = s.txDcMW * flexPct / 100;
+  const curtailMW = s.txDcMW * flexPct / 100 / s.pue;  // Excel: inp_tx_mw*inp_flex_pct/inp_pue
   const flexQueueScale = Math.min(1, flexPct / 15);
   const accelMo = Math.round((s.txQueueNoFlex - s.txQueueFlex) * flexQueueScale * 10) / 10;
   const annualGPU = s.txDcMW * s.txGpuRate;                              // $600M/yr
@@ -433,16 +433,16 @@ function calcTexas(s, effectiveFlexPct) {
 function calcArizona(s, effectiveFlexPct) {
   // ── Excel: Arizona sheet ────────────────────────────────────────────
   // Row 5:  Effective Flex % (from Global Assumptions SUMPRODUCT)
-  // Row 6:  Curtailable MW = 200MW × Flex%
+  // Row 6:  Curtailable MW = 200MW × Flex% / PUE   (Excel: inp_az_mw*inp_flex_pct/inp_pue)
   // Row 7:  Flex Queue Scale = MIN(1, flexPct / 15%)
   // Row 8:  Effective Queue Acceleration = queueSavings × flexQueueScale
-  // Row 11: Annual GPU Revenue = 200MW × $3.0M/MW = $600M/yr
+  // Row 11: Annual GPU Revenue = 200MW × $5.0M/MW = $1,000M/yr
   // Row 12: Time-to-Power = annualGPU × (accelMo / 12)          [Year 0]
   // Row 13: Avoided Upgrade = $25M × MIN(1, Flex%/10%)          [Year 0]
   // Row 18: DR Capacity = curtailMW × $120/kW-yr × 1,000 / 1M
   // Row 19: DR Energy = curtailMW × 120hrs × $40/MWh / 1M
   const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : 0;
-  const curtailMW = s.azDcMW * flexPct / 100;
+  const curtailMW = s.azDcMW * flexPct / 100 / s.pue;  // Excel: inp_az_mw*inp_flex_pct/inp_pue
   const flexQueueScale = Math.min(1, flexPct / 15);
   const accelMo = Math.round((s.azQueueNoFlex - s.azQueueFlex) * flexQueueScale * 10) / 10;
   const annualGPU = s.azDcMW * s.azGpuRate;                               // $600M/yr
@@ -471,21 +471,21 @@ function calcArizona(s, effectiveFlexPct) {
 function calcVirginia(s, effectiveFlexPct) {
   // ── Excel: Virginia sheet ───────────────────────────────────────────
   // Row 5:  Effective Flex % (from Global Assumptions SUMPRODUCT)
-  // Row 6:  Curtailable MW = 200MW × Flex%
+  // Row 6:  Curtailable MW = 275MW(target) × Flex% / PUE   (Excel: inp_va_target*inp_flex_pct/inp_pue)
   // Row 7:  Flex Queue Scale = MIN(1, flexPct / 15%)
   // Row 8:  Effective Queue Acceleration = queueSavings × flexQueueScale
   // Row 9:  Upsize Increment = 275 − 200 = 75 MW
   // Row 10: UCAP = curtailMW × 90% × MIN(1, 0.5 + Flex%/20%)
-  // Row 14: Annual GPU Revenue — Base = 200MW × $3.0M = $600M/yr
-  // Row 15: Time-to-Power — BASE = annualBaseGPU × (accelMo/12)  [Year 0]  ← KEY: was missing
-  // Row 16: Annual Upsize Revenue = 75MW × $3.0M = $225M/yr
+  // Row 14: Annual GPU Revenue — Base = 200MW × $5.0M = $1,000M/yr
+  // Row 15: Time-to-Power — BASE = annualBaseGPU × (accelMo/12)  [Year 0]
+  // Row 16: Annual Upsize Revenue = 75MW × $5.0M = $375M/yr
   // Row 17: Upsize Time-to-Power = upsizeRev × (accelMo/12)      [Year 0]
   // Row 18: Interconnect Savings = (40−20) × MIN(1, Flex%/10%)    [Year 0]
   // Row 23: Annual PJM Cap Rev = UCAP × $329.17/MW-day × 365 / 1M
-  // Row 24: Annual Upsize Revenue = $225M/yr recurring
+  // Row 24: Annual Upsize Revenue = $375M/yr recurring
   // Row 25: Annual DR Energy = curtailMW × 100hrs × $75/MWh / 1M
   const flexPct = effectiveFlexPct !== undefined ? effectiveFlexPct : 0;
-  const curtailMW = s.vaCurrentMW * flexPct / 100;
+  const curtailMW = s.vaUpsizeMW * flexPct / 100 / s.pue;  // Excel: inp_va_target*inp_flex_pct/inp_pue
   const flexQueueScale = Math.min(1, flexPct / 15);
   const accelMo = Math.round((s.vaQueueNoFlex - s.vaQueueFlex) * flexQueueScale * 10) / 10;
   const incrMW = Math.max(0, s.vaUpsizeMW - s.vaCurrentMW);               // 75 MW
@@ -753,7 +753,7 @@ const GlobalControls = ({ s, set, pitchMode, setPitchMode, reset, totalNPV, effe
                   <Slider label="Analysis Horizon" value={s.years} min={5} max={20} unit=" yrs" onChange={v=>set('years',v)} />
                 </div>
                 <div className="min-w-[160px]">
-                  <Slider label="GPU Revenue Rate" value={s.txGpuRate} min={1} max={6} step={0.1} onChange={v=>{set('txGpuRate',v);set('azGpuRate',v);set('vaGpuRate',v);}} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
+                  <Slider label="GPU Revenue Rate" value={s.txGpuRate} min={1} max={7} step={0.1} onChange={v=>{set('txGpuRate',v);set('azGpuRate',v);set('vaGpuRate',v);}} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
                 </div>
               </>
             )}
@@ -1031,7 +1031,7 @@ const TexasTab = ({ s, set, tx, pitchMode, effectiveFlexPct }) => {
               <Slider label="Spike Hours/Year" value={s.txSpikeHours} min={50} max={400} step={10} onChange={v=>set('txSpikeHours',v)} />
               <Slider label="Queue Without Flex (mo)" value={s.txQueueNoFlex} min={12} max={60} onChange={v=>set('txQueueNoFlex',v)} />
               <Slider label="Queue With Flex (mo)" value={s.txQueueFlex} min={6} max={36} onChange={v=>set('txQueueFlex',v)} />
-              <Slider label="GPU Revenue Rate" value={s.txGpuRate} min={1} max={6} step={0.1} onChange={v=>set('txGpuRate',v)} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
+              <Slider label="GPU Revenue Rate" value={s.txGpuRate} min={1} max={7} step={0.1} onChange={v=>set('txGpuRate',v)} fmt={v=>`$${v.toFixed(1)}M/MW/yr`} />
               <Slider label="DR Cap Rate ($/kW-yr)" value={s.txDrCapRate} min={0} max={80} step={5} onChange={v=>set('txDrCapRate',v)} />
             </div>
           </div>
@@ -1928,12 +1928,13 @@ const SensitivityTab = ({ s, set }) => {
   const [colVar, setColVar] = useState('txGpuRate');
   const [scenario, setScenario] = useState('base');
 
+  // VARS — sensitivity ranges anchored to Excel Bear/Base/Bull (Scenario Toggle C/D/E)
   const VARS = [
-    { key:'txFlexPct', label:'Flexibility %', min:0.5, max:20, values:[0.5,2,5,10,15,20] },
-    { key:'txSpikeHours', label:'Spike Hours/yr', min:50, max:400, values:[50,100,150,250,400] },
-    { key:'vaCapacityPrice', label:'PJM Cap Price ($/MW-day)', min:50, max:500, values:[50,150,329,400,500] },
-    { key:'txGpuRate', label:'GPU Revenue Rate ($M/MW/yr)', min:1, max:6, values:[1,2,3,4.5,6] },
-    { key:'txQueueNoFlex', label:'Queue Wait Reduction (mo)', min:12, max:60, values:[12,18,24,36,48] },
+    { key:'txFlexPct',       label:'Flexibility %',              min:0.5, max:20,  values:[0.5,2,5,8.2,12,15,20] },
+    { key:'txSpikeHours',    label:'Spike Hours/yr',             min:50,  max:400, values:[50,90,120,150,250,400] },
+    { key:'vaCapacityPrice', label:'PJM Cap Price ($/MW-day)',   min:50,  max:500, values:[50,150,260,329,395,500] },
+    { key:'txGpuRate',       label:'GPU Revenue Rate ($M/MW/yr)',min:1,   max:7,   values:[1,2,3.5,5,6.5,7] },
+    { key:'txQueueNoFlex',   label:'Queue Wait Reduction (mo)',  min:12,  max:60,  values:[12,18,24,36,48] },
   ];
 
   const computeNPV = (overrides) => {
@@ -1967,14 +1968,15 @@ const SensitivityTab = ({ s, set }) => {
 
   // Tornado
   const baseNPV = computeNPV({});
+  // Tornado lo/hi — Bear/Bull anchored to Excel Scenario Toggle (C/E columns)
   const tornadoDrivers = [
-    { label:'GPU Revenue Rate', key:'txGpuRate', lo:1.0, hi:6.0 },
-    { label:'Queue Reduction (months)', key:'txQueueNoFlex', lo:12, hi:48 },
-    { label:'Flexibility Commitment %', key:'txFlexPct', lo:0.5, hi:20 },
-    { label:'PJM Cap Price ($/MW-day)', key:'vaCapacityPrice', lo:50, hi:500 },
-    { label:'ERCOT Spike Price ($/MWh)', key:'txSpikePrice', lo:500, hi:5000 },
-    { label:'Spike/Stress Hours/yr', key:'txSpikeHours', lo:50, hi:400 },
-    { label:'Discount Rate (WACC)', key:'discountRate', lo:6, hi:20 },
+    { label:'GPU Revenue Rate',        key:'txGpuRate',       lo:3.5,  hi:6.5  }, // Bear C9 → Bull E9
+    { label:'Queue Reduction (months)',key:'txQueueNoFlex',   lo:12,   hi:48   },
+    { label:'Flexibility Commitment %',key:'txFlexPct',       lo:5,    hi:12   }, // Bear C10 → Bull E10
+    { label:'PJM Cap Price ($/MW-day)',key:'vaCapacityPrice', lo:260,  hi:395  }, // Bear C18 → Bull E18
+    { label:'ERCOT Curtail Hrs/yr',    key:'txSpikeHours',    lo:90,   hi:150  }, // Bear C17 → Bull E17
+    { label:'DR Energy Rate ($/MWh)',  key:'txDrEnergyRate',  lo:42,   hi:68   }, // Bear C15 → Bull E15
+    { label:'Discount Rate (WACC)',    key:'discountRate',    lo:6,    hi:20   },
   ].map(d => ({
     ...d,
     loNPV: computeNPV({[d.key]: d.lo}),
@@ -1986,11 +1988,26 @@ const SensitivityTab = ({ s, set }) => {
     negSwing: +(Math.min(d.hiNPV, d.loNPV) - baseNPV).toFixed(1),
   })).sort((a,b) => b.swing - a.swing);
 
-  // Scenarios
+  // Scenarios — aligned to Excel GPU_Flex_Model_Final_v6 Scenario Toggle sheet
+  // Bear: row C (C9–C18), Base: row D (D9–D18), Bull: row E (E9–E18)
+  // Parameters that vary by scenario: GPU rate, DR energy rate, curtailment hours, PJM cap price, flex%
+  // Parameters that do NOT vary: spike price ($2,500 fixed), queue months (market-driven, not scenario)
   const SCENARIOS = {
-    bear: { txGpuRate:1.5, azGpuRate:1.5, vaGpuRate:1.5, vaCapacityPrice:200, txSpikePrice:1000, txQueueNoFlex:18, txFlexPct:2, azFlexPct:2, vaFlexPct:2 },
-    base: {},
-    bull: { txGpuRate:5.0, azGpuRate:5.0, vaGpuRate:5.0, vaCapacityPrice:450, txSpikePrice:5000, txQueueNoFlex:36, txFlexPct:15, azFlexPct:15, vaFlexPct:15 },
+    bear: {
+      txGpuRate:3.5, azGpuRate:3.5, vaGpuRate:3.5,   // Excel C9: $3.5M/MW/yr
+      vaCapacityPrice:260,                              // Excel C18: $260/MW-day
+      txSpikeHours:90,                                  // Excel C17: 90 curtailment hrs/yr
+      txDrEnergyRate:42,                                // Excel C15: $42/MWh DR energy rate
+      txFlexPct:5,                                      // Excel C10: 5% flex commitment
+    },
+    base: {},  // Uses DEFAULTS — Excel D9: $5.0M, D15: $55, D17: 120hrs, D18: $329.17, D10: computed 8.2%
+    bull: {
+      txGpuRate:6.5, azGpuRate:6.5, vaGpuRate:6.5,   // Excel E9: $6.5M/MW/yr
+      vaCapacityPrice:395,                              // Excel E18: $395/MW-day
+      txSpikeHours:150,                                 // Excel E17: 150 curtailment hrs/yr
+      txDrEnergyRate:68,                                // Excel E15: $68/MWh DR energy rate
+      txFlexPct:12,                                     // Excel E10: 12% flex commitment
+    },
   };
   const scenarioResults = ['bear','base','bull'].map(sc => {
     const params = {...s, ...SCENARIOS[sc]};
@@ -2111,7 +2128,12 @@ const SensitivityTab = ({ s, set }) => {
             const c = colors[sc];
             const isActive = JSON.stringify(SCENARIOS[sc]||{}) === '{}' ? scenario===sc : scenario===sc;
             return (
-              <button key={sc} onClick={() => { setScenario(sc); if (sc !== 'base') { Object.entries(SCENARIOS[sc]).forEach(([k,v])=>set(k,v)); } }}
+              <button key={sc} onClick={() => {
+                setScenario(sc);
+                // Always apply scenario values; base resets to DEFAULTS for all scenario-controlled keys
+                const SCENARIO_KEYS = ['txGpuRate','azGpuRate','vaGpuRate','vaCapacityPrice','txSpikeHours','txDrEnergyRate'];
+                SCENARIO_KEYS.forEach(k => set(k, SCENARIOS[sc][k] !== undefined ? SCENARIOS[sc][k] : DEFAULTS[k]));
+              }}
                 className={`p-4 rounded-xl border-2 transition-all text-left ${scenario===sc ? `border-${c}-500 bg-${c}-50` : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                 <p className={`text-sm font-bold mb-2 text-${c}-700`}>{labels[sc]}</p>
                 <p className="text-xs text-slate-500 mb-1">Portfolio NPV</p>
@@ -2136,11 +2158,11 @@ const SensitivityTab = ({ s, set }) => {
             </thead>
             <tbody>
               {[
-                ['GPU Revenue Rate', '$1.5M/MW/yr', '$3.0M/MW/yr', '$5.0M/MW/yr'],
-                ['PJM Cap Price', '$200/MW-day', '$329/MW-day', '$450/MW-day'],
-                ['ERCOT Spike Price', '$1,000/MWh', '$2,500/MWh', '$5,000/MWh'],
-                ['Queue Reduction', '6 months', '12 months', '24 months'],
-                ['Flexibility %', '15%', '25%', '35%'],
+                ['GPU Revenue Rate',        '$3.5M/MW/yr',  '$5.0M/MW/yr',  '$6.5M/MW/yr'],
+                ['PJM Cap Price ($/MW-day)','$260',         '$329',         '$395'],
+                ['ERCOT Curtail Hrs/yr',    '90 hrs',       '120 hrs',      '150 hrs'],
+                ['ERCOT DR Rate ($/MWh)',   '$42',          '$55',          '$68'],
+                ['Flex Commitment %',       '5%',           '8.2%',         '12%'],
               ].map(([label, bear, base, bull]) => (
                 <tr key={label} className="border-b border-slate-100">
                   <td className="py-2 pr-4 text-slate-600">{label}</td>
@@ -2582,16 +2604,18 @@ const CSPTab = ({ s, tx, az, va }) => {
         //   cspFlexRev  = flexMW × gpuRate × (1 − blendedDisc)
         //   valueSplit  = totalBenefit / cspTotalRev
         // Inputs below match Excel Scenario Analysis Section A exactly.
+        // NAMED_SCENARIOS — bear/base/bull aligned to Excel GPU_Flex_Model_Final_v6 Scenario Toggle
+        // h100 = gpuRate×$1M / (8760hrs × 180GPUs/MW × 0.85util)
         const NAMED_SCENARIOS = [
           { id:'bear',      name:'Bear Case',         badge:'🐻', color:'var(--red)',
-            h100:1.12, gpuRate:1.50,   flexPct:2,    drRate:35,  curtailHrs:80,
-            desc:'GPU price compression from H200/B200 competition. Minimal flex adoption — customers prioritize cost certainty. Low curtailment frequency means DR credits barely move the needle.' },
+            h100:2.61, gpuRate:3.50,   flexPct:5,    drRate:42,  curtailHrs:90,
+            desc:'Excel Bear (Scenario Toggle col C): $3.5M/MW GPU rate, 5% flex commitment, $42/MWh DR rate, 90 curtailment hrs/yr, $260/MW-day PJM cap price.' },
           { id:'base',      name:'Base Case',         badge:'📊', color:'var(--text-2)',
-            h100:2.24, gpuRate:3.00,   flexPct:11.1, drRate:55,  curtailHrs:120,
-            desc:'Current market conditions per Excel model (Apr 2026 audit). 11.1% portfolio flex enrollment, $55/MWh ERCOT DR rate, 120 annual curtailment hours.' },
+            h100:3.73, gpuRate:5.00,   flexPct:8.2,  drRate:55,  curtailHrs:120,
+            desc:'Excel Base (Scenario Toggle col D): $5.0M/MW GPU rate, 8.2% effective flex (SUMPRODUCT workload mix), $55/MWh DR rate, 120 curtailment hrs/yr, $329.17/MW-day PJM.' },
           { id:'bull',      name:'Bull Case',         badge:'🐂', color:'var(--green)',
-            h100:3.73, gpuRate:5.00,   flexPct:15,   drRate:75,  curtailHrs:200,
-            desc:'Tight GPU supply premium. Higher flex enrollment as pre-training workloads surge. ERCOT scarcity pushes DR rates above $75/MWh — strong ancillary service economics.' },
+            h100:4.85, gpuRate:6.50,   flexPct:12,   drRate:68,  curtailHrs:150,
+            desc:'Excel Bull (Scenario Toggle col E): $6.5M/MW GPU rate, 12% flex commitment, $68/MWh DR rate, 150 curtailment hrs/yr, $395/MW-day PJM cap price.' },
           { id:'pricecomp', name:'Price Compression', badge:'📉', color:'var(--amber)',
             h100:1.34, gpuRate:1.796,  flexPct:65,   drRate:55,  curtailHrs:120,
             desc:'B200/GB200 commoditization drives H100 rates to $1.34/hr. CSPs compensate with 65% flex enrollment to monetize idle capacity via grid revenue — margin maintained through volume.' },
@@ -2826,17 +2850,20 @@ const CSPTab = ({ s, tx, az, va }) => {
             </thead>
             <tbody>
               {[
-                {attr:'Annual Compute Spend',    p1:'$870M',  p2:'$345M',  p3:'$102M',  p4:'$15M',  port:'$1,800M', bold:true},
-                {attr:'DC Power Demand (MW)',     p1:'290 MW', p2:'115 MW', p3:'34 MW',  p4:'5 MW',  port:'444 MW (IT load)'},
-                {attr:'Inference Share (Firm)',   p1:'40%',    p2:'70%',    p3:'5%',     p4:'30%',   port:'44.98%'},
-                {attr:'Pre-Training (Flex)',      p1:'45%',    p2:'10%',    p3:'60%',    p4:'20%',   port:'36.8%'},
-                {attr:'MLOps / Retraining',       p1:'10%',    p2:'15%',    p3:'5%',     p4:'40%',   port:'11.25%'},
-                {attr:'Research / Batch',         p1:'5%',     p2:'5%',     p3:'30%',    p4:'10%',   port:'6.97%'},
-                {attr:'DR-Eligible MW',           p1:'174 MW', p2:'34.5 MW',p3:'32.3 MW',p4:'3.5 MW',port:'49.1 MW'},
-                {attr:'L1 Compute Savings',       p1:'$42.6M', p2:'$7.9M',  p3:'$10.6M', p4:'$0.75M',port:'$83.7M', accent:'var(--teal)'},
-                {attr:'L2 DR Credit',             p1:'$0.57M', p2:'$0.11M', p3:'$0.11M', p4:'$0.01M',port:'$0.16M', accent:'var(--teal)'},
-                {attr:'TOTAL Annual Benefit',     p1:'$43.2M', p2:'$8.0M',  p3:'$10.7M', p4:'$0.76M',port:'$83.8M', bold:true, accent:'var(--green)'},
-                {attr:'Benefit % of Spend',       p1:'4.97%',  p2:'2.33%',  p3:'10.5%',  p4:'5.08%', port:'4.66%', accent:'var(--green)'},
+                // Excel Customer Profiles sheet — GPU_Flex_Model_Final_v6.xlsx
+                // MW: C7=250, D7=150, E7=50, F7=50 | GPU rate: Base $5.0M/MW/yr (Scenario Toggle D9)
+                // L1 = spend × workload% × discount% | L2 = DR-elig-MW × $55/MWh × 120hrs × 100% / 1M
+                {attr:'Annual Compute Spend',    p1:'$1,250M', p2:'$750M',  p3:'$250M',  p4:'$250M', port:'$2,500M', bold:true},
+                {attr:'DC Power Demand (MW)',     p1:'250 MW',  p2:'150 MW', p3:'50 MW',  p4:'50 MW', port:'444 MW (IT load)'},
+                {attr:'Inference Share (Firm)',   p1:'40%',     p2:'70%',    p3:'5%',     p4:'30%',   port:'44.5%'},
+                {attr:'Pre-Training (Flex)',      p1:'45%',     p2:'10%',    p3:'60%',    p4:'20%',   port:'33.5%'},
+                {attr:'MLOps / Retraining',       p1:'10%',     p2:'15%',    p3:'5%',     p4:'40%',   port:'14.0%'},
+                {attr:'Research / Batch',         p1:'5%',      p2:'5%',     p3:'30%',    p4:'10%',   port:'8.0%'},
+                {attr:'DR-Eligible MW',           p1:'150 MW',  p2:'45 MW',  p3:'47.5 MW',p4:'35 MW', port:'35.9 MW'},
+                {attr:'L1 Compute Savings',       p1:'$61.3M',  p2:'$17.3M', p3:'$26.0M', p4:'$12.5M',port:'$117.0M', accent:'var(--teal)'},
+                {attr:'L2 DR Credit',             p1:'$0.99M',  p2:'$0.30M', p3:'$0.31M', p4:'$0.23M',port:'$0.24M',  accent:'var(--teal)'},
+                {attr:'TOTAL Annual Benefit',     p1:'$62.2M',  p2:'$17.5M', p3:'$26.3M', p4:'$12.7M',port:'$117.2M', bold:true, accent:'var(--green)'},
+                {attr:'Benefit % of Spend',       p1:'4.98%',   p2:'2.34%',  p3:'10.53%', p4:'5.09%', port:'4.69%', accent:'var(--green)'},
                 {attr:'Flex Tolerance',           p1:'Medium', p2:'Low-Med',p3:'Very High',p4:'High', port:'Mixed'},
                 {attr:'Primary Value Driver',     p1:'Pricing lock + DR credits at scale',p2:'Firm SLA guarantee',p3:'Spot-like economics without cloud unreliability',p4:'MLOps savings + strategic alignment',port:'Compute savings dominate'},
                 {attr:'Switching Cost (post-integration)',p1:'High — months of re-integration',p2:'Medium — inference dependencies',p3:'Low — scheduler portable',p4:'Medium — grid signal sticky',port:'Varies by workload type'},
@@ -2857,8 +2884,8 @@ const CSPTab = ({ s, tx, az, va }) => {
         </div>
         <div style={{padding:'10px 20px',borderTop:'1px solid var(--border)',background:'var(--bg-surface)'}}>
           <p style={{fontSize:9,color:'var(--text-3)',margin:0,lineHeight:1.6}}>
-            <strong style={{color:'var(--text-2)'}}>Source: Excel Customer Profiles sheet (GPU_Flex_Model_Final_v5.xlsx).</strong> L1 formula: MW × workload% × $3M/MW-yr × discount%. L2 = DR-eligible MW × $55/MWh × 120 hrs × 50% customer share.
-            Inference customers pay +10% SLA premium (partially offsetting flex discounts). For high-flex profiles (P3: Research), effective savings reach ~10.5% vs. list rate. P1 Hyperscaler at 45% pre-training drives the largest absolute benefit: $43.2M/yr.
+            <strong style={{color:'var(--text-2)'}}>Source: Excel Customer Profiles sheet (GPU_Flex_Model_Final_v6.xlsx).</strong> L1 formula: MW × workload% × $5M/MW-yr × discount% (Excel Base: 8% pre-train, 4% MLOps, 18% research). L2 = DR-eligible MW × $55/MWh × 120 hrs × 100% customer share (Base).
+            Inference customers pay +10% SLA premium. For high-flex profiles (P3: Research), effective savings reach ~10.5% vs. list rate. P1 Hyperscaler at 45% pre-training drives the largest absolute benefit: $62.2M/yr.
           </p>
         </div>
       </div>
@@ -2867,10 +2894,12 @@ const CSPTab = ({ s, tx, az, va }) => {
       {(() => {
         // Excel Section D: 5-Year Cumulative Flex Benefit Projection
         // H100 price escalator: −12%/yr | Flex adoption ramp: +3%/yr | DR market: +5%/yr
-        const baseH100 = 2.2383;    // Base Case H100 rate ($/hr/GPU)
-        const baseFlexShare = 0.111; // Base flex enrollment %
-        const baseDRRate = 55;       // Base DR rate ($/MWh)
-        const PRICE_ESC = -0.12;     // −12%/yr GPU price escalator (Excel model)
+        // Excel Section D — Base Case starting values aligned to Scenario Toggle D9–D18
+        // H100 = $5.0M/MW/yr ÷ (8760 hrs × 180 GPUs/MW × 0.85 util) = $3.73/GPU-hr
+        const baseH100 = 3.7313;    // Base Case H100 rate ($/hr/GPU) — Excel Base $5.0M/MW/yr
+        const baseFlexShare = 0.082; // Base effective flex = 8.2% (SUMPRODUCT workload mix, Excel C27)
+        const baseDRRate = 55;       // Base DR rate ($/MWh) — Excel Scenario Toggle D15
+        const PRICE_ESC = -0.12;     // −12%/yr GPU price escalator (Excel Flex Value D18)
         const FLEX_RAMP = 0.03;      // +3%/yr flex adoption growth
         const DR_MATUR  = 0.05;      // +5%/yr DR market maturation
         const baseL1 = flex_grossRev > 0 ? flex_grossRev : 16.88; // live from CSP model or fallback
@@ -2879,7 +2908,7 @@ const CSPTab = ({ s, tx, az, va }) => {
           const h100 = baseH100 * Math.pow(1 + PRICE_ESC, yr-1);
           const flexSh = baseFlexShare * Math.pow(1 + FLEX_RAMP, yr-1);
           const drRate = baseDRRate * Math.pow(1 + DR_MATUR, yr-1);
-          const gpuRate = 3.0 * Math.pow(1 + PRICE_ESC, yr-1); // $3M/MW base scales same as H100
+          const gpuRate = 5.0 * Math.pow(1 + PRICE_ESC, yr-1); // Excel Base $5.0M/MW/yr scales with H100
           const nonInfTot = s.wlPreTrain + s.wlMLOps + s.wlResearch;
           const bDisc = nonInfTot > 0 ? (s.wlPreTrain*8+s.wlMLOps*4+s.wlResearch*18)/(nonInfTot*100) : 0.0847;
           const flexMW = 600 * flexSh;
@@ -2899,7 +2928,7 @@ const CSPTab = ({ s, tx, az, va }) => {
                 <p style={{fontSize:12,fontWeight:700,color:'var(--text-1)',margin:'0 0 2px'}}>
                   <span style={{color:'var(--amber)',marginRight:6}}>§D</span>5-Year Cumulative Flex Benefit Projection
                 </p>
-                <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>H100 price −12%/yr · Flex adoption +3%/yr · DR market +5%/yr · Base Case starting point</p>
+                <p style={{fontSize:10,color:'var(--text-3)',margin:0}}>H100 $3.73/hr · GPU $5.0M/MW/yr · Flex 8.2% · DR $55/MWh — Base Case (Excel v6) · Price −12%/yr · Flex +3%/yr · DR +5%/yr</p>
               </div>
               <div style={{display:'flex',gap:10}}>
                 {[{l:'5-Yr Total Benefit',v:`$${total5yr.toFixed(1)}M`,c:'var(--teal)'},{l:'3-Yr CAGR',v:`+${(cagr*100).toFixed(1)}%/yr`,c:'var(--green)'}].map(k=>(
@@ -2945,7 +2974,7 @@ const CSPTab = ({ s, tx, az, va }) => {
             </div>
             <div style={{padding:'10px 20px',borderTop:'1px solid var(--border)',background:'var(--bg-surface)'}}>
               <p style={{fontSize:9,color:'var(--text-3)',margin:0,lineHeight:1.6}}>
-                <strong style={{color:'var(--text-2)'}}>Source: Excel Section D — 5-Year Cumulative Flex Benefit Projection.</strong> Projections use Base Case starting values: H100 $2.24/hr, flex 11.1%, DR $55/MWh.
+                <strong style={{color:'var(--text-2)'}}>Source: Excel Section D — 5-Year Cumulative Flex Benefit Projection (GPU_Flex_Model_Final_v6.xlsx).</strong> Base Case starting values: H100 $3.73/hr, GPU $5.0M/MW/yr (Scenario Toggle D9), flex 8.2% (SUMPRODUCT workload mix), DR $55/MWh.
                 GPU price escalator −12%/yr · Flex adoption ramp +3%/yr · DR market maturation +5%/yr. Live model: all year-1 values update when workload mix or assumptions change.
               </p>
             </div>
